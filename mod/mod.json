@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "id": "local.hello-world",
+  "name": "Hello World 模板",
+  "version": "0.1.0",
+  "author": "Mod 开发者",
+  "description": "最小托管 Mod：生命周期日志与 UI 挂载文字。",
+  "playInstructions": "启用后重启游戏，查看 Hello World 文字及 HELLO_READY 日志。",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "HelloMod.Entry",
+  "runtimeApiVersion": 1,
+  "runtimeAssemblyPolicy": "required",
+  "resources": [],
+  "scripts": [],
+  "dependencies": []
+}

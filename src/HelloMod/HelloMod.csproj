@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>HelloMod</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <GameReferenceDir>$(MSBuildThisFileDirectory)../../.work/references</GameReferenceDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PlantsVsZombies"><HintPath>$(GameReferenceDir)/PlantsVsZombies.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="GodotSharp"><HintPath>$(GameReferenceDir)/GodotSharp.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="CheckReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameReferenceDir)/PlantsVsZombies.dll')" Text="Run python tools/mod.py prepare --game-dir GAME_DIR first." />
+  </Target>
+</Project>
