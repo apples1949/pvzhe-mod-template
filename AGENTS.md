@@ -12,6 +12,8 @@ FeatureLab 是可选配方与验收参考，不是新 Mod 默认功能。开发�
 
 创建新 Mod 时主题明确后主动确定合规且稳定的 ID；已有项目添加功能不更换身份。显示名及作者尊重用户指定，发布前确认并执行 --release 检查。具体字段限制、占位检查和同 ID 升级要求集中在 mod-develop 的 references/identity-and-release.md。
 
+自定义验证先按 [验证执行策略](.agents/skills/pvzhe-mod-verify/references/verification-strategy.md) 明确本轮变化、实际条件和可证伪断言；采集/判定/报告分离，报告修复离线复核，按影响范围重验。共享产物的后台验收与构建不得交叠；每轮证据绑定身份，不读遗留报告冒充本轮。
+
 更改工具后执行 `python -m unittest discover -s tests -v`。更改入口后 build，再做实际游戏验证；日志/包静态检查不能替代运行结论。保持最小允许名单打包，不能把游戏 DLL 或整个 bin 目录放入 pmod。
 
 Wiki 是当前游戏版本的操作事实入口。只读取任务所需主题；先核对版本/摘要及每页的实测、静态、待验证边界，沿用匹配的路径，只分析差异和缺项。新确认的路径记录输入、状态前提、步骤和证据；不将信号测试冒充鼠标命中，不将构建成功冒充功能成功。明确升级模板时必须同步 Wiki，遵循 [Wiki 维护规则](docs/wiki/maintenance.md)，保留历史验证记录。

@@ -178,3 +178,5 @@ python -m unittest discover -s tests -v
 默认由 AI 自主布局；如果你想直接拖动决定位置，可要求使用 pvzhe-placement-preview。工具支持本地背景/组件图片、多物件、布局切换、占位提示和60秒反馈，确认的画布位置不会自动避让，仍遵循游戏窗口缩放与锚点策略。试用纯色演示：`python tools/placement_editor.py`；协议与依赖见 [位置输入工具](docs/placement-preview.md)。无需游戏源码，游戏资源不随模板分发。
 
 需要原版外观的位置预览时，开发测试分支先准备“隐藏待摆放组件→干净背景捕获→透明组件渲染”，资料齐全后才开窗口。字体、贴图和导入依赖缓存留在.work，版本变化由PCK/DLL哈希识别；详细流程见 [缓存与捕获](docs/resource-cache-and-capture.md)。默认Hello World不自动截图或打开预览。
+
+自定义功能的运行用例与失败重验见 [验证执行策略](.agents/skills/pvzhe-mod-verify/references/verification-strategy.md)。AI应说明每轮目标，按变更选择用例；报告修复使用已采集证据离线复核，不反复启动完整游戏流程。

@@ -19,4 +19,4 @@ description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评�
 4. 修改 `mod/mod.json` 时核对唯一 ID、类型全名、schema/API 版本、运行时 required 策略；添加资源显式列入 `resources`。新增第三方 DLL、多程序集或 Godot 节点脚本超出当前单 DLL 构建器，需要先核对发布协议并扩展工具，不能将 bin 整包复制。
 5. 执行 `python tools/mod.py build` 与 `python tools/mod.py check`。工具从明确允许名单组包；源文件、宿主 DLL、PCK 和本机报告必须留在包外。
 
-验证：编译无错误；入口通过发布程序集的接口/公开无参构造检查；ZIP 根部为 mod.json，入口位于 Runtime/ModAssembly.dll。工具修改还需 `python -m unittest discover -s tests -v`。最后按 mod-verify 实际运行，不能以构建成功代替游戏验证。
+验证：编译无错误；入口通过发布程序集的接口/公开无参构造检查；ZIP 根部为 mod.json，入口位于 Runtime/ModAssembly.dll。工具修改还需 `python -m unittest discover -s tests -v`。构建失败显式停止运行；已有后台验收时不覆盖其共享产物，等待完成或使用真正隔离的运行快照。最后按 mod-verify 实际运行，不能以构建成功代替游戏验证。
