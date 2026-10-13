@@ -115,7 +115,7 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 | `tools/HostProbe/` | 仅反射发布程序集，不调用游戏入口 |
 | `tools/runtime_test.py` | 独立发布副本的实际游戏验证 |
 | `.agents/skills/` | 需求引导、发布准备、制作、验证与版本迁移 Skills；详细参考按需读取 |
-| `docs/` | 兼容证据、扩展原则 |
+| `docs/`、`docs/wiki/` | 兼容证据、扩展原则与按版本组织的游戏操作知识 |
 | `tests/` | PCK 边界与打包隔离检查 |
 | `.work/` | 本地引用与分析信息；不提交 |
 | `dist/` | 本地构建及验证产物；不提交 |
@@ -127,6 +127,8 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 后续自己的复用组件放入 `src/HelloMod/Components/`，业务能力放入 `Features/`，接入差异放入 `Adapters/`，自己的资源放入 `mod/Assets/`；仅在需要时创建目录。通过 `mod.json.resources` 明确打包新资源，不复制宿主 DLL 或整份解包内容。资源加载与原生 `res://` 路径的区别见 [扩展说明](docs/architecture.md)。
 
 ## 给 AI 的入口
+
+[开发 Wiki](docs/wiki/README.md) 集中记录 0.30.0 的启动状态、测试关卡入口、原版组件与鼠标坐标、战斗服务、资源注册表、设置和构建验收路径。AI 先匹配版本，再按任务查阅，避免重复从零分析。每页标明运行实测、静态确认及待验证边界；功能流程仍由 Skills 引导。
 
 玩家提出功能需求时，AI 先使用 **pvzhe-mod-guide** 理解意图和上下文。缺少影响用途、位置或行为且无法合理推断的信息时询问；原版组件选择、资源路径和技术接入由 AI 处理。无需玩家主动要求复用组件或知道 Skill 名称。
 
@@ -150,7 +152,7 @@ python tools/runtime_test.py --example feature-lab
 - `pvzhe-pck-extract`：索引、按需提取、资源依赖。
 - `pvzhe-mod-develop`：基于发布接口开发、复用宿主能力、构建。
 - `pvzhe-mod-verify`：安装、启用、实际运行、收集验证证据。
-- `pvzhe-template-upgrade`：仅在明确要求将旧模板适配新版游戏时使用；对比新旧机制，同步模板、工具、文档及受影响 Skills。见 [升级 Skill](.agents/skills/pvzhe-template-upgrade/SKILL.md)。
+- `pvzhe-template-upgrade`：仅在明确要求将旧模板适配新版游戏时使用；对比新旧机制，同步模板、工具、文档、版本化 Wiki 及受影响 Skills。见 [升级 Skill](.agents/skills/pvzhe-template-upgrade/SKILL.md)。
 
 可直接要求 AI：“读取本项目 Skills，仅使用我的已发布游戏目录，准备并构建 Hello World，再运行独立存档验证。”这些 Skills 和工具都不要求访问内部源码。
 

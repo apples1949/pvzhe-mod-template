@@ -5,6 +5,8 @@ description: 对 PVZHE 发布 PCK 建立资源索引并按需提取配置、资�
 
 # PCK 按需提取
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [content-index](../../../docs/wiki/0.30.0/content-index.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：目标发布 PCK、提取目标与本地输出目录。输出：保留相对路径且通过 MD5 校验的文件、依赖路径与注册键的分析结果。
 
 1. 先读 README 的 PCK 说明。使用 release-analyze 准备出的 `.work/pck-index.json` 搜索准确路径；不得凭素材名称猜路径。

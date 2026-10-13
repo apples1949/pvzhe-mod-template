@@ -5,6 +5,8 @@ description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评�
 
 # 开发与构建
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [overview](../../../docs/wiki/0.30.0/overview.md)、[build-validation](../../../docs/wiki/0.30.0/build-validation.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 玩家功能请求先经 pvzhe-mod-guide，再读具体制作 Skill；本 Skill 负责共同编译/打包流程。默认最小模板是开发起点，FeatureLab 是可选参考，只取需求所需实现，不默认加入其按钮、统计、规则和关卡。只有构建该示例时命令加 `--example feature-lab`，输出 dist/feature-lab。
 
 输入：发布分析结果、已澄清需求、模板。输出：满足需求的 Mod 变更、对应 pmod 与本地构建证据；自定义身份与入口需同步修改清单。

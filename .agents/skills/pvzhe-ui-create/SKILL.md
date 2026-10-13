@@ -5,6 +5,8 @@ description: 为 PVZHE Mod 制作按钮、提示或确认弹窗及简单界面�
 
 # 基础 UI 制作
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [ui](../../../docs/wiki/0.30.0/ui.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 先经过 pvzhe-mod-guide。输入：明确的位置、用途、文字/内容和交互；输出：UI 功能、必要适配代码及实际交互证据。关键缺项返回需求引导，组件选型由 AI 决定。
 
 1. 读 [复用目录](../../../docs/reuse-catalog.md) 与 [示例说明](../../../examples/FeatureLab/README.md)。需要重新核对时执行 `python tools/catalog.py`，只使用发布包与 DLL。目录存在不代表所有组件已运行验证。

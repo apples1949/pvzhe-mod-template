@@ -5,6 +5,8 @@ description: 为 PVZHE 对局制作信息展示与统计，例如右下角击杀
 
 # 对局统计与 HUD
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [battle-services](../../../docs/wiki/0.30.0/battle-services.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：经过 mod-guide 的展示位置、统计口径、范围和恢复要求。输出：统计逻辑、HUD 和行为验证；纯展示不应修改游戏规则。
 
 读 [战斗配方](../../../docs/recipes/battle-hud.md) 和 `examples/FeatureLab/Features/KillCounter.cs`。该例按已发布僵尸卡牌配置识别僵尸类型、按死亡时阵营过滤，观察 character.lifecycle.v3 的 death-committed；不是玩家击杀归因器。

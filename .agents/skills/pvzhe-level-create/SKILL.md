@@ -5,6 +5,8 @@ description: 为 PVZHE Mod 创建使用原版地图、卡牌与僵尸的独立�
 
 # 关卡制作
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [levels](../../../docs/wiki/0.30.0/levels.md)、[battle-testing](../../../docs/wiki/0.30.0/battle-testing.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：经过 mod-guide 澄清的地图/玩法、难度或波次、选卡规则、结束条件与奖励意图。输出：自己的关卡 JSON、目录注册与可进入的入口。
 
 1. 读 [关卡配方](../../../docs/recipes/levels.md)、FeatureLab 的 Assets/level.json 与 DemoLevel.cs。用发布索引、配置和 DLL 核对 MapName、卡牌/僵尸键及波次结构；不要求源码。玩家无需自行提供注册键。

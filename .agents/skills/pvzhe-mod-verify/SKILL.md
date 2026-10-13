@@ -5,6 +5,8 @@ description: 安装、启用并实际运行验证 PVZHE pmod，处理独立测�
 
 # 安装与验证
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [startup](../../../docs/wiki/0.30.0/startup.md)、[battle-testing](../../../docs/wiki/0.30.0/battle-testing.md)、[build-validation](../../../docs/wiki/0.30.0/build-validation.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：已构建 pmod、匹配的发布游戏、需求验收项与测试环境。输出：当前产物的加载、功能、界面证据和未验证项。
 
 用户准备分享/发布时，先按 [身份与发布规范](../pvzhe-mod-develop/references/identity-and-release.md) 确认名称、作者与版本，重建最终包并执行 check --release；已安装 ID 冲突只在确认是同一 Mod 升级后允许，不把发布字段检查当作实际功能验收。

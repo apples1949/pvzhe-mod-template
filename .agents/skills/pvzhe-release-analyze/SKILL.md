@@ -5,6 +5,8 @@ description: 分析指定 PVZHE Windows C# 发行版的 PCK、程序集及 Mod �
 
 # 发布版分析
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [overview](../../../docs/wiki/0.30.0/overview.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：用户的完整发布目录、本模板、Python 3.11+、.NET 9 SDK。输出：本地 `.work/release.json`、`pck-index.json`、`api.json`、引用 DLL，以及适用于该发布版的兼容判断。
 
 明确要求将旧模板适配新版游戏时，先读 pvzhe-template-upgrade，保存旧证据再 prepare；本 Skill 只负责发布输入分析，不自行扩大为模板、文档和全部 Skills 的版本迁移。

@@ -5,6 +5,8 @@ description: 基于 PVZHE 已发布事件与游戏服务实现简单战斗功能
 
 # 简单战斗功能
 
+先按 [Wiki 索引](../../../docs/wiki/README.md) 核对发行版本与摘要，再按需读取 [battle-services](../../../docs/wiki/0.30.0/battle-services.md)。匹配基线时沿用已确认的操作路径；仅对缺项、差异或失败点补充分析，不从零遍历游戏。静态确认和待验证内容不能冒充运行验收。
+
 输入：mod-guide 整理的触发条件、效果、数值与作用范围。输出：功能代码、设置（如需）和真实行为验收。
 
 1. 读 [战斗配方](../../../docs/recipes/settings-and-gameplay.md) 与 StartingSun.cs。先判断需要观察通知、修改扩展点还是执行命令，不使用猜测的函数名和结构。
