@@ -40,7 +40,7 @@ Initialize 注册 v3 MainMenu/BattleHud；收到 Root/Lifetime 后实例化自�
 3. 将控件局部坐标转换到用于输入的 Viewport。内部合成输入不是桌面坐标，也不是 Control 的画布 global 坐标。
 4. 记录鼠标事件后回调和业务结果。点击失败而信号成功，应报告命中失败；不能以信号兜底后仍宣布“鼠标验收通过”。
 
-以下是静态/编译核对过的转换与输入方式，完整通用命中流程尚未运行验收：
+以下仅为静态/编译核对过的坐标转换与按下事件示意，不是已实测的完整点击配方；按下/释放配对及同帧或分帧时序须在当前宿主与控件核验：
 
 ```csharp
 Vector2 center = button.GetGlobalTransformWithCanvas() * (button.Size / 2);
@@ -50,10 +50,11 @@ viewport.PushInput(new InputEventMouseButton
 {
     ButtonIndex = MouseButton.Left, Pressed = true, Position = center, GlobalPosition = center
 }, true);
-// 测试驱动等一个处理帧后，以相同坐标发送 Pressed=false；再检查回调是否进入。
+// 需配对发送相同目标的 Pressed=false，再观察事件、回调及结果。
+// 此处未验证释放时序，不规定必须等待一帧或必须同帧发送。
 ```
 
-button 应为当前有效 Control，事件只送其所属 viewport，不能随意混用根 Window 像素大小和伸缩后的逻辑尺寸。需要边界判断时把局部矩形四角用同一变换映射到 viewport；只判断中心在内还不足以证明完整可见，还需检查裁剪/遮挡。
+button 应为当前有效 Control，事件只送其所属 viewport，不能随意混用根 Window 像素大小和伸缩后的逻辑尺寸。需要边界判断时把局部矩形四角用同一变换映射到 viewport；只判断中心在内还不足以证明完整可见，还需检查裁剪/遮挡。输入诊断与证据分类按 [验证执行策略](../../../.agents/skills/pvzhe-mod-verify/references/verification-strategy.md)，本示例属于宿主合成输入，不代表系统鼠标或人工验收。
 
 `GetGlobalRect()` 返回所在画布的矩形，不保证是屏幕坐标。LevelChoose 的 GUIFollow 为跟随 viewport 的 CanvasLayer；曾把负Y当作出屏导致错误排查。依据：[Control.get_global_rect](https://docs.godotengine.org/en/stable/classes/class_control.html#class-control-method-get-global-rect)、[CanvasItem.get_global_transform_with_canvas](https://docs.godotengine.org/en/stable/classes/class_canvasitem.html#class-canvasitem-method-get-global-transform-with-canvas)。同样，`IsVisibleInTree()` 和非零大小不能证明命中可用。
 
