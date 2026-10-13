@@ -11,7 +11,7 @@ description: 为 PVZHE Mod 制作按钮、提示或确认弹窗及简单界面�
 
 1. 读 [复用目录](../../../docs/reuse-catalog.md) 与 [示例说明](../../../examples/FeatureLab/README.md)。需要重新核对时执行 `python tools/catalog.py`，只使用发布包与 DLL。目录存在不代表所有组件已运行验证。
 2. 优先调用原版 DialogManager 或实例化 MainButton，参考 `examples/FeatureLab/Adapters/HostUi.cs`。原版资源来自宿主 res://，无需打包复制贴图；不要将 new MainButton() 当成完整场景，它缺少子节点和配置。
-3. 新增控件先按 [场景适配与宿主共存](references/scene-fit.md) 明确显示/启用阶段、避让原版控件和模态优先级；挂载不等于战斗开始。再在合适的主菜单/战斗 UI 挂载回调创建节点，用 surface.Lifetime 管理节点和事件，避免反复挂载叠加。业务弹窗不能直接当作通用容器；确认/输入框尚需单独验证。
+3. 新增控件按 [场景适配与宿主共存](references/scene-fit.md) 由匹配 Wiki 或发行场景/行为分析建立控件、阶段、布局模式与动态占位清单（含空卡槽、金币等短暂信息），再明确显示/启用阶段、避让原版控件和模态优先级；截图未显示不能证明区域空闲；挂载不等于战斗开始。再在合适的主菜单/战斗 UI 挂载回调创建节点，用 surface.Lifetime 管理节点和事件，避免反复挂载叠加。业务弹窗不能直接当作通用容器；确认/输入框尚需单独验证。
 4. 通用提示/确认框的 Init(Dictionary) 不能假定自动设置字段；当前 Tips 应设置公开 text。正常关闭走 CloseDialog，确保暂停与 TimeScale 恢复；不要只 QueueFree。避免叠加模态弹窗，避免切场景清理覆盖宿主状态。
 5. UI 使用本地展示，不借按钮绕过战斗命令的权限/验证。修改共享 Theme/StyleBox 前按需复制；按钮布局、文字、缩放、鼠标过滤和字体须实际检查。
 

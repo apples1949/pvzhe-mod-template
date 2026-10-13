@@ -76,3 +76,15 @@ Battle 数据保存/恢复已接入，但完整保存退出后读档、复活/�
 本轮为文档与 Skills 更新，未新增 GUI 运行证据。通用战斗按钮的完整阶段验收仍待实现验证；没有将引用 Mod 的高层/光标个案结论提升为模板通用规则。需求案例用于人工审阅行为预期，不宣称所有 AI 已通过执行回归。
 
 检查结果：11份 Skills 通过 quick_validate；42份文档的129个本地链接目标全部存在；git diff --check 通过。未修改工具/入口，因此本轮未重新构建或运行 GUI。
+
+## UI 结构与阶段证据补强（2026-10-13）
+
+明确场景/实例/动态创建与行为分析在先、运行截图与交互验证在后的证据流程；同步 UI/PCK/验证 Skills、Wiki 维护规则、升级 Skill 与兼容报告。发行 0.30.0 PCK 中提取 TowerDefenseControlNew.tscn 的 MD5 校验通过，确认 GUITop/OptionButton、实例来源、左下布局、layer=3、默认隐藏和 autoSize。这些为静态结构证据，未新增 GUI 或完整阶段行为验收，最终尺寸及条件仍待核验。未修改引用 Mod 或工具/入口。
+
+## 动态金币占位与卡槽布局资料（2026-10-13）
+
+新增 battle-layout Wiki，UI/验证指导及模板升级资料同步布局模式、槽数、动态触发与窗口尺寸的独立覆盖要求。仅分析匹配发行资料，未修改入口/工具或引用 Mod。
+
+发行 PCK 提取 CoinBank、TowerDefenseManager、SeedBank 场景，MD5 校验通过；发布 DLL 方法体静态确认 CoinBank 初始透明，Collection 调用 ShowCoinBank，默认位置86/557、alpha=1、非still停留5秒后淡出；显示框基础尺寸167×40，宿主父层100。SeedBank.SetMobileMode/ApplyMode 静态确认卡牌容器迁移、模式显示切换及 MobilePreset 保存。自己的分析程序和原始证据仅留在 .work，未分发游戏代码。
+
+未新增 GUI 验收；实际金币拾取与布局切换的完整显示/命中矩形仍待运行核验，不将静态范围当成所有窗口/模式的最终坐标，也不保证任一候选按钮位置已安全。

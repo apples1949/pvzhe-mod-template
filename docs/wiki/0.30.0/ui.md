@@ -66,3 +66,19 @@ Window 不继承 CanvasItem，不能照搬 `tree.Root.GetViewportRect()`；使�
 按 [场景适配](../../../.agents/skills/pvzhe-ui-create/references/scene-fit.md) 创建状态表、刷新可见/启用状态，并保留命令入口检查。关卡左下已有原版选项时，在邻近空位布局且验证原选项仍可用；不将固定边距或 Layer=100 当作通用配方。坐标与输入方式按上文区分，命中失败先定位原因；升层后须复验宿主暂停/模态优先级。
 
 FeatureLab 的 PRESET 关卡跳过选卡，因此它通过不能验证“选卡阶段隐藏按钮”。需要此行为时另设有选卡阶段的场景或实际原版关卡，分别保留准备与战斗证据。
+
+## 已知左下控件：布局前必须考虑
+
+状态：以下结构由本基线发行 PCK 提取并静态核对（2026-10-13）；阶段变化/最终命中矩形仍须按目标功能核验，不以源码参考或截图代替发行行为验收。
+
+| 项目 | 发行结构证据 |
+| --- | --- |
+| 场景 | res://Scene/TowerDefesne/TowerDefenseNew/TowerDefenseControlNew.tscn（目录拼写为 TowerDefesne） |
+| 原版选项 | GUITop/OptionButton；根节点导出 optionButton 指向该节点 |
+| 实例 | res://Prefab/GUI/Button/SpriteBrightButton/SpriteBrightButton.tscn；不是普通 BaseButton，需继续定位点击子节点 |
+| 位置与层 | 父级 GUITop 为 CanvasLayer，layer=3；OptionButton anchor_top/bottom=1，offset_left=4、top=-56、right=139、bottom=75，scale=(0.4,0.4) |
+| 默认与动态 | visible=false、autoSize=true；这不表示战斗时不存在，也不能把偏移直接当成最终按钮矩形 |
+
+从 [内容索引](content-index.md) 的提取入口获取该场景和实例依赖，再追踪显隐/autoSize/阶段逻辑，记录运行时尺寸及同坐标空间矩形。选卡截图或 PRESET 测试关卡的一次截图不能证明左下区域无原版按钮。具体步骤见 [布局证据顺序](../../../.agents/skills/pvzhe-ui-create/references/scene-fit.md)。
+
+对局摆放位置还须核对 [布局模式与动态占位](battle-layout.md)：金币拾取会显示设置右侧信息区，另一卡槽布局可能占用设置上方。不要把左右/上下方向固定为安全方案。
