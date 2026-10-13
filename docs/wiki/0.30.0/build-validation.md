@@ -43,3 +43,5 @@ Bash 中过滤输出时使用 pipefail 并检查真实退出码，或者把日�
 默认 runtime_test 复制发行版到独立用户目录，测试 Hello World 标签；FeatureLab 验证自己的目录/关卡/卡槽、UI事件、设置重启、阳光、死亡/HUD与胜利。完整命令与证据位置见 [示例验证](../../../.agents/skills/pvzhe-mod-verify/references/example-scenarios.md)。通用自定义项目、原版冒险自动进入与真实鼠标命中未由该工具统一实现。
 
 发布版禁用 --main-pack，本机 headless 曾原生崩溃；当前图形 OpenGL 副本路径已实测。退出冻结扩展点撤销和曾出现的 ObjectDB 泄漏诊断不能一概过滤；JSON unsupported 诊断仅在明确自读 JSON 的已知场景可解释为非阻断。具体排查见 [运行排障](../../../.agents/skills/pvzhe-mod-verify/references/runtime-troubleshooting.md)。
+
+最终包除功能测试外，还需不带自定义测试参数的普通加载验收。具体阶段、清单注册契约及测试夹具隔离见 [自定义功能验收](../../../.agents/skills/pvzhe-mod-verify/references/feature-acceptance.md)。通过 Mod 测试关卡只报告该场景，不沿用“原版关卡成功”标签。

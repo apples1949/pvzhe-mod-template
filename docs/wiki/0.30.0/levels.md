@@ -19,3 +19,9 @@ v3 使用 contentEntries 声明 category=Level/key=demo。Content.Provide 的资
 自动运行脚本的测试参数只开启验收流程；普通 Mod 不自动击杀僵尸或改用户资料。测试覆盖实际波次、真实角色伤害/死亡/HUD/胜利，难度、自然通关、读档和多人需单独验证。结果不应泛化为这些能力均已验证。
 
 运行代码参考 [DemoLevel](../../../examples/FeatureLab/Features/DemoLevel.cs)，已验证选择流程见 [BATTLE-01](battle-testing.md)。地图、角色、卡牌与原版关卡查询直接从 [内容索引](content-index.md) 开始，不从源码名称猜注册键。
+
+## 清单契约与测试内容
+
+contentEntries 是宿主所需内容声明；对应目录在正常初始化路径完成 ProvideLevelCatalog 注册，不能仅在测试参数下注册。功能测试加载通过与无测试参数的最终包加载分别验收；见 [验收规则](../../../.agents/skills/pvzhe-mod-verify/references/feature-acceptance.md)。
+
+自读 JSON 的已知 unsupported package file 诊断，与 required contents not registered 的内容注册失败是不同问题；不能因为前者在 FeatureLab 非阻断就忽略后者，也不能将二者归为同一原因。保留原始诊断与应用/回滚结果。测试关卡优先独立于最终发布内容，若随包交付则明确用途并在普通启动完成注册。

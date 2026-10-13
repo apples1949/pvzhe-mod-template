@@ -58,3 +58,11 @@ button 应为当前有效 Control，事件只送其所属 viewport，不能随�
 `GetGlobalRect()` 返回所在画布的矩形，不保证是屏幕坐标。LevelChoose 的 GUIFollow 为跟随 viewport 的 CanvasLayer；曾把负Y当作出屏导致错误排查。依据：[Control.get_global_rect](https://docs.godotengine.org/en/stable/classes/class_control.html#class-control-method-get-global-rect)、[CanvasItem.get_global_transform_with_canvas](https://docs.godotengine.org/en/stable/classes/class_canvasitem.html#class-canvasitem-method-get-global-transform-with-canvas)。同样，`IsVisibleInTree()` 和非零大小不能证明命中可用。
 
 Window 不继承 CanvasItem，不能照搬 `tree.Root.GetViewportRect()`；使用控件对应的 viewport，并核对当前发布 GodotSharp 的 API。不要从编译错误跳过到旧包运行。
+
+## 战斗操作的显示与共存
+
+状态：设计约束与已公开接口的适配指引；通用战斗按钮的完整阶段/避让实现尚未运行验收。BattleHud 提供挂载位置和场景作用域，不自动管理选卡→战斗→结算的显示状态；TryGetBattle 的 Running/Paused 是已知观察入口，具体边界需按功能验证，不能将单个标志当作全部模态/结算判定。
+
+按 [场景适配](../../../.agents/skills/pvzhe-ui-create/references/scene-fit.md) 创建状态表、刷新可见/启用状态，并保留命令入口检查。关卡左下已有原版选项时，在邻近空位布局且验证原选项仍可用；不将固定边距或 Layer=100 当作通用配方。坐标与输入方式按上文区分，命中失败先定位原因；升层后须复验宿主暂停/模态优先级。
+
+FeatureLab 的 PRESET 关卡跳过选卡，因此它通过不能验证“选卡阶段隐藏按钮”。需要此行为时另设有选卡阶段的场景或实际原版关卡，分别保留准备与战斗证据。
