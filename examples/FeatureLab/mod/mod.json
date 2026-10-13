@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 3,
+  "id": "local.feature-lab",
+  "name": "功能开发示例",
+  "version": "0.1.0",
+  "author": "Mod 开发者",
+  "description": "原版按钮与弹窗、击杀统计、设置、开局阳光和独立关卡的示例。",
+  "playInstructions": "主菜单左下角有说明、统计开关和示例关卡入口；对局右下角显示敌方僵尸死亡次数。",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "FeatureLab.Entry",
+  "runtimeApiVersion": 3,
+  "runtimeAssemblyPolicy": "required",
+  "contentEntries": [{ "category": "Level", "key": "demo" }],
+  "resources": ["Assets/level.json"],
+  "settings": [
+    { "key": "showKills", "type": "bool", "label": "显示本局击杀数", "default": true, "applyMode": "immediate", "affectsGameplay": false },
+    { "key": "bonusSun", "type": "int", "label": "新对局额外阳光", "default": 50, "min": 0, "max": 500, "step": 25, "applyMode": "restart", "affectsGameplay": true }
+  ]
+}

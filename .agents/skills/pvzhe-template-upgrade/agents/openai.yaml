@@ -1,0 +1,4 @@
+interface:
+  display_name: "PVZHE 模板版本迁移"
+  short_description: "仅用于明确要求随新版游戏更新旧模板，分析兼容差异并同步代码、文档和相关技能"
+  default_prompt: "使用 $pvzhe-template-upgrade，将当前旧模板适配到我提供的新版游戏源码或发行版，完成差异分析、必要修改和兼容验证。"

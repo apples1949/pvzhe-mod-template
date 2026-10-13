@@ -11,7 +11,23 @@ const string ns = "PVZHE.ModEditor.ModSystem.";
 var contract = host.GetType(ns + "IXWModRuntimeEntry", true)!;
 var api = host.GetType(ns + "XWModRuntimeApi", true)!;
 var manifest = host.GetType(ns + "XWModManifest", true)!;
-if (args.Length > 1)
+if (args.Length > 1 && args[1] == "--types")
+{
+    Console.WriteLine(JsonSerializer.Serialize(args.Skip(2).Select(name =>
+    {
+        var type = host.GetType(name);
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+        return new
+        {
+            name, present = type != null, baseType = type?.BaseType?.FullName,
+            methods = type?.GetMethods(flags).Select(m => m.ToString()),
+            properties = type?.GetProperties(flags).Select(p => p.ToString()),
+            fields = type?.GetFields(flags).Select(f => f.ToString()),
+            events = type?.GetEvents(flags).Select(e => e.ToString())
+        };
+    }), new JsonSerializerOptions { WriteIndented = true }));
+}
+else if (args.Length > 1)
 {
     var mod = AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(args[1]));
     var entry = mod.GetType(args[2], true)!;

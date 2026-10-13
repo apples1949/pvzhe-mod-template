@@ -13,7 +13,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from pck import Pack, safe_path
 from mod import check_package
 import mod
+from manifest_policy import validate_metadata
 from runtime_test import config_entries, variant_string
+
+
+def metadata(**values):
+    return {"id": "test.mod", "name": "测试 Mod", "author": "测试作者", "version": "0.1.0", **values}
 
 
 def make_pack(path, version=4, names=("res://a.txt",), flags=0):
@@ -85,11 +90,64 @@ class PckTests(unittest.TestCase):
 
 
 class PackageTests(unittest.TestCase):
+    def test_profiles_keep_sources_and_outputs_separate(self):
+        with patch.multiple(mod, EXAMPLE=mod.EXAMPLE, DIST=mod.DIST, PACKAGE=mod.PACKAGE):
+            mod.select_example("feature-lab")
+            self.assertEqual(mod.source_root(), mod.ROOT / "examples/FeatureLab/mod")
+            self.assertEqual(mod.PACKAGE, mod.ROOT / "dist/feature-lab/feature-lab.pmod")
+            mod.select_example("hello-world")
+            self.assertEqual(mod.source_root(), mod.ROOT / "mod")
+            self.assertEqual(mod.PACKAGE, mod.ROOT / "dist/hello-world.pmod")
+            with self.assertRaisesRegex(ValueError, "Unknown"):
+                mod.select_example("typo")
+
+    def test_declared_level_data_allowed_but_unlisted_data_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp) / "test.pmod"
+            manifest = metadata(runtimeAssembly="Runtime/ModAssembly.dll", resources=["Assets/level.json"])
+            with zipfile.ZipFile(path, "w") as z:
+                z.writestr("mod.json", json.dumps(manifest))
+                z.writestr("Runtime/ModAssembly.dll", b"MZtest")
+                z.writestr("Assets/level.json", '{"Name":"own.level"}')
+            self.assertEqual(check_package(path), manifest)
+            with zipfile.ZipFile(path, "a") as z:
+                z.writestr("Assets/undeclared.json", "{}")
+            with self.assertRaisesRegex(ValueError, "Unexpected"):
+                check_package(path)
+
+    def test_feature_verification_requires_scenario_completion(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); work = root / ".work"; work.mkdir()
+            source = root / "examples/FeatureLab/mod"; source.mkdir(parents=True)
+            package = root / "dist/feature-lab/feature-lab.pmod"; package.parent.mkdir(parents=True)
+            m = {**metadata(), "id": "test.features", "schemaVersion": 3, "runtimeApiVersion": 3,
+                 "runtimeAssembly": "Runtime/ModAssembly.dll", "runtimeAssemblyPolicy": "required",
+                 "runtimeEntryType": "FeatureLab.Entry", "resources": []}
+            (source / "mod.json").write_text(json.dumps(m))
+            (work / "api.json").write_text(json.dumps({"schemaVersion": 3, "runtimeApiVersion": 3}))
+            with zipfile.ZipFile(package, "w") as z:
+                z.writestr("mod.json", json.dumps(m)); z.writestr("Runtime/ModAssembly.dll", b"MZfeatures")
+            log = root / "game.log"
+            identity = hashlib.sha256(b"MZfeatures").hexdigest()
+            base = f"[Mod:test.features] HELLO_INIT: test\n[Mod:test.features] HELLO_BINARY: {identity}\npackage applied: test.features\n"
+            markers = ("HELLO_READY", "LAB_UI", "LAB_DIALOG", "LAB_SETTINGS", "LAB_LEVEL", "LAB_HUD",
+                       "LAB_BATTLE", "LAB_BONUS", "LAB_KILL", "LAB_RESULT", "LAB_TEST_PASS")
+            with patch.multiple(mod, ROOT=root, WORK=work, DIST=package.parent, PACKAGE=package, EXAMPLE="feature-lab"):
+                log.write_text(base + "".join(f"[Mod:test.features] {x}: yes\n" for x in markers[:-1]))
+                with self.assertRaisesRegex(ValueError, "LAB_TEST_PASS"):
+                    mod.verify(SimpleNamespace(log=log))
+                with log.open("a") as f:
+                    f.write("[Mod:test.features] LAB_TEST_PASS: yes\n")
+                mod.verify(SimpleNamespace(log=log))
+                report = json.loads((package.parent / "verification.json").read_text())
+                self.assertEqual(report["example"], "feature-lab")
+                self.assertEqual(report["runtimeBinarySha256"], identity)
+
     def test_runtime_log_must_match_current_binary(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); work = root / ".work"; work.mkdir(); (root / "mod").mkdir()
             package = root / "dist/test.pmod"; package.parent.mkdir()
-            m = {"id": "test.hello", "schemaVersion": 3, "runtimeApiVersion": 1,
+            m = {**metadata(), "id": "test.hello", "schemaVersion": 3, "runtimeApiVersion": 1,
                  "runtimeAssembly": "Runtime/ModAssembly.dll", "runtimeAssemblyPolicy": "required",
                  "runtimeEntryType": "HelloMod.Entry", "resources": []}
             (root / "mod/mod.json").write_text(json.dumps(m))
@@ -112,7 +170,7 @@ class PackageTests(unittest.TestCase):
     def test_reject_accidentally_distributed_host_dll(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp) / "test.pmod"
-            manifest = {"runtimeAssembly": "Runtime/ModAssembly.dll", "resources": []}
+            manifest = metadata(runtimeAssembly="Runtime/ModAssembly.dll", resources=[])
             with zipfile.ZipFile(path, "w") as z:
                 z.writestr("mod.json", json.dumps(manifest)); z.writestr("Runtime/ModAssembly.dll", b"MZtest")
             self.assertEqual(check_package(path), manifest)
@@ -128,6 +186,71 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(config_entries(data)[key.decode()], value)
         with self.assertRaises(ValueError):
             config_entries(data + b"unexpected")
+
+
+class MetadataTests(unittest.TestCase):
+    def test_limits_and_character_sets(self):
+        validate_metadata(metadata(id="a" * 32, author="作" * 32, version="1.2.3-alpha.1+build.001"))
+        for key, value in (("id", "a" * 33), ("id", "Uppercase"), ("id", "dir/mod"),
+                           ("id", "dir\\mod"), ("id", "中文"), ("id", ".."),
+                           ("author", "作" * 33), ("author", "😀" * 17),
+                           ("name", ""), ("author", " "), ("id", 123), ("name", "Name\n")):
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                validate_metadata(metadata(**{key: value}))
+
+    def test_semver_including_numeric_prerelease(self):
+        for version in ("0.1.0", "1.0.0-beta.1", "1.0.0-0", "1.0.0-01x", "1.0.0+001", "1.2.3+" + "x" * 26):
+            validate_metadata(metadata(version=version))
+        for version in ("1.0", "v1.0.0", "01.0.0", "1.0.0-01", "1.0.0-beta.01",
+                        "1.0.0-", "1.0.0+a..b", "1.0.0_foo", "1.2.3+" + "x" * 27):
+            with self.subTest(version=version), self.assertRaisesRegex(ValueError, "version"):
+                validate_metadata(metadata(version=version))
+
+    def test_release_rejects_examples_but_local_build_allows_them(self):
+        for changes in ({"id": "local.hello-world"}, {"id": "local.feature-lab"},
+                        {"author": "Mod 开发者"}, {"name": "Hello World 模板"}):
+            sample = metadata(**changes)
+            validate_metadata(sample)
+            with self.assertRaisesRegex(ValueError, "release"):
+                validate_metadata(sample, release=True)
+        validate_metadata(metadata(id="local.my-custom-mod"), release=True)
+
+    def test_custom_identity_changes_package_filename(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); (root / "mod").mkdir()
+            (root / "mod/mod.json").write_text(json.dumps(metadata(id="my.kill-counter")))
+            with patch.multiple(mod, ROOT=root, EXAMPLE=mod.EXAMPLE, DIST=mod.DIST, PACKAGE=mod.PACKAGE):
+                mod.select_example("hello-world")
+                self.assertEqual(mod.PACKAGE.name, "my.kill-counter.pmod")
+
+    def test_conflicts_and_confirmed_updates(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); installed = root / "test.mod.pmod"
+            with zipfile.ZipFile(installed, "w") as archive:
+                archive.writestr("mod.json", json.dumps(metadata(id="TEST.MOD")))
+            args = SimpleNamespace(mods_dir=root, allow_update=False)
+            with patch.object(mod, "PACKAGE", root / "dist/test.mod.pmod"):
+                with self.assertRaisesRegex(ValueError, "conflict"):
+                    mod.check_id_conflicts(metadata(), args)
+                args.allow_update = True
+                mod.check_id_conflicts(metadata(), args)
+                installed.rename(root / "another-file.pmod")
+                with self.assertRaisesRegex(ValueError, "conflict"):
+                    mod.check_id_conflicts(metadata(), args)
+
+    def test_release_check_rejects_stale_packaged_metadata(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); (root / "mod").mkdir(); work = root / ".work"; work.mkdir()
+            packaged = metadata(runtimeAssembly="Runtime/ModAssembly.dll", runtimeAssemblyPolicy="required",
+                                runtimeEntryType="HelloMod.Entry", schemaVersion=3, runtimeApiVersion=1, resources=[])
+            (root / "mod/mod.json").write_text(json.dumps({**packaged, "author": "Changed"}))
+            (work / "api.json").write_text(json.dumps({"schemaVersion": 3, "runtimeApiVersion": 3}))
+            package = root / "test.mod.pmod"
+            with zipfile.ZipFile(package, "w") as archive:
+                archive.writestr("mod.json", json.dumps(packaged)); archive.writestr("Runtime/ModAssembly.dll", b"MZtest")
+            with patch.multiple(mod, ROOT=root, WORK=work, PACKAGE=package, EXAMPLE="hello-world"):
+                with self.assertRaisesRegex(ValueError, "differs"):
+                    mod.check(SimpleNamespace(release=True, mods_dir=None))
 
 
 if __name__ == "__main__":

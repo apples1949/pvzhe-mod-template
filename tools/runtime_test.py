@@ -11,9 +11,11 @@ import struct
 import subprocess
 import sys
 import uuid
+import argparse
 from pathlib import Path
 from pck import Pack
 from mod import check_package, sha
+import mod as workflow
 
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / ".work"
@@ -39,7 +41,9 @@ def variant_string(text):
     return struct.pack("<II", 4, len(data)) + data + b"\0" * (-len(data) % 4)
 
 
-def test():
+def test(example="hello-world"):
+    workflow.select_example(example)
+    runtime = WORK / ("runtime" if example == "hello-world" else "runtime-feature-lab")
     if os.name != "nt":
         raise ValueError("Runtime test currently supports Windows release only")
     evidence = json.loads((WORK / "release.json").read_text(encoding="utf-8"))
@@ -80,11 +84,13 @@ func capture():
     await get_tree().create_timer(2.0).timeout
     get_tree().quit()
 '''
+    if example == "feature-lab":
+        driver = driver.split(b'    var banner =')[0]
     data = b"ECFG" + struct.pack("<I", len(entries))
     for key, value in entries.items():
         k = key.encode()
         data += struct.pack("<I", len(k)) + k + struct.pack("<I", len(value)) + value
-    target = WORK / "runtime" / pack.path.name
+    target = runtime / pack.path.name
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(pack.path, target)
     with target.open("r+b") as f:
@@ -107,16 +113,16 @@ func capture():
     if Pack(target).read("project.binary") != data:
         raise ValueError("Test pack verification failed")
     userdata = Path(os.environ["APPDATA"]) / "Godot/app_userdata" / name
-    (WORK / "runtime/userdata-path.txt").write_text(str(userdata), encoding="utf-8")
+    (runtime / "userdata-path.txt").write_text(str(userdata), encoding="utf-8")
     mods = userdata / "Mods"
     mods.mkdir(parents=True, exist_ok=True)
-    package = ROOT / "dist/hello-world.pmod"
+    package = workflow.PACKAGE
     check_package(package)
     shutil.copyfile(package, mods / package.name)
-    manifest = json.loads((ROOT / "mod/mod.json").read_text(encoding="utf-8"))
+    manifest = workflow.manifest()
     state = mods / "enabled_mods.json"
     previous = state.read_bytes() if state.exists() else None
-    log = WORK / "runtime/game.log"
+    log = runtime / "game.log"
     original_exe = Path(evidence["pck"]).with_suffix(".exe")
     if not original_exe.exists():
         raise FileNotFoundError("Expected game executable beside PCK with same basename")
@@ -134,15 +140,41 @@ func capture():
         if log.exists():
             log.unlink()
         command = [str(exe), "--rendering-driver", "opengl3", "--windowed", "--resolution", "800x450",
-                   "--quit-after", "2700", "--log-file", str(log)]
-        print("Test driver presses the existing loading StartButton, captures the banner, then exits.", flush=True)
+                   "--quit-after", "3600", "--log-file", str(log)]
+        if example == "feature-lab":
+            command += ["--", "--feature-lab-test"]
+        print("Test driver presses the existing loading StartButton; " +
+              ("FeatureLab verifies UI, battle and settings." if example == "feature-lab" else
+               "captures the banner, then exits."), flush=True)
         print("Starting released game with isolated data:", userdata, flush=True)
-        with (WORK / "runtime/stdout.log").open("w", encoding="utf-8") as output:
+        with (runtime / "stdout.log").open("w", encoding="utf-8") as output:
             subprocess.run(command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT, timeout=120, check=True)
-        subprocess.run([sys.executable, str(ROOT / "tools/mod.py"), "verify", "--log", str(log)], cwd=ROOT, check=True)
-        screenshot = userdata / "hello-world.png"
-        if screenshot.exists():
-            shutil.copyfile(screenshot, ROOT / "dist/hello-world.png")
+        subprocess.run([sys.executable, str(ROOT / "tools/mod.py"), "verify", "--example", example,
+                        "--log", str(log)], cwd=ROOT, check=True)
+        screenshots = ("hello-world",) if example == "hello-world" else ("ui-dialog", "level-browser", "battle-hud")
+        for name in screenshots:
+            screenshot = userdata / (name + ".png")
+            if not screenshot.is_file():
+                raise FileNotFoundError("Missing current test screenshot: " + str(screenshot))
+            shutil.copyfile(screenshot, workflow.DIST / screenshot.name)
+        if example == "feature-lab":
+            persistence_log = runtime / "persistence.log"
+            second_command = command.copy()
+            second_command[second_command.index("--log-file") + 1] = str(persistence_log)
+            second_command[-1] = "--feature-lab-persistence"
+            with (runtime / "persistence-stdout.log").open("w", encoding="utf-8") as output:
+                subprocess.run(second_command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT, timeout=120, check=True)
+            text = persistence_log.read_text(encoding="utf-8", errors="replace")
+            if f"[Mod:{manifest['id']}] LAB_PERSIST_PASS:" not in text:
+                raise ValueError("Settings persistence was not observed after process restart")
+            report_path = workflow.DIST / "verification.json"
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            if f"[Mod:{manifest['id']}] HELLO_BINARY: {report['runtimeBinarySha256']}" not in text:
+                raise ValueError("Persistence test binary does not match the current package")
+            report["settingsRestartVerified"] = True
+            report["persistenceLogSha256"] = sha(persistence_log)
+            workflow.write_json(report_path, report)
+            print("PASS: settings survived a second real game process (bool=false, restart int=75)")
     finally:
         if previous is None:
             state.unlink(missing_ok=True)
@@ -151,14 +183,17 @@ func capture():
 
 
 if __name__ == "__main__":
-    lock = WORK / "runtime/test.lock"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--example", choices=("hello-world", "feature-lab"), default="hello-world")
+    args = parser.parse_args()
+    lock = WORK / ("runtime" if args.example == "hello-world" else "runtime-feature-lab") / "test.lock"
     lock.parent.mkdir(parents=True, exist_ok=True)
     try:
         handle = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
-        raise SystemExit("Another runtime test is active. If interrupted, confirm the test process exited before removing .work/runtime/test.lock.")
+        raise SystemExit(f"Another runtime test is active. If interrupted, confirm the test process exited before removing {lock}.")
     try:
-        test()
+        test(args.example)
     finally:
         os.close(handle)
         lock.unlink(missing_ok=True)

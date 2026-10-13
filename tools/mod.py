@@ -8,12 +8,33 @@ import sys
 import zipfile
 from pathlib import Path
 from pck import Pack, safe_path
+from manifest_policy import EXAMPLE_IDS, validate_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / ".work"
 DIST = ROOT / "dist"
 PACKAGE = DIST / "hello-world.pmod"
 PROBE = ROOT / "tools/HostProbe/bin/Release/net9.0/HostProbe.dll"
+EXAMPLE = "hello-world"
+
+
+def select_example(name):
+    global EXAMPLE, DIST, PACKAGE
+    if name not in ("hello-world", "feature-lab"):
+        raise ValueError(f"Unknown example: {name}")
+    EXAMPLE = name
+    DIST = ROOT / "dist" if name == "hello-world" else ROOT / "dist/feature-lab"
+    PACKAGE = DIST / (name + ".pmod")
+    path = source_root() / "mod.json"
+    if path.exists():
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+        validate_metadata(metadata)
+        if metadata["id"] not in EXAMPLE_IDS:
+            PACKAGE = DIST / (metadata["id"] + ".pmod")
+
+
+def source_root():
+    return ROOT / "mod" if EXAMPLE == "hello-world" else ROOT / "examples/FeatureLab/mod"
 
 
 def sha(path):
@@ -93,8 +114,9 @@ def verify_references():
     return evidence
 
 
-def manifest():
-    m = json.loads((ROOT / "mod/mod.json").read_text(encoding="utf-8"))
+def manifest(release=False):
+    m = json.loads((source_root() / "mod.json").read_text(encoding="utf-8"))
+    validate_metadata(m, release=release)
     if m["runtimeAssembly"] != "Runtime/ModAssembly.dll" or m["runtimeAssemblyPolicy"] != "required":
         raise ValueError("This builder requires Runtime/ModAssembly.dll and required policy")
     if not m["id"] or not m["runtimeEntryType"]:
@@ -105,11 +127,14 @@ def manifest():
     return m
 
 
-def build(_):
+def build(args):
+    m = manifest(release=getattr(args, "release", False))
+    check_id_conflicts(m, args)
     verify_references()
-    m = manifest()
-    run("dotnet", "build", ROOT / "src/HelloMod", "-c", "Release", "--nologo")
-    dll = ROOT / "src/HelloMod/bin/Release/net9.0/HelloMod.dll"
+    project = ROOT / "src/HelloMod" if EXAMPLE == "hello-world" else ROOT / "examples/FeatureLab"
+    assembly = "HelloMod" if EXAMPLE == "hello-world" else "FeatureLab"
+    run("dotnet", "build", project, "-c", "Release", "--nologo")
+    dll = project / f"bin/Release/net9.0/{assembly}.dll"
     probe_build()
     run("dotnet", PROBE, WORK / "references", dll, m["runtimeEntryType"])
     # Explicit allowlist: never archive project/references/bin wholesale.
@@ -117,13 +142,13 @@ def build(_):
              m["runtimeAssembly"]: dll.read_bytes()}
     for name in m.get("resources", []):
         relative = safe_path(name)
-        source = (ROOT / "mod" / relative).resolve()
-        if not source.is_relative_to(ROOT / "mod") or source.suffix.lower() in (".dll", ".cs", ".gd", ".exe", ".ps1"):
+        source = (source_root() / relative).resolve()
+        if not source.is_relative_to(source_root()) or source.suffix.lower() in (".dll", ".cs", ".gd", ".exe", ".ps1"):
             raise ValueError(f"Invalid content resource: {name}")
         if relative.casefold() in {p.casefold() for p in files}:
             raise ValueError(f"Reserved/duplicate archive path: {name}")
         files[relative] = source.read_bytes()
-    DIST.mkdir(exist_ok=True)
+    DIST.mkdir(parents=True, exist_ok=True)
     temp = PACKAGE.with_suffix(".tmp")
     with zipfile.ZipFile(temp, "w", compression=zipfile.ZIP_DEFLATED) as z:
         for name, data in sorted(files.items()):
@@ -132,14 +157,15 @@ def build(_):
             z.writestr(info, data)
     temp.replace(PACKAGE)
     (DIST / "verification.json").unlink(missing_ok=True)
-    (DIST / "hello-world.png").unlink(missing_ok=True)
+    for screenshot in DIST.glob("*.png"):
+        screenshot.unlink()
     write_json(DIST / "build-info.json", {"packageSha256": sha(PACKAGE),
                "release": verify_references(), "entries": sorted(files)})
     check_package(PACKAGE)
     print(f"Built: {PACKAGE}")
 
 
-def check_package(path):
+def check_package(path, release=False):
     with zipfile.ZipFile(path) as z:
         names = z.namelist()
         for name in names:
@@ -147,10 +173,47 @@ def check_package(path):
         if len({n.casefold() for n in names}) != len(names) or z.testzip():
             raise ValueError("Invalid archive paths/checksums")
         m = json.loads(z.read("mod.json"))
+        validate_metadata(m, release=release)
         allowed = {"mod.json", "Runtime/ModAssembly.dll", *m.get("resources", [])}
         if set(names) != allowed or not z.read(m["runtimeAssembly"]).startswith(b"MZ"):
             raise ValueError("Unexpected files or missing managed assembly")
         return m
+
+
+def check_id_conflicts(metadata, args):
+    directory = getattr(args, "mods_dir", None)
+    if not directory:
+        return
+    target = Path(directory).resolve()
+    if not target.is_dir():
+        raise ValueError(f"Mods directory does not exist: {target}")
+    for path in sorted(target.iterdir()):
+        if not path.is_file() or path.suffix.lower() != ".pmod" or path.resolve() == PACKAGE.resolve():
+            continue
+        try:
+            with zipfile.ZipFile(path) as archive:
+                other = json.loads(archive.read("mod.json"))
+            other_id = other.get("id")
+            if not isinstance(other_id, str) or not other_id.strip():
+                raise ValueError("missing ID")
+        except (OSError, ValueError, KeyError, zipfile.BadZipFile, AttributeError) as error:
+            raise ValueError(f"Cannot inspect installed Mod ID: {path.name}: {error}") from error
+        if other_id.strip().casefold() == metadata["id"]:
+            if getattr(args, "allow_update", False) and path.name.casefold() == PACKAGE.name.casefold():
+                continue
+            raise ValueError(f"Mod ID conflict: {metadata['id']} in {path.name}; "
+                             "--allow-update only permits a confirmed update of the same package filename")
+
+
+def check(args):
+    metadata = check_package(PACKAGE, release=getattr(args, "release", False))
+    if getattr(args, "release", False):
+        if metadata != manifest(release=True):
+            raise ValueError("Packaged manifest differs from current mod.json; rebuild before release")
+    check_id_conflicts(metadata, args)
+    print(f"PASS: package metadata and contents checked: {PACKAGE}")
+    if getattr(args, "release", False) and not getattr(args, "mods_dir", None):
+        print("Local Mod ID conflicts not checked; use --mods-dir. Global uniqueness is not verified.")
 
 
 def install(args):
@@ -178,7 +241,10 @@ def verify(args):
         binary_sha = hashlib.sha256(archive.read(m["runtimeAssembly"])).hexdigest()
     if f"[Mod:{m['id']}] HELLO_BINARY: {binary_sha}" not in log:
         raise ValueError("Runtime DLL does not match the current package, or log predates binary evidence")
-    for marker in ("HELLO_INIT", "HELLO_READY", "HELLO_UI"):
+    markers = ("HELLO_INIT", "HELLO_READY", "HELLO_UI") if EXAMPLE == "hello-world" else (
+        "HELLO_INIT", "HELLO_READY", "LAB_UI", "LAB_DIALOG", "LAB_SETTINGS", "LAB_LEVEL",
+        "LAB_HUD", "LAB_BATTLE", "LAB_BONUS", "LAB_KILL", "LAB_RESULT", "LAB_TEST_PASS")
+    for marker in markers:
         if f"[Mod:{m['id']}] {marker}:" not in log:
             raise ValueError(f"Missing runtime evidence: {marker}; use a fresh log from this build")
     if f"package applied: {m['id']}" not in log:
@@ -192,8 +258,9 @@ def verify(args):
                "runtimeBinarySha256": binary_sha,
                "shutdownDiagnostics": [line for line in phases[-1].splitlines()
                    if len(phases) > 1 and line.startswith(("WARNING:", "ERROR:"))],
-               "result": "runtime lifecycle and UI callback observed"})
-    print("PASS: package applied, initialization, all-mods-ready and UI mount observed")
+               "example": EXAMPLE, "markers": markers,
+               "result": "runtime scenario observed"})
+    print(f"PASS: {EXAMPLE}; package/binary identity and {len(markers)} runtime markers observed")
 
 
 def extract(args):
@@ -210,13 +277,25 @@ def main():
     sub = p.add_subparsers(dest="command", required=True)
     a = sub.add_parser("prepare"); a.add_argument("--game-dir", required=True); a.add_argument("--pck"); a.set_defaults(func=prepare)
     a = sub.add_parser("build"); a.set_defaults(func=build)
-    a = sub.add_parser("check"); a.set_defaults(func=lambda _: print(check_package(PACKAGE)))
+    a = sub.add_parser("check"); a.set_defaults(func=check)
     a = sub.add_parser("install"); a.add_argument("--mods-dir", required=True); a.set_defaults(func=install)
     a = sub.add_parser("verify"); a.add_argument("--log", required=True); a.set_defaults(func=verify)
     a = sub.add_parser("extract"); a.add_argument("--pck", required=True); a.add_argument("--output", required=True)
     group = a.add_mutually_exclusive_group(required=True); group.add_argument("--path", nargs="+"); group.add_argument("--prefix")
     a.set_defaults(func=extract)
-    args = p.parse_args(); args.func(args)
+    for command in ("build", "check", "install", "verify"):
+        sub.choices[command].add_argument("--example", choices=("hello-world", "feature-lab"), default="hello-world")
+    for command in ("build", "check"):
+        parser = sub.choices[command]
+        parser.add_argument("--release", action="store_true", help="Reject template/example metadata before distribution")
+        parser.add_argument("--mods-dir", help="Read installed top-level pmod IDs for local conflicts")
+        parser.add_argument("--allow-update", action="store_true", help="Permit a confirmed same-ID/same-filename update")
+    args = p.parse_args()
+    if getattr(args, "allow_update", False) and not getattr(args, "mods_dir", None):
+        p.error("--allow-update requires --mods-dir")
+    if hasattr(args, "example"):
+        select_example(args.example)
+    args.func(args)
 
 
 if __name__ == "__main__":

@@ -35,6 +35,19 @@ dist/build-info.json        # 本地构建证据；含发布包路径与摘要
 
 `.pmod` 是最终分发文件；不是 Godot PCK，也不需要 `--export-pack`。不要把 `dist/build-info.json`、`.work/`、整个发布目录或自己的 `bin/` 当成 Mod 分发。更新游戏后重新运行 `prepare` 与 `build`。
 
+## 创建自己的 Mod 与发布
+
+AI 在新项目主题明确后会拟定稳定的小写 ID，名称可根据主题建议，作者由你指定。已有 Mod 增加功能不会自动改 ID。模板和 FeatureLab 的默认身份仅用于示例；准备分享时确认 `mod/mod.json` 中的名称、作者和版本，并替换示例 ID。作者最多32个 UTF-16 单元，ID 为1～32个小写字母/数字/`_-.`，版本最多32字符且符合 SemVer（默认 `0.1.0`）。姓名可用中文；Mod 显示名称没有另设32字符上限。
+
+```powershell
+python tools/mod.py build --release
+python tools/mod.py check --release --mods-dir '<实际目标 Mods 目录>'
+```
+
+普通 build/check 校验字段格式但允许示例身份；`--release` 拒绝已知模板身份和占位信息，check 还核对包内清单与当前清单一致。自定义 ID 的输出是 `dist/<id>.pmod`，原示例文件名不变。先完成实际加载和功能验收，再分发该文件。
+
+`--mods-dir` 只读检查目录直接包含的 .pmod 是否有重复 ID，不提供目录时会告知未检查本地冲突；不保证全网唯一。确认同 ID、同文件名的旧包确属当前 Mod 后，可加 `--allow-update` 做升级检查；不同文件名的重复 ID 仍拒绝。具体命名、稳定身份与发布步骤见 [身份与发布规范](.agents/skills/pvzhe-mod-develop/references/identity-and-release.md)。发布检查不代表自动上传。
+
 ## 安装与运行
 
 1. 退出游戏。在游戏 Mod 管理界面确认 Mod 目录；默认 Windows 路径为 `%APPDATA%\Godot\app_userdata\植物大战僵尸杂交版\Mods`，不是游戏 EXE 所在目录。
@@ -77,6 +90,8 @@ python tools/runtime_test.py
 
 测试仅启用示例，结束时恢复测试目录原有启用状态；日志在 `.work/runtime/game.log`，截图在 `dist/hello-world.png`。新存档会显示用户名弹窗，不影响左上角文字验收，测试不会填写用户资料。此脚本当前只支持 Windows、未加密独立 PCK v4。发布版禁止 `--main-pack` 路径覆盖，故必须复制为同名 EXE/PCK。此版本在本机 `--headless` 会发生原生崩溃，自动测试使用真实图形窗口。测试目录保留供排查，需要时仅删除上述记录指向的测试目录。
 
+用户名提示是独立新存档的预期行为；关闭提示不等于已经建档。涉及交互或保存的验证，按 [首次启动处理](.agents/skills/pvzhe-mod-verify/references/first-run.md) 满足对应前提。内置脚本只验证两个固定示例，自定义 Mod 应按玩家需求补充测试场景。
+
 ## 从 PCK 获取开发信息
 
 `prepare` 已生成 `.work/pck-index.json`。按路径查找需要的配置/资源，只提取需要的内容：
@@ -99,7 +114,7 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 | `tools/mod.py`、`tools/pck.py` | 发布包准备、解包、构建、安装、日志验证 |
 | `tools/HostProbe/` | 仅反射发布程序集，不调用游戏入口 |
 | `tools/runtime_test.py` | 独立发布副本的实际游戏验证 |
-| `.agents/skills/` | AI 可发现的四个流程 Skills |
+| `.agents/skills/` | 需求引导、发布准备、制作、验证与版本迁移 Skills；详细参考按需读取 |
 | `docs/` | 兼容证据、扩展原则 |
 | `tests/` | PCK 边界与打包隔离检查 |
 | `.work/` | 本地引用与分析信息；不提交 |
@@ -113,14 +128,33 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 
 ## 给 AI 的入口
 
+玩家提出功能需求时，AI 先使用 **pvzhe-mod-guide** 理解意图和上下文。缺少影响用途、位置或行为且无法合理推断的信息时询问；原版组件选择、资源路径和技术接入由 AI 处理。无需玩家主动要求复用组件或知道 Skill 名称。
+
+本项目新增第1～4阶段的制作 Skills：`pvzhe-ui-create`（按钮/弹窗）、`pvzhe-battle-hud`（对局展示/统计）、`pvzhe-mod-settings`（设置）、`pvzhe-gameplay-feature`（简单规则）、`pvzhe-level-create`（关卡）。植物与新角色行为仍暂缓。
+
+可直接描述：“帮我加个按钮”（AI 会问位置和用途），“在对局右下角显示本局击杀数”（AI 判断组件并澄清必要口径），“让这个统计能关闭”（AI 沿用上下文并接入设置）。引导案例见 [.agents/skills/pvzhe-mod-guide/references/scenarios.md](.agents/skills/pvzhe-mod-guide/references/scenarios.md)。
+
+完整进阶实现见 [FeatureLab](examples/FeatureLab/README.md)，复用事实见 [组件目录](docs/reuse-catalog.md)，操作配方见 [功能配方](docs/feature-recipes.md)。默认 Hello World 保持独立：
+
+```powershell
+python tools/catalog.py                          # 从发布包/DLL生成复用资料，不复制素材
+python tools/mod.py build --example feature-lab
+python tools/runtime_test.py --example feature-lab
+```
+
+输出在 `dist/feature-lab/`；测试用两次独立进程核验 UI、设置保存/重启、关卡启动、真实僵尸死亡/HUD和胜利。只使用自己的 JSON 配置与 DLL，以及宿主场景/注册键引用。具体边界见示例说明。
+
 项目内 `.agents/skills/` 可由支持项目技能的 AI 工具发现；其他工具直接读取对应 `SKILL.md`。按任务调用：
 
 - `pvzhe-release-analyze`：发布版本、Mod API、兼容证据。
 - `pvzhe-pck-extract`：索引、按需提取、资源依赖。
 - `pvzhe-mod-develop`：基于发布接口开发、复用宿主能力、构建。
 - `pvzhe-mod-verify`：安装、启用、实际运行、收集验证证据。
+- `pvzhe-template-upgrade`：仅在明确要求将旧模板适配新版游戏时使用；对比新旧机制，同步模板、工具、文档及受影响 Skills。见 [升级 Skill](.agents/skills/pvzhe-template-upgrade/SKILL.md)。
 
 可直接要求 AI：“读取本项目 Skills，仅使用我的已发布游戏目录，准备并构建 Hello World，再运行独立存档验证。”这些 Skills 和工具都不要求访问内部源码。
+
+维护者升级模板可要求：“游戏已更新，请使用 pvzhe-template-upgrade 将旧模板适配到我提供的新版发行目录（或游戏项目源码目录）。”没有路径时 AI 会询问，源码只是可选内部分析输入；只有源码而缺少发行版时，不能宣称已完成发布运行兼容验收。普通玩家开发、首次准备和一般排错不会自动触发此迁移。
 
 ## 检查与排错
 

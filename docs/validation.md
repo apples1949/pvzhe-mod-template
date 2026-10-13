@@ -25,3 +25,38 @@
 - 游戏退出时，宿主冻结的 Mod 扩展点清理报告“需要重启”警告；堆栈经过宿主的 RegistrationRemoved/RemoveOwner。运行期间 applied 的 diagnostics 为 0，退出代码为 0。验证报告保留关闭后的诊断，不将其包装为完全无警告运行。
 - 退出时还观察到一条 `ObjectDB instance was leaked` 警告，归因未确认。最小实例显示与运行验证通过；此处未证明宿主或全部 Mod 的退出阶段没有泄漏。
 - 未验证其他游戏版本、Android、多人战斗或完整组件库；本模板为这类扩展保留结构，新增功能需补充相应验收。
+
+## 第 1～4 阶段功能增量
+
+同一发布版基线。新增需求引导、UI、HUD、设置、简单战斗规则及关卡制作 Skills；默认 Hello World 与 FeatureLab 独立构建。植物和新角色行为仍暂缓。
+
+| 检查 | 本轮结果与范围 |
+| --- | --- |
+| 原版组件 | 完整 MainButton 场景、DialogBoxTips 通过真实宿主创建及事件；原版字体、章节/关卡图卡与背景从 res:// 读取，无素材复制 |
+| 弹窗 | 原版按钮打开说明；CloseDialog 关闭后暂停状态恢复；保存界面截图 |
+| 设置 | showKills 主菜单切换及对局即时显隐；bonusSun 保存75后当前仍50且提示重启；第二个真实进程读取 bool=false、int=75 |
+| 简单规则 | Ready 新局余额300→350，宿主 Economy.Credit 命令完成；不订阅 Restored 发放 |
+| 关卡 | 独立目录注册；经过目录、可见章节、可见关卡的原版按钮事件进入；身份对应自己的 saveKey；检查预设火炬坚果实际可见且内容对应；真实生成两只普通僵尸并最终胜利 |
+| HUD | 初值0；宿主 Combat.Damage 对真实角色造成伤害，death-committed 两次后显示2；800×450 截图检查锚点、描边、边距 |
+| 构建/产物 | Release 0警告0错误；FeatureLab ZIP 仅 mod.json、Runtime/ModAssembly.dll、自己的 Assets/level.json |
+| 二进制证据 | 本轮包 SHA-256 为 `c44828b3fb1dc90edcf3ad2d70f76b0e105813a24c28bee9fe03ef55a0b21190`；运行 DLL 摘要与包对应，12个场景标记通过；报告 settingsRestartVerified=true |
+| 玩家准备 | 复制干净模板文件到空目录，排除 .work/dist/bin/obj，仅提供发布版：prepare→catalog→feature-lab build→check 通过；该干净副本未另跑 GUI 测试 |
+| 基础回归 | 默认 Hello World 重新构建、真实 GUI 运行与截图通过 |
+| 工具测试 | 10项通过；新增两种构建身份隔离、JSON允许名单及功能日志必须含场景完成证据的检查 |
+| Skills | 10份 SKILL.md 通过 quick_validate 的格式检查；8个需求引导案例供行为回归，不将格式检查等同于所有 AI 的引导行为已验证 |
+
+当前结果在 `dist/feature-lab/feature-lab.pmod`、`verification.json`、`ui-dialog.png`、`level-browser.png`、`battle-hud.png`；两轮日志在 `.work/runtime-feature-lab/game.log`、`persistence.log`。
+
+本轮仍保留宿主退出时冻结扩展点清理警告；运行阶段未观察到错误。加载器对自读 JSON 的 applied diagnostics=1，该版本不支持 JSON privateResources，不是关卡自动注册；目录由入口调用宿主 API 注册。不能据此声称完全无诊断加载。
+
+Battle 数据保存/恢复已接入，但完整保存退出后读档、复活/催眠/重复死亡等负例、多分辨率、真实鼠标点击与音效、自然通关和难度平衡、多人同步尚未完成运行验收。确认/输入框仅完成发布资源和接口调查，不能宣称它们已具备与 Tips 相同的验证程度。
+
+## 身份与发布检查增量
+
+命名规则纳入 manifest_policy.py，build/check/install/verify 的包流程执行基础字段检查。`build/check --release` 增加已知示例占位信息拒绝；check --release 核对当前清单与产物一致，--mods-dir 只读检查目录直接包含的 pmod ID，--allow-update 仅允许显式确认的同 ID、同文件名升级。
+
+- 16项工具测试通过：新增字段长度/字符集、严格 SemVer、示例与发布模式区分、自定义 ID 产物命名、重复 ID/升级和过期清单拒绝。
+- 在独立模板副本中实际完成默认 build/check，确认默认示例的 release 检查失败；将清单换成虚构测试身份后完成 build --release 与空 Mods 目录的 check --release，产物文件名对应 ID。测试署名仅用于本地测试，不修改默认模板，也不上传。
+- 原 Hello World 与 FeatureLab 包通过新版基础检查；11份 Skills 格式及文档链接检查通过。
+
+本轮不改运行入口/游戏行为，没有重新进行 GUI 验收；发布字段通过也不代替功能验收。32字符与 SemVer 为模板规范，不声称所有宿主版本有相同约束；作者采用保守 UTF-16 长度口径。占位检测无法证明真实署名或用户确认，本地 ID 扫描也无法证明全球唯一。

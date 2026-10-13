@@ -1,11 +1,13 @@
 ---
 name: pvzhe-release-analyze
-description: 分析 PVZHE 已发布 Windows C# 游戏的 PCK、程序集及 Mod 接口，建立无需游戏源码的开发基线；适用于首次准备和游戏升级。
+description: 分析指定 PVZHE Windows C# 发行版的 PCK、程序集及 Mod 接口，建立无需源码的开发基线；用于首次准备或发布接口确认，模板跨版本迁移使用 pvzhe-template-upgrade。
 ---
 
 # 发布版分析
 
 输入：用户的完整发布目录、本模板、Python 3.11+、.NET 9 SDK。输出：本地 `.work/release.json`、`pck-index.json`、`api.json`、引用 DLL，以及适用于该发布版的兼容判断。
+
+明确要求将旧模板适配新版游戏时，先读 pvzhe-template-upgrade，保存旧证据再 prepare；本 Skill 只负责发布输入分析，不自行扩大为模板、文档和全部 Skills 的版本迁移。
 
 1. 读项目 README 与 `docs/compatibility.md`。确认发布目录内 EXE、PCK、`data_*` 运行时的对应关系；多个 PCK 要指定目标，不能任选。
 2. 在模板根目录执行 `python tools/mod.py prepare --game-dir '<发布目录>'`，必要时添加 `--pck '<PCK>'`。工具直接索引 PCK，从发布运行时或包内获取两个编译引用，再反射入口契约及常用服务。不要访问内部源码或要求用户提供源码。

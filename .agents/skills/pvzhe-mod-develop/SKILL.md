@@ -5,7 +5,11 @@ description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评�
 
 # 开发与构建
 
-输入：发布分析结果、用户功能要求、模板。输出：源码变更、`dist/hello-world.pmod` 与本地构建证据。
+玩家功能请求先经 pvzhe-mod-guide，再读具体制作 Skill；本 Skill 负责共同编译/打包流程。默认最小模板是开发起点，FeatureLab 是可选参考，只取需求所需实现，不默认加入其按钮、统计、规则和关卡。只有构建该示例时命令加 `--example feature-lab`，输出 dist/feature-lab。
+
+输入：发布分析结果、已澄清需求、模板。输出：满足需求的 Mod 变更、对应 pmod 与本地构建证据；自定义身份与入口需同步修改清单。
+
+新建独立 Mod 或准备分发时读 [身份与发布规范](references/identity-and-release.md)。创建时确定合规且稳定的 ID，发布前确认用户署名/显示名称/版本；build/check 均执行基础字段校验，分发使用 `--release` 加严检查。
 
 1. 读 README、`docs/architecture.md`、`.work/api.json`。缺少发布证据先 prepare。编译引用只能来自用户发布包，不引用源码工程或复制宿主实现。
 2. 最小入口为普通类 `HelloMod.Entry : IXWModRuntimeEntry`。在 `Initialize` 建立功能与订阅，通过宿主 Lifetime 管理订阅，通过 UI 挂载回调的场景作用域管理节点；`Shutdown` 释放本地引用，避免静态节点/跨场景残留。
