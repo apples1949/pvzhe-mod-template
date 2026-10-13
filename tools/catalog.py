@@ -1,7 +1,7 @@
 """Extract a small reuse catalog from released PCK/DLL, without copying game assets."""
 import json
 import re
-from pck import Pack
+from game_cache import GameCache
 from mod import ROOT, WORK, PROBE, probe_build, run, verify_references, write_json
 
 COMPONENTS = {
@@ -35,7 +35,7 @@ def scene_facts(pack, path):
 
 def main():
     release = verify_references()
-    pack = Pack(release["pck"])
+    pack = GameCache(WORK, release).pack
     probe_build()
     api = json.loads(run("dotnet", PROBE, WORK / "references", "--types", *TYPES, capture=True))
     write_json(WORK / "reuse-catalog.json", {"release": release,

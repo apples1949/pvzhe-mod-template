@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup><Reference Include="GodotSharp"><HintPath>../../.work/references/GodotSharp.dll</HintPath><Private>false</Private></Reference></ItemGroup>
+</Project>

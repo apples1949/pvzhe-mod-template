@@ -8,6 +8,7 @@ import sys
 import zipfile
 from pathlib import Path
 from pck import Pack, safe_path
+from game_cache import GameCache
 from manifest_policy import EXAMPLE_IDS, validate_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,6 +103,8 @@ def prepare(args):
     write_json(WORK / "release.json", {"gameDir": str(game), "pck": str(pck),
                "pckSha256": sha(pck), "engine": pack.engine, "pckFormat": pack.version,
                "entryCount": len(pack.entries), "assemblies": identities})
+    cache = GameCache(WORK, json.loads((WORK / "release.json").read_text(encoding="utf-8")), pack)
+    print(f"Resource cache initialized: {cache.root}")
     print(f"Prepared released engine {pack.engine}, PCK v{pack.version}, {len(pack.entries)} entries")
     print("Local evidence: .work/release.json, .work/api.json, .work/pck-index.json")
 
@@ -264,12 +267,28 @@ def verify(args):
 
 
 def extract(args):
-    pack = Pack(args.pck)
+    evidence_path = WORK / "release.json"
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8")) if evidence_path.exists() else None
+    pck = args.pck or (evidence["pck"] if evidence else None)
+    if not pck:
+        raise ValueError("Run prepare or specify --pck")
+    pack = Pack(pck)
     names = [n for n in pack.entries if n.startswith(args.prefix)] if args.prefix else args.path
     if not names:
         raise ValueError("No matching PCK resources")
-    pack.extract(names, args.output)
-    print(f"Extracted {len(names)} files with MD5 verification")
+    if args.output and not getattr(args, "dependencies", False):
+        pack.extract(names, args.output)
+        print(f"Extracted {len(names)} files with MD5 verification")
+        return
+    if not evidence:
+        raise ValueError("Shared cache requires prepare first")
+    cache = GameCache(WORK, evidence, pack)
+    report = cache.fetch(names, dependencies=getattr(args, "dependencies", False))
+    if args.output:
+        pack.extract(report["paths"], args.output)
+    print(f"Cache: {cache.files}; extracted={report['extracted']}; reused={report['reused']}")
+    if report["unresolved"]:
+        print("Unresolved dependencies (not source recovery): " + ", ".join(report["unresolved"]))
 
 
 def main():
@@ -280,7 +299,7 @@ def main():
     a = sub.add_parser("check"); a.set_defaults(func=check)
     a = sub.add_parser("install"); a.add_argument("--mods-dir", required=True); a.set_defaults(func=install)
     a = sub.add_parser("verify"); a.add_argument("--log", required=True); a.set_defaults(func=verify)
-    a = sub.add_parser("extract"); a.add_argument("--pck", required=True); a.add_argument("--output", required=True)
+    a = sub.add_parser("extract"); a.add_argument("--pck"); a.add_argument("--output"); a.add_argument("--dependencies", action="store_true")
     group = a.add_mutually_exclusive_group(required=True); group.add_argument("--path", nargs="+"); group.add_argument("--prefix")
     a.set_defaults(func=extract)
     for command in ("build", "check", "install", "verify"):

@@ -12,7 +12,7 @@ description: 分析指定 PVZHE Windows C# 发行版的 PCK、程序集及 Mod �
 明确要求将旧模板适配新版游戏时，先读 pvzhe-template-upgrade，保存旧证据再 prepare；本 Skill 只负责发布输入分析，不自行扩大为模板、文档和全部 Skills 的版本迁移。
 
 1. 读项目 README 与 `docs/compatibility.md`。确认发布目录内 EXE、PCK、`data_*` 运行时的对应关系；多个 PCK 要指定目标，不能任选。
-2. 在模板根目录执行 `python tools/mod.py prepare --game-dir '<发布目录>'`，必要时添加 `--pck '<PCK>'`。工具直接索引 PCK，从发布运行时或包内获取两个编译引用，再反射入口契约及常用服务。不要访问内部源码或要求用户提供源码。
+2. 在模板根目录执行 `python tools/mod.py prepare --game-dir '<发布目录>'`，必要时添加 `--pck '<PCK>'`。工具直接索引 PCK，从发布运行时或包内获取两个编译引用，再反射入口契约及常用服务。同时初始化 .work/game-cache 的版本索引，按 [缓存协议](../../../docs/resource-cache-and-capture.md) 核对PCK/DLL哈希；后续资源提取共用该目录，不靠修改时间判版本。不要访问内部源码或要求用户提供源码。
 3. 检查三个报告：PCK 格式/引擎/摘要、DLL 来源/摘要、schema 与 runtime API、入口方法。游戏版本取发布 `project.binary`/文件名/实际启动记录，不能将程序集 `1.0.0.0` 误认为游戏版本。
 4. 区分已证实接口和未知能力。`api.json` 仅摘要部分类型；新增能力按需分析发布 DLL 的公共类型、配置与资源。若进行反编译，只保留用户本地工作区中的分析材料，不把它加入模板分发。
 5. 将证据用于 `pvzhe-mod-develop`。发布更新必须重新准备，不能将旧接口、UID、注册键或 API 版本无条件套用。

@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "title": "摆放组件",
+  "context": {
+    "kind": "demo",
+    "note": "模拟布局，不对应游戏场景"
+  },
+  "layouts": [
+    {
+      "id": "horizontal",
+      "label": "横排演示",
+      "canvas": {
+        "width": 1080,
+        "height": 600
+      },
+      "backgroundColor": "#161e2c",
+      "objects": [
+        {
+          "id": "button",
+          "text": "演示按钮",
+          "x": 70,
+          "y": 360,
+          "width": 170,
+          "height": 48
+        },
+        {
+          "id": "counter",
+          "text": "计数：123",
+          "x": 780,
+          "y": 40,
+          "width": 170,
+          "height": 52
+        }
+      ],
+      "regions": [
+        {
+          "label": "动态信息区（示意）",
+          "x": 80,
+          "y": 550,
+          "width": 180,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "id": "vertical",
+      "label": "竖排演示",
+      "canvas": {
+        "width": 1080,
+        "height": 600
+      },
+      "backgroundColor": "#161e2c",
+      "objects": [
+        {
+          "id": "button",
+          "text": "演示按钮",
+          "x": 70,
+          "y": 300,
+          "width": 170,
+          "height": 48
+        },
+        {
+          "id": "counter",
+          "text": "计数：123",
+          "x": 780,
+          "y": 40,
+          "width": 170,
+          "height": 52
+        }
+      ],
+      "regions": [
+        {
+          "label": "动态信息区（示意）",
+          "x": 80,
+          "y": 550,
+          "width": 180,
+          "height": 40
+        },
+        {
+          "label": "侧栏（示意）",
+          "x": 10,
+          "y": 80,
+          "width": 220,
+          "height": 450
+        }
+      ]
+    }
+  ]
+}

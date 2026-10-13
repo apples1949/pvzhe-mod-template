@@ -8,7 +8,7 @@
 
 - Windows x64；拥有完整的 0.30.0 C# 发布目录（EXE、PCK、`data_PlantsVsZombies_windows_x86_64/`）。其他版本先执行发布版分析，不能默认兼容。
 - .NET **9.0 SDK**，最低 9.0.100；`global.json` 允许同一主版本内的最新 feature band。实测 SDK 9.0.316，目标框架 `net9.0`。只装游戏自带运行时不足以编译。
-- Python **3.11+**，实测 3.12；仅使用标准库，无 pip/npm 依赖。
+- Python **3.11+**，实测 3.12；核心构建/解包仅使用标准库。可选图片位置预览需要 Pillow，纯色预览无需额外依赖。
 - PowerShell；以下命令在模板根目录执行。若系统使用 `py -3`，将 `python` 替换为 `py -3`。
 
 最小示例不需要安装 Godot 编辑器、导出模板或解包完整游戏工程。发布包携带 `GodotSharp.dll` 与 `PlantsVsZombies.dll`，工具直接使用这两个文件作为编译引用。需要编辑场景时，再安装与发布引擎匹配的 Godot .NET 版本；本次发布 PCK 标记为 **4.7.0**。
@@ -24,7 +24,7 @@ python tools/mod.py build
 python tools/mod.py check
 ```
 
-将 `$game` 换为自己的发布目录。目录内多个 PCK 时，显式添加 `--pck '完整路径.pck'`。准备步骤读取 PCK 目录及 `project.binary`，记录引擎、格式、资源索引与 SHA-256，并通过发布程序集反射提取 Mod 接口信息，全部保存在忽略提交的 `.work/`。它不会读取任何游戏源码路径。
+将 `$game` 换为自己的发布目录。目录内多个 PCK 时，显式添加 `--pck '完整路径.pck'`。准备步骤读取 PCK 目录及 `project.binary`，记录引擎、格式、资源索引与 SHA-256，并通过发布程序集反射提取 Mod 接口信息，全部保存在忽略提交的 `.work/`。它不会读取任何游戏源码路径。prepare还初始化忽略提交的统一版本资源缓存；新增UI资源按需提取并复用，避免每次问答临时解包。见 [资源缓存与预览捕获](docs/resource-cache-and-capture.md)。
 
 构建会核验本地引用摘要、编译入口、验证其实现发布版接口，再按允许名单创建产物：
 
@@ -172,3 +172,9 @@ python -m unittest discover -s tests -v
 - 实际运行失败：保留当前日志、退出码与发布摘要；构建成功只说明编译与打包通过。测试窗口运行需要可用图形环境，不能用静态检查冒充运行验证。
 
 默认用户目录规则参考 [Godot 官方数据路径说明](https://docs.godotengine.org/en/stable/tutorials/io/data_paths.html)。本模板是基于发布包实测的社区示例，不是官方 SDK。
+
+## 可选的可视化位置输入
+
+默认由 AI 自主布局；如果你想直接拖动决定位置，可要求使用 pvzhe-placement-preview。工具支持本地背景/组件图片、多物件、布局切换、占位提示和60秒反馈，确认的绝对位置不会自动避让。试用纯色演示：`python tools/placement_editor.py`；协议与依赖见 [位置输入工具](docs/placement-preview.md)。无需游戏源码，游戏资源不随模板分发。
+
+需要原版外观的位置预览时，开发测试分支先准备“隐藏待摆放组件→干净背景捕获→透明组件渲染”，资料齐全后才开窗口。字体、贴图和导入依赖缓存留在.work，版本变化由PCK/DLL哈希识别；详细流程见 [缓存与捕获](docs/resource-cache-and-capture.md)。默认Hello World不自动截图或打开预览。
