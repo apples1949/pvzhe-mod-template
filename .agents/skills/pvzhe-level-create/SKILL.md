@@ -9,6 +9,8 @@ description: 为 PVZHE Mod 创建使用原版地图、卡牌与僵尸的独立�
 
 输入：经过 mod-guide 澄清的地图/玩法、难度或波次、选卡规则、结束条件与奖励意图。输出：自己的关卡 JSON、目录注册与可进入的入口。
 
+已有地图上的波次与选卡留在本Skill；新增背景/网格/道路/地形转pvzhe-map-create，需新角色时组合plant-create或zombie-create。
+
 1. 读 [关卡配方](../../../docs/recipes/levels.md)、FeatureLab 的 Assets/level.json 与 DemoLevel.cs。用发布索引、配置和 DLL 核对 MapName、卡牌/僵尸键及波次结构；不要求源码。玩家无需自行提供注册键。
 2. 使用独立 Name/saveKey、目录键和 Mod 身份。name 必须与目录 SaveKey 一致，不复制原版进度/解锁/奖励逻辑。示例使用 modern Process/Feature JSON 与 TowerDefenseLevelNewConfig，不混用旧配置字段。
 3. JSON 包含自己的数据，资源用宿主注册键引用，不复制游戏贴图。构建器通过 resources 允许名单打包；JSON 不是可以单独注册为关卡的 Resource，入口需解析、初始化并发布目录。

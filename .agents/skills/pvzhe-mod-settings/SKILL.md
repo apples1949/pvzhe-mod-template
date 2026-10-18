@@ -14,6 +14,7 @@ description: 为 PVZHE Mod 添加持久化设置、显示开关或受限参数�
 1. 声明 key、type、label、default；数值添加 min/max/step。纯显示设置 affectsGameplay=false、applyMode=immediate；修改战斗规则时明确 restart 生效，不能假装保存后立即生效。
 2. context.Settings.Get<T> 的 T 与发布版类型相符，核对当前 DLL；TrySave 返回成功与 RestartRequired 都要处理。不要从用户点击次数反推当前保存值。
 3. Changed 用于即时刷新，订阅纳入 Lifetime；生命周期结束前解除事件。默认值、保存值、当前有效值是不同状态，重启设置不能把三个值混为一谈。
-4. 有上下文就沿用已有功能，不询问用户技术字段。范围/默认值无法合理推断时回到 mod-guide。
+4. 涉及热更新失效、自有快捷页或草稿/保存冲突时读 [状态与保存](references/state-and-save.md)，按实际契约定位，不默认每帧轮询或绕开宿主保存。
+5. 有上下文就沿用已有功能，不询问用户技术字段。范围/默认值无法合理推断时回到 mod-guide。
 
 验证：默认值正确，保存后即时字段更新，重启值仍在，非法范围被拒绝，restart 字段提示正确，取消/失败不会静默改变行为，禁用后无残留。feature-lab 自动测试实际保存 bool 并检查 HUD 显隐；持久化重启检查由运行工具的第二阶段完成。

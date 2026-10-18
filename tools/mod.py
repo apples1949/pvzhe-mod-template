@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -36,6 +37,31 @@ def select_example(name):
 
 def source_root():
     return ROOT / "mod" if EXAMPLE == "hello-world" else ROOT / "examples/FeatureLab/mod"
+
+
+def build_target():
+    """Optional player project selection; FeatureLab always remains independent."""
+    if EXAMPLE == "feature-lab":
+        return ROOT / "examples/FeatureLab/FeatureLab.csproj", "FeatureLab"
+    config_path = ROOT / "mod-project.json"
+    if not config_path.exists():
+        return ROOT / "src/HelloMod/HelloMod.csproj", "HelloMod"
+    config = json.loads(config_path.read_text(encoding="utf-8-sig"))
+    if (not isinstance(config, dict) or set(config) != {"schemaVersion", "project", "assemblyName"}
+            or type(config["schemaVersion"]) is not int or config["schemaVersion"] != 1):
+        raise ValueError("mod-project.json requires schemaVersion=1, project and assemblyName")
+    project_value, assembly = config["project"], config["assemblyName"]
+    if not isinstance(project_value, str):
+        raise ValueError("Project must be a repository-relative .csproj path")
+    project = (ROOT / safe_path(project_value)).resolve()
+    if not project.is_relative_to(ROOT.resolve()) or project.suffix.lower() != ".csproj" or not project.is_file():
+        raise ValueError("Project must be an existing repository-relative .csproj file")
+    if (not isinstance(assembly, str) or not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}", assembly)
+            or assembly.casefold() in {"godotsharp", "plantsvszombies"}):
+        raise ValueError("Invalid/reserved assemblyName; use the project's AssemblyName without .dll")
+    if assembly.lower().endswith(".dll"):
+        raise ValueError("assemblyName must not include .dll")
+    return project, assembly
 
 
 def sha(path):
@@ -134,10 +160,9 @@ def build(args):
     m = manifest(release=getattr(args, "release", False))
     check_id_conflicts(m, args)
     verify_references()
-    project = ROOT / "src/HelloMod" if EXAMPLE == "hello-world" else ROOT / "examples/FeatureLab"
-    assembly = "HelloMod" if EXAMPLE == "hello-world" else "FeatureLab"
+    project, assembly = build_target()
     run("dotnet", "build", project, "-c", "Release", "--nologo")
-    dll = project / f"bin/Release/net9.0/{assembly}.dll"
+    dll = project.parent / f"bin/Release/net9.0/{assembly}.dll"
     probe_build()
     run("dotnet", PROBE, WORK / "references", dll, m["runtimeEntryType"])
     # Explicit allowlist: never archive project/references/bin wholesale.
@@ -163,7 +188,8 @@ def build(args):
     for screenshot in DIST.glob("*.png"):
         screenshot.unlink()
     write_json(DIST / "build-info.json", {"packageSha256": sha(PACKAGE),
-               "release": verify_references(), "entries": sorted(files)})
+               "release": verify_references(), "entries": sorted(files),
+               "project": project.relative_to(ROOT).as_posix(), "assemblyName": assembly})
     check_package(PACKAGE)
     print(f"Built: {PACKAGE}")
 

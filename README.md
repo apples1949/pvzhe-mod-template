@@ -120,7 +120,7 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 | `.work/` | 本地引用与分析信息；不提交 |
 | `dist/` | 本地构建及验证产物；不提交 |
 
-修改身份时同步清单 `id/name`，修改入口命名空间时同步 `runtimeEntryType`。当前构建器固定类库项目和输出名；若重命名项目，也修改工具中的对应路径。不要改用与宿主同名的程序集。
+修改身份时同步清单 `id/name`，修改入口命名空间时同步 `runtimeEntryType`。默认类库项目和输出名保持不变；若确需重命名，可用根目录 mod-project.json 选择项目与程序集，无需修改工具，见 [自定义项目配置](docs/project-configuration.md)。不要改用与宿主同名的程序集。
 
 新增游戏能力先查 `.work/api.json` 和发布资源，优先使用 `XWModRuntimeContext` 提供的 Hooks、Lifetime、Content、Presentation 等能力。订阅在 `Initialize` 建立并纳入宿主生命周期；UI 节点纳入场景作用域，避免切场景残留。入口为普通 C# 类，不继承 Godot 节点，因此最小项目无需 Godot SDK 源生成器。
 
@@ -132,7 +132,9 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 
 玩家提出功能需求时，AI 先使用 **pvzhe-mod-guide** 理解意图和上下文。缺少影响用途、位置或行为且无法合理推断的信息时询问；原版组件选择、资源路径和技术接入由 AI 处理。无需玩家主动要求复用组件或知道 Skill 名称。
 
-本项目新增第1～4阶段的制作 Skills：`pvzhe-ui-create`（按钮/弹窗）、`pvzhe-battle-hud`（对局展示/统计）、`pvzhe-mod-settings`（设置）、`pvzhe-gameplay-feature`（简单规则）、`pvzhe-level-create`（关卡）。植物与新角色行为仍暂缓。
+既有制作Skills覆盖UI、HUD、设置、简单规则和关卡。社区功能已拆为资源修改、植物/僵尸创建、发射、护具、角色外观、投射物、地图、输入绑定和pmod补丁十个入口；清单与职责见 [功能提取](docs/community-skill-extraction.md)。这些指导直接用于MDK开发，不依赖游戏内模组编辑器；新增资源/角色链路仍需按发行契约与实际运行验收，不能仅因Skill存在就声称全部能力已验证。
+
+基础复用路径的 [0.30内容接入配方](docs/wiki/0.30.0/content-authoring.md) 已有独立发行版运行证据；按 [覆盖矩阵](docs/skill-audit-0.30.0.md) 区分已测与自有动画、新脚本等待专项验证能力，默认模板仍保持Hello World。
 
 可直接描述：“帮我加个按钮”（AI 会问位置和用途），“在对局右下角显示本局击杀数”（AI 判断组件并澄清必要口径），“让这个统计能关闭”（AI 沿用上下文并接入设置）。引导案例见 [.agents/skills/pvzhe-mod-guide/references/scenarios.md](.agents/skills/pvzhe-mod-guide/references/scenarios.md)。
 

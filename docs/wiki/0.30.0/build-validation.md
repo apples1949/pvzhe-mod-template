@@ -1,12 +1,12 @@
 # 构建与分阶段验证
 
-基线：[0.30.0](overview.md)。当前 build/check、包身份、两个固定示例已经实测；自定义项目重命名与通用运行场景尚无配置化入口。此限制应明确告知，不要求 AI 为简单功能重写工具链。自定义验收和失败重验按 [验证执行策略](../../../.agents/skills/pvzhe-mod-verify/references/verification-strategy.md) 拆分采集、判定及报告；该流程指导不表示固定示例工具已提供通用用例选择器。
+基线：[0.30.0](overview.md)。当前 build/check、包身份、两个固定示例已经实测；自定义项目可通过mod-project.json选择，通用运行场景仍无配置化入口。此限制应明确告知，不要求 AI 为简单功能重写工具链。自定义验收和失败重验按 [验证执行策略](../../../.agents/skills/pvzhe-mod-verify/references/verification-strategy.md) 拆分采集、判定及报告；该流程指导不表示固定示例工具已提供通用用例选择器。
 
 ## 在最小模板开发自己的 Mod
 
 默认源码是 src/HelloMod、清单在 mod/mod.json。可以保留项目目录、程序集和类名，修改身份与实现；显示名和 Mod ID 不要求等于 C# 类型名。自定义 ID 后产物变成 dist/<id>.pmod。FeatureLab 是单独项目，默认模板不引用它。
 
-build 当前明确支持默认项目和 `--example feature-lab`；若确需重命名目录/程序集，必须同步构建路径与入口检查及受影响测试。避免为单个按钮先搬迁两个示例、全局替换测试路径或将用例期望改成新文件名来掩盖工具缺陷。自定义验收不等于注册一个新的 --example：先保持当前可工作的构建入口，再另设功能验收。
+build默认构建HelloMod，支持根目录mod-project.json选择项目/程序集，见 [项目配置](../../project-configuration.md)；`--example feature-lab`仍使用独立固定项目。重命名时同步csproj引用和清单入口，非法配置直接失败。避免为单个按钮先搬迁两个示例、全局替换测试路径或将用例期望改成新文件名来掩盖工具缺陷。自定义验收不等于注册一个新的 --example：先保持当前可工作的构建入口，再另设功能验收。
 
 名称、署名、ID、版本及发布模式集中在 [身份与发布规范](../../../.agents/skills/pvzhe-mod-develop/references/identity-and-release.md)。发布检查不能代替当前 DLL 的真实行为验收。
 

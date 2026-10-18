@@ -7,6 +7,7 @@
 | 问题 | PCK 相对路径 | 数据结构与查询方法 |
 | --- | --- | --- |
 | 哪些植物/僵尸角色、卡牌存在 | Asset/Config/Character/CharacterResource.json | 顶层为角色键；每项有 Packet 字典、Scene、Sprite。角色与卡牌不是一对一 |
+| 哪些子弹配置可用 | Asset/Config/Projectile/ProjectileResource.json | 投射物键→UID；实际配置可能经过remap，运行名不一定等于注册键 |
 | 地图名可以写什么 | Asset/Config/Map/MapResource.json | 顶层地图注册键→UID；MapName 使用键 |
 | 原版目录/章节/关卡是什么 | Asset/Config/Level/LevelResource.json | 目录→Chapter数组→Level数组；每关有 OpenKey、SaveKey、UnlockImage、Level难度字典 |
 | 哪些卡牌属于某卡池 | Asset/Config/PacketBank/PacketBankResource.json | 卡池键→Include与Category；Include需跟踪引用池，不能只读一个 Category 就当完整卡池 |
