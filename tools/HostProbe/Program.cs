@@ -13,19 +13,62 @@ var api = host.GetType(ns + "XWModRuntimeApi", true)!;
 var manifest = host.GetType(ns + "XWModManifest", true)!;
 if (args.Length > 1 && args[1] == "--types")
 {
-    Console.WriteLine(JsonSerializer.Serialize(args.Skip(2).Select(name =>
+    int memberIndex = Array.IndexOf(args, "--member");
+    string? memberFilter = null;
+    if (memberIndex >= 0)
+    {
+        if (memberIndex < 3 || memberIndex != args.Length - 2 || string.IsNullOrWhiteSpace(args[^1]))
+            throw new ArgumentException("--member requires type names followed by one nonempty member-name fragment.");
+        memberFilter = args[^1];
+    }
+    bool Include(MemberInfo member) => memberFilter == null || member.Name.Contains(memberFilter, StringComparison.OrdinalIgnoreCase);
+    var names = memberIndex < 0 ? args.Skip(2) : args.Skip(2).Take(memberIndex - 2);
+    Console.WriteLine(JsonSerializer.Serialize(names.Select(name =>
     {
         var type = host.GetType(name);
         const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
         return new
         {
             name, present = type != null, baseType = type?.BaseType?.FullName,
-            methods = type?.GetMethods(flags).Select(m => m.ToString()),
-            properties = type?.GetProperties(flags).Select(p => p.ToString()),
-            fields = type?.GetFields(flags).Select(f => f.ToString()),
-            events = type?.GetEvents(flags).Select(e => e.ToString())
+            methods = type?.GetMethods(flags).Where(Include).Select(m => m.ToString()),
+            methodDetails = type?.GetMethods(flags).Where(Include).Select(m => new
+            {
+                signature = m.ToString(), name = m.Name, isStatic = m.IsStatic,
+                parameters = m.GetParameters().Select(p => new
+                {
+                    name = p.Name, type = p.ParameterType.FullName, isOut = p.IsOut,
+                    isOptional = p.IsOptional, hasDefaultValue = p.HasDefaultValue,
+                    defaultValue = p.HasDefaultValue && p.DefaultValue != null ? Convert.ToString(p.DefaultValue, System.Globalization.CultureInfo.InvariantCulture) : null
+                })
+            }),
+            enumValues = type?.IsEnum == true
+                ? type.GetFields(flags).Where(f => f.IsLiteral).ToDictionary(f => f.Name, f => f.GetRawConstantValue()) : null,
+            properties = type?.GetProperties(flags).Where(Include).Select(p => p.ToString()),
+            fields = type?.GetFields(flags).Where(Include).Select(f => f.ToString()),
+            events = type?.GetEvents(flags).Where(Include).Select(e => e.ToString())
         };
     }), new JsonSerializerOptions { WriteIndented = true }));
+}
+else if (args.Length > 1 && args[1] == "--find-types")
+{
+    if (args.Length != 3 || string.IsNullOrWhiteSpace(args[2]))
+        throw new ArgumentException("--find-types requires one nonempty name fragment.");
+    Type[] types;
+    string[] loaderErrors = Array.Empty<string>();
+    try { types = host.GetTypes(); }
+    catch (ReflectionTypeLoadException error)
+    {
+        types = error.Types.OfType<Type>().ToArray();
+        loaderErrors = error.LoaderExceptions.Select(e => e?.Message ?? "Unknown loader failure").Distinct().ToArray();
+    }
+    Console.WriteLine(JsonSerializer.Serialize(new
+    {
+        matches = types.Where(t => (t.IsPublic || t.IsNestedPublic) &&
+            t.Name is not ("MethodName" or "PropertyName" or "SignalName") &&
+            (t.FullName ?? t.Name).Contains(args[2], StringComparison.OrdinalIgnoreCase))
+            .Select(t => new { name = t.FullName, baseType = t.BaseType?.FullName }),
+        loaderErrors
+    }, new JsonSerializerOptions { WriteIndented = true }));
 }
 else if (args.Length > 1)
 {

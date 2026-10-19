@@ -87,3 +87,11 @@ FeatureLab 的 PRESET 关卡跳过选卡，因此它通过不能验证“选卡�
 玩家明确要求拖动决定位置时，使用 [可视化输入工具](../../placement-preview.md)；确认的参考画布位置优先于自主避让建议，宿主窗口缩放/锚点适配仍须保留，不默认打开窗口。此工具只提供预览/输入，当前游戏资源外观和场景坐标映射由对应开发任务按需准备，不代表游戏功能已运行验证。
 
 原版外观的位置预览优先使用完整组件的透明SubViewport渲染，字体/贴图来自当前发布环境；开启测试前准备隐藏目标组件后的背景捕获。0.30.0 MainButton常态透明输出已通过独立测试，不能泛化为全部弹窗/复杂组件均可离屏渲染。实现和缓存规则见 [资源缓存与捕获](../../resource-cache-and-capture.md)。
+
+## MainButton实例的默认局部偏移
+
+发行 `Prefab/GUI/Button/MainButton.tscn` 的根类型为TextureButton，默认offset_left=-58、top=-23、right=59、bottom=23；它不是普通Button。通用观察器以BaseButton识别按钮，不能只枚举Button而漏掉这个实例。
+
+定位需同时核对父层锚点和实例自己的局部矩形。容器按左上角定位时，HostUi示例会显式设置button.Position；漏做这步会保留prefab默认偏移。SetAnchorsAndOffsetsPreset后的Position赋值与相对增加也不同。不要先把固定(-58,-23)归因于相机，或直接添加CanvasLayer/每帧反向补偿；先查看发行场景的实际属性。主菜单本轮仍沿用宿主层，DialogManager的DialogLayer在发行场景为100，普通Mod界面不应越过模态层。
+
+本轮菜单先用节点数判通过，截图与四角断言发现出屏，修复后按[社区方向实验](../../community-mod-experiments.md)验证。边界与命中使用控件所属viewport及其四角，IsVisibleInTree/数量只能证明节点状态；未测试MoreGame等菜单子状态，不将普通主菜单结论推广为全部页面。

@@ -1,6 +1,6 @@
 # 启动与测试前提
 
-基线：[0.30.0](overview.md)。状态：独立目录、加载驱动、主菜单挂载与提示关闭已实测；原版建档自动化尚未运行验证。来源：runtime_test.py、FeatureLab 的主菜单回调与 Smoke、实测记录。
+基线：[0.30.0](overview.md)。状态：独立目录、加载驱动、主菜单挂载与提示关闭已实测；模式导航实验也验证了原版用户名框建立隔离测试用户，用户资料跨进程恢复另验。来源：runtime_test.py、FeatureLab及模式导航实测记录。
 
 ## 启动状态不要混用
 
@@ -19,6 +19,8 @@
 适用：独立测试首次进入游戏、用户名提示挡住操作，或需要跨进程验证持久化。输入是实际测试用户目录、当前界面/日志及待验证功能；输出是明确的环境状态、提示处理结果和可执行的功能前提。
 
 ## 判断是否预期内
+
+主菜单挂载可能早于菜单动画后出现的首次用户名弹窗。采集/交互前等待目标状态和已知提示实际出现、处理完成及无模态，不能只在挂载后一秒扫描一次就认定干净。模式导航实验在独立userdata中填写DialogBoxNewUser.nameLineEdit并发送可见readyButtonNewUser的Pressed，随后检查GetUserCurrent及模态结束；这是真正的测试建档，和仅CloseDialog不同。该步骤只能属于已隔离的测试环境，不能放进正常Mod入口或修改玩家资料；见 [记录](../../mode-navigation-experiment.md)。
 
 `runtime_test.py` 每次生成新的应用名和独立 user://，不读取玩家存档。因此首次用户名提示属于正常新玩家流程，不是 Mod 加载失败。路径在 `.work/runtime/userdata-path.txt`；FeatureLab 在 `.work/runtime-feature-lab/userdata-path.txt`。先核对该文件、本次命令和日志，不凭弹窗判断“存档丢失”。
 

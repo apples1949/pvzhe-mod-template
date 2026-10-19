@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 3,
+  "id": "local.mode-navigation",
+  "name": "模式导航实验",
+  "version": "0.1.0",
+  "author": "Local experiment",
+  "description": "独立模式页面、章节目录和直接关卡",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "ModeNavigation.Entry",
+  "runtimeApiVersion": 3,
+  "runtimeAssemblyPolicy": "required",
+  "contentEntries": [
+    {
+      "category": "Level",
+      "key": "journey"
+    }
+  ],
+  "resources": [
+    "Assets/first.json",
+    "Assets/second.json"
+  ],
+  "settings": []
+}

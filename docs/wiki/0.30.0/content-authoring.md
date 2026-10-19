@@ -92,3 +92,9 @@ if (!context.Content.Override(new XWModContentId("", "Projectile", "Pea"), owned
 ## 包和验收边界
 
 本轮包只含清单、自有 DLL、自有关卡 JSON 与一个自有文本数值资源；没有宿主图片/DLL、源码引用或 Godot 编辑器依赖。普通启动与测试参数分离。完整覆盖范围、失败证据和未测能力见 [验收记录](../../skill-audit-0.30.0.md)，不要把最小复用链扩称为通用角色/动画 SDK。
+
+## 自有地图背景与缓存模式
+
+社区方向实验将原地图克隆为7×4，使用自己生成的棋盘Texture与克隆场景，不复制原图进包。0.30的GetMapScene(cache: false)会走ResourceLoader CacheMode.Ignore；参数默认值其实为true，而本发行的MapChange相关实际分支显式传false，不能从默认值推断所有调用。即使为PackedScene设置虚拟user://路径并写入mapScene缓存，后续读取仍可能尝试真实文件。曾导致地图加载错误，但战斗阶段已标Running、地图实例为空、坐标缓存为零；这些不是已确认的坐标接口缺陷。
+
+本轮修正为将自有Texture保存到本Mod缓存的.res、PackedScene保存为.scn，保留宿主资源的外部引用，核对ResourceSaver返回值和GetMapScene(false)/GetMapTexture(false)可读，再Provide新地图。正常场景实例和背景必须另验；配置拓扑通过不代表背景加载。实验每次初始化重新生成缓存，若后续改为复用，需绑定宿主与Mod/参数身份，不使用旧同名文件冒充本轮成功。流程和具体结果见[社区方向实验](../../community-mod-experiments.md)。

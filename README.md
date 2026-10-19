@@ -17,6 +17,10 @@
 
 用户说“复刻某植物”时，AI通过 [植物复刻指导](.agents/skills/pvzhe-plant-recreate/SKILL.md) 统筹属性、外观、行为和可玩验收，先自主调查、补全合理细节，核心分歧才询问。经典PvZ素材工具采用`pvz-*`命名，接入本游戏的制作流程采用`pvzhe-*`；实际近似与验收边界见 [复刻实验](docs/plant-recreation-experiment.md)。非射击植物及外部僵尸的生产、恢复、移动与攻击验证见 [双例迁移实验](docs/migration-pair-experiment.md)，僵尸由 zombie-create 统筹；默认模板不增加这些功能。
 
+常见跨功能制作还做了[社区方向实验](docs/community-mod-experiments.md)：拾取/快捷键、主菜单音乐与自有地图。音频请求由[audio-edit](.agents/skills/pvzhe-audio-edit/SKILL.md)处理，验证范围与局限分别记录，实验不进入默认包。
+
+新增模式入口和独立导航页面由 [mode-create](.agents/skills/pvzhe-mode-create/SKILL.md) 指导；章节/关卡继续由level-create负责。可选 [模式导航配方](examples/ModeNavigation/README.md) 展示章节选关和直接开局两种路线，不加入默认Hello World；边界和运行证据见 [导航实验](docs/mode-navigation-experiment.md)。
+
 ## 初始化、构建
 
 ```powershell

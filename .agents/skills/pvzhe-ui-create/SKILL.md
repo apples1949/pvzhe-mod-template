@@ -9,6 +9,8 @@ description: 为 PVZHE Mod 制作按钮、提示或确认弹窗及简单界面�
 
 先经过 pvzhe-mod-guide。输入：明确的位置、用途、文字/内容和交互；输出：UI 功能、必要适配代码及实际交互证据。关键缺项返回需求引导，组件选型由 AI 决定。
 
+涉及新模式入口、页面嵌套和返回链时由 [mode-create](../pvzhe-mode-create/SKILL.md) 组织导航，本Skill负责其中的控件与样式。
+
 1. 按 [缓存与预览准备](../../../docs/resource-cache-and-capture.md) 在开发准备时建立统一发行缓存；UI用途明确后提取对应场景/字体/主题依赖，后续复用并增量补齐，不为每次问答重新解包。只在需要预览时准备显式背景隐藏/透明组件捕获分支，正常启动不执行。读 [复用目录](../../../docs/reuse-catalog.md) 与 [示例说明](../../../examples/FeatureLab/README.md)。需要重新核对时执行 `python tools/catalog.py`，只使用发布包与 DLL。目录存在不代表所有组件已运行验证。
 2. 优先调用原版 DialogManager 或实例化 MainButton，参考 `examples/FeatureLab/Adapters/HostUi.cs`。原版资源来自宿主 res://，无需打包复制贴图；不要将 new MainButton() 当成完整场景，它缺少子节点和配置。
 3. 新增控件按 [场景适配与宿主共存](references/scene-fit.md) 由匹配 Wiki 或发行场景/行为分析建立控件、阶段、布局模式与动态占位清单（含空卡槽、金币等短暂信息），再明确显示/启用阶段、避让原版控件和模态优先级；截图未显示不能证明区域空闲；挂载不等于战斗开始。再在合适的主菜单/战斗 UI 挂载回调创建节点，用 surface.Lifetime 管理节点和事件，避免反复挂载叠加。业务弹窗不能直接当作通用容器；确认/输入框尚需单独验证。

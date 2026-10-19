@@ -13,3 +13,5 @@
 - 退出录制/离场/禁用时解除事件、恢复临时输入状态，不能静态保留上一局的按住或指针状态。
 
 验证按“输入送达→控件/入口→命令→业务→表现”记录，详见 [验证执行策略](../../pvzhe-mod-verify/references/verification-strategy.md)。同帧/分帧为被测条件，不是统一实现要求。
+
+0.30拾取助手另实测Window.WindowInput场景作用域订阅，经Input.ParseInputEvent发送F8按下/回声/释放可到达，按下切换一次、回声和释放不重复。业务仍检查Running、暂停/模态、文本焦点与单人范围，离开BattleHud解除监听；该路径只证明当前引擎合成输入，不证明系统键盘/触屏。详见[社区方向实验](../../../../docs/community-mod-experiments.md)，不强制所有快捷键改成全局窗口监听。

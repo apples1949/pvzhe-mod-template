@@ -49,3 +49,9 @@ Bash 中过滤输出时使用 pipefail 并显式失败即停止/检查每条命�
 发布版禁用 --main-pack，本机 headless 曾原生崩溃；当前图形 OpenGL 副本路径已实测。退出冻结扩展点撤销和曾出现的 ObjectDB 泄漏诊断不能一概过滤；JSON unsupported 诊断仅在明确自读 JSON 的已知场景可解释为非阻断。具体排查见 [运行排障](../../../.agents/skills/pvzhe-mod-verify/references/runtime-troubleshooting.md)。
 
 最终包除功能测试外，还需不带自定义测试参数的普通加载验收。具体阶段、清单注册契约及测试夹具隔离见 [自定义功能验收](../../../.agents/skills/pvzhe-mod-verify/references/feature-acceptance.md)。通过 Mod 测试关卡只报告该场景，不沿用“原版关卡成功”标签。
+
+## 查询发布接口时减少猜测
+
+prepare/build已生成HostProbe后，使用 `dotnet tools/HostProbe/bin/Release/net9.0/HostProbe.dll .work/references --types AudioManager 'AudioManagerEnum+TYPE'`。保留原methods字符串，methodDetails补充isStatic、参数名、类型、out、optional和默认值，enumValues显示真实名称和值。大类型可添加 `--member CoinCreate` 限定成员名片段（保留匹配重载），避免将海量JSON输出截断后当作完整数据。只有类型片段时使用 `--find-types Coin`；结果的loaderErrors非空表示部分类型因缺依赖未加载，匹配结果仍可用于下一步查询，空匹配不能当作完整不存在证明。查询不会执行宿主游戏逻辑，公共签名不证明行为。
+
+新增元数据用不含游戏内容的小程序集集成测试验证；独立临时目录构建，不与正在验收的Mod共享bin。部分编译错误是调用者未核对签名造成，不能全部归为模板缺陷；保留信息并沿实际编译诊断修正。

@@ -1,5 +1,7 @@
 # 关卡配置与内容身份
 
+新增章节的组织与稳定身份见 [章节指导](../../../.agents/skills/pvzhe-level-create/references/chapters.md)；模式入口、自己的选择页面及直接关卡路线见 [模式与导航](mode-navigation.md)。目录/章节数据不自动定义新的战斗玩法。
+
 基线：[0.30.0](overview.md)。状态：FeatureLab 的现代关卡配置、独立目录、原版图卡、预设卡槽、两次真实死亡与胜利已实测；其他玩法、失败/恢复/奖励仍按需求另验。来源：发行接口及自己的 DemoLevel/Smoke。
 
 mod/Assets/level.json 使用现代 Process/Feature 结构，在运行入口读包内文件、Json.Parse、TowerDefenseLevelNewConfig.data 初始化。MapName/卡牌/僵尸键来自已发布内容；示例选择 FrontlawnEmpty、PlantFirenut、ZombieNormal。Packet Method=PRESET 跳过选卡并使用预设卡牌，波次 Spawn 的 Line 是从1开始的行编号。任意新地图/卡牌必须重新核验。
@@ -25,3 +27,7 @@ v3 使用 contentEntries 声明 category=Level/key=demo。Content.Provide 的资
 contentEntries 是宿主所需内容声明；对应目录在正常初始化路径完成 ProvideLevelCatalog 注册，不能仅在测试参数下注册。功能测试加载通过与无测试参数的最终包加载分别验收；见 [验收规则](../../../.agents/skills/pvzhe-mod-verify/references/feature-acceptance.md)。
 
 自读 JSON 的已知 unsupported package file 诊断，与 required contents not registered 的内容注册失败是不同问题；不能因为前者在 FeatureLab 非阻断就忽略后者，也不能将二者归为同一原因。保留原始诊断与应用/回滚结果。测试关卡优先独立于最终发布内容，若随包交付则明确用途并在普通启动完成注册。
+
+## 就绪不只看场景名
+
+等待SceneManager.Instance.isLoading结束、目标目录按钮实际出现且可用，再进行章节/关卡选择；“任意Button存在”不代表目标目录已生成。目录标题可带前后缀，识别需关联本Mod身份，不把示例标题当作所有项目的唯一标识。Running是阶段标记，不能证明Map等依赖初始化成功；地图缺失时应先检查完整日志最早资源/组件错误及实例，不继续将零缓存值分析成坐标缺陷。

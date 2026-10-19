@@ -30,3 +30,9 @@ death-committed 按实体身份/生命阶段去重，revived后是否再次计�
 Initialize 订阅 Ready，回调限定新的单人对局，读取设置参数，记录原余额→await Economy.Credit→检查返回→记录最终余额。不订阅 Restored 发奖，避免恢复重复获益；示例只验证了新局增量，完整读档不重复发奖仍需对相应功能验收。
 
 对应代码：[StartingSun](../../../examples/FeatureLab/Features/StartingSun.cs)、[KillCounter](../../../examples/FeatureLab/Features/KillCounter.cs)、[Smoke](../../../examples/FeatureLab/Verification/Smoke.cs)。金额50是示例，不能当成玩家要求的默认奖励。
+
+## 阳光收取与金币不同
+
+0.30普通阳光为TowerDefenseSun（继承TowerDefenseSunBase），本轮活动组名Sun；调用原对象Collection后，要等待收取补间入账，再验证余额与CollectionCredited。收取开始isCollect=true不等于余额已到账，池化/离场后引用需核对有效性。金币为TowerDefenseCoinBase→TowerDefenseGroundItemBase，不属于SunBase；不能用枚举SunBase来证明金币没有生成。
+
+发行CoinCreate(pos,num,...)的num是金额，按1000/50/10拆分，传1不会产生金币；这是本轮局部IL分析与有效10金额运行对照的结论，不把num一律解释为数量。具体拾取助手的键入/暂停、白名单、入账和设置边界见[社区方向实验](../../community-mod-experiments.md)。本轮仅单人，未证明不同账号所有权/联机收取。

@@ -1,6 +1,6 @@
 ---
 name: pvzhe-level-create
-description: 为 PVZHE Mod 创建使用原版地图、卡牌与僵尸的独立关卡，完成配置、目录注册、入口、校验及胜负验证；不负责新增植物。
+description: 为 PVZHE Mod 创建章节与独立关卡，组织目录、选关图卡、配置、身份及胜负验证；模式页面由mode-create负责，不负责新增植物。
 ---
 
 # 关卡制作
@@ -10,6 +10,8 @@ description: 为 PVZHE Mod 创建使用原版地图、卡牌与僵尸的独立�
 输入：经过 mod-guide 澄清的地图/玩法、难度或波次、选卡规则、结束条件与奖励意图。输出：自己的关卡 JSON、目录注册与可进入的入口。
 
 已有地图上的波次与选卡留在本Skill；新增背景/网格/道路/地形转pvzhe-map-create，需新角色时组合plant-create或zombie-create。
+
+新建/追加章节或多关卡时读 [章节组织](references/chapters.md)；新模式入口、独立页面及直达/嵌套路线组合 [mode-create](../pvzhe-mode-create/SKILL.md)。章节是关卡组织层，不等于新的战斗玩法。
 
 1. 读 [关卡配方](../../../docs/recipes/levels.md)、FeatureLab 的 Assets/level.json 与 DemoLevel.cs。用发布索引、配置和 DLL 核对 MapName、卡牌/僵尸键及波次结构；不要求源码。玩家无需自行提供注册键。
 2. 使用独立 Name/saveKey、目录键和 Mod 身份。name 必须与目录 SaveKey 一致，不复制原版进度/解锁/奖励逻辑。示例使用 modern Process/Feature JSON 与 TowerDefenseLevelNewConfig，不混用旧配置字段。

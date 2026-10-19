@@ -6,9 +6,11 @@
 | --- | --- | --- |
 | 按钮/提示/弹窗 | pvzhe-ui-create | 快捷键另用input-bindings；位置预览只有用户认可才调用 |
 | 对局信息/统计 | pvzhe-battle-hud | 设置开关组合mod-settings |
+| 背景音乐、音效、局部音量 | pvzhe-audio-edit | 区分流键/战斗音乐方案/场景作用域；设置或选择界面按需组合 |
 | 设置持久化/热更新 | pvzhe-mod-settings | 不为配置新造完整界面 |
 | 简单对局规则、奖励/控制效果 | pvzhe-gameplay-feature | 新角色基础不是临时规则 |
-| 用原版地图做波次/关卡 | pvzhe-level-create | 新网格/地形/背景走map-create |
+| 新模式入口、点进去的新页面、页面嵌套/返回 | pvzhe-mode-create | 先区分导航和玩法；特殊规则组合gameplay-feature，章节/关卡组合level-create |
+| 新章节、追加关卡、用原版地图做波次/关卡 | pvzhe-level-create | 章节组织见其references/chapters；新网格/地形/背景走map-create |
 | 已有资源的伤害、费用、血量等 | pvzhe-resource-edit | 短时局部规则可能组合gameplay-feature；不默认新建角色 |
 | 独立新子弹/投射物及命中效果 | pvzhe-projectile-create | 发射节奏走character-fire；修改原子弹字段走resource-edit |
 | 新植物 | pvzhe-plant-create | 负责身份/骨架/种植入口；发射/外观按需组合 |

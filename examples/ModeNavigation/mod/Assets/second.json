@@ -1,0 +1,87 @@
+{
+  "Name": "local.mode-navigation.second",
+  "LevelName": "终点关",
+  "Description": "本地模板验证，不影响原关卡",
+  "LevelNumber": 1,
+  "NextLevel": "",
+  "HomeWorld": "Morden",
+  "Version": "1.0",
+  "Process": {
+    "Name": "Wave",
+    "Data": {
+      "MowerUse": false,
+      "EntryBroadcastDuration": 0,
+      "CameraTravelDuration": 0,
+      "EntryLabelDuration": 0.1
+    }
+  },
+  "Feature": [
+    {
+      "Name": "Map",
+      "Data": {
+        "MapName": "FrontlawnEmpty"
+      }
+    },
+    {
+      "Name": "BGM",
+      "Data": {
+        "BackgroundMusic": "Frontlawn"
+      }
+    },
+    {
+      "Name": "Sun",
+      "Data": {
+        "Open": true,
+        "Begin": 300,
+        "SpawnInterval": 600,
+        "SpawnNum": 50
+      }
+    },
+    {
+      "Name": "PacketBank",
+      "Data": {
+        "PacketBankName": "GeneralPlant"
+      }
+    },
+    {
+      "Name": "SeedBank",
+      "Data": {
+        "Method": "PRESET",
+        "Packet": [
+          "PlantPeaShooterSingle",
+          "PlantSunFlower",
+          "PlantWallnut"
+        ],
+        "ColdDownStart": false
+      }
+    },
+    {
+      "Name": "Wave",
+      "Data": {
+        "FlagZombie": "ZombieFlag",
+        "FlagWaveInterval": 600,
+        "BeginCol": 7,
+        "SpawnColStart": 8,
+        "SpawnColEnd": 9,
+        "Dynamic": [],
+        "Wave": [
+          {
+            "Spawn": [
+              {
+                "Zombie": "ZombieNormal",
+                "Line": 1,
+                "Num": 1
+              },
+              {
+                "Zombie": "ZombieNormal",
+                "Line": 3,
+                "Num": 1
+              }
+            ],
+            "Event": []
+          }
+        ]
+      }
+    }
+  ]
+}
