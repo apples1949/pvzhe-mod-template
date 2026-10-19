@@ -38,7 +38,7 @@
 
 ## BATTLE-03：暂停、恢复、退出与返回
 
-静态确认的场景是 `Prefab/GUI/DialogBox/DialogBoxGeneral/DialogBoxGamePause/DialogBoxGamePause.tscn`、`Prefab/GUI/DialogBox/MenuDialog/DialogBattlePause/DialogBattlePause.tscn`，不是可随意打开的通用提示框。宿主战斗快照具有 Paused；完整菜单操作链路尚未实测。
+静态确认的场景是 `Prefab/GUI/DialogBox/DialogBoxGeneral/DialogBoxGamePause/DialogBoxGamePause.tscn`、`Prefab/GUI/DialogBox/MenuDialog/DialogBattlePause/DialogBattlePause.tscn`，不是可随意打开的通用提示框。宿主战斗快照具有 Paused。[双例迁移实验](../../migration-pair-experiment.md)通过实际currentControl.buttonPause.ButtonPressed切换路径打开DialogBattlePause，再CloseDialog恢复；生产与自有恢复在暂停5.2秒内不推进。此为宿主控件事件/状态路径，未验系统鼠标。实验还覆盖程序化返回菜单释放作用域与重开；保存退出及读档仍待验证。
 
 人工验收应使用实际游戏菜单：暂停后确认模拟暂停，继续后恢复；退出后确认 BattleHud 场景作用域释放，再返回菜单/开新局检查无残留。对“保存并退出”先满足资料与存档前提并另验读档。不要用 tree.Quit 证明返回菜单正常，也不要仅修改 tree.Paused 假装实现完整宿主暂停流程。
 

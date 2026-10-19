@@ -13,6 +13,10 @@
 
 最小示例不需要安装 Godot 编辑器、导出模板或解包完整游戏工程。发布包携带 `GodotSharp.dll` 与 `PlantsVsZombies.dll`，工具直接使用这两个文件作为编译引用。需要编辑场景时，再安装与发布引擎匹配的 Godot .NET 版本；本次发布 PCK 标记为 **4.7.0**。
 
+想将经典版或其他改版角色做成 Mod 时，可用新增的资料定位、PAK提取与reanim导入 Skills；它们按需使用用户自己的素材，不是 Hello World 的依赖。转换图片需要可选 Pillow，命令与实测边界见 [经典素材导入实验](docs/classic-import-experiment.md)。
+
+用户说“复刻某植物”时，AI通过 [植物复刻指导](.agents/skills/pvzhe-plant-recreate/SKILL.md) 统筹属性、外观、行为和可玩验收，先自主调查、补全合理细节，核心分歧才询问。经典PvZ素材工具采用`pvz-*`命名，接入本游戏的制作流程采用`pvzhe-*`；实际近似与验收边界见 [复刻实验](docs/plant-recreation-experiment.md)。非射击植物及外部僵尸的生产、恢复、移动与攻击验证见 [双例迁移实验](docs/migration-pair-experiment.md)，僵尸由 zombie-create 统筹；默认模板不增加这些功能。
+
 ## 初始化、构建
 
 ```powershell

@@ -1,6 +1,6 @@
 # 素材路线与动画结构
 
-社区来源见 [提取清单](../../../../docs/community-skill-extraction.md)。具体二进制布局、数值和修复线索待当前发行核对；本模板没有捆绑社区转换器或一条通用转换命令。
+社区来源见 [提取清单](../../../../docs/community-skill-extraction.md)。模板没有捆绑社区转换器；新增的 [reanim-import](../../pvzhe-reanim-import/SKILL.md) 提供范围受限的本地转换工具，支持范围与运行证据逐项说明，不是一条命令复刻角色玩法。
 
 默认先用 [0.30原外观复用路线](../../../../docs/wiki/0.30.0/content-authoring.md)：注册宿主CharacterSprite引用，不分发图集；需要简单色调变化时评估自有实例sprite.Modulate。该最小路线不证明自有动画转换/换头全部支持，不能为缺少转换器要求玩家提供游戏源码。
 

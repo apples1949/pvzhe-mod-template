@@ -5,10 +5,10 @@ description: 为 PVZHE 角色复用或制作外观、动画、换头与部件对
 
 # 角色外观与动画
 
-先经mod-guide确定外观目标与需要保留的行为，默认评估宿主复用。输入：目标角色、发行资源及可选自有素材。输出：最小外观资源、必要适配与过程证据；无需玩家掌握图集格式。0.30原外观复用、实例色调与动画推进已实测；自有图集、格式转换和换头仍属待专项验证。
+先经mod-guide确定外观目标与需要保留的行为，默认评估宿主复用。输入：目标角色、发行资源及可选自有素材。输出：最小外观资源、必要适配与过程证据；无需玩家掌握图集格式。0.30原外观复用、实例色调与动画推进已实测；新增reanim转换的局部证据见对应Skill，完整角色绑定及换头仍须专项验证。
 
 1. 按 [内容契约](../pvzhe-mod-develop/references/content-contract.md) 判断原版引用、自有静态/逐帧、已有动画转换或换头路线；只在缺少所需素材时向玩家索取，不强制经典版解包。
-2. 普通换肤读 [素材与动画](references/assets-and-animation.md)；换头/多部件、尺寸位置调整再读 [几何与跟随](references/geometry-and-follow.md)，不默认加载全部美术细节。
+2. 普通换肤读 [素材与动画](references/assets-and-animation.md)；经典/改版角色名称先由 [source-identify](../pvz-source-identify/SKILL.md) 定位，已有reanim用 [reanim-import](../pvzhe-reanim-import/SKILL.md) 转换。换头/多部件、尺寸位置调整再读 [几何与跟随](references/geometry-and-follow.md)，不默认加载全部美术细节。
 3. 保留基础行为依赖的片段、事件、控制层和根运动；只换PNG可能破坏射击/移动，需与character-fire或zombie-create核对。
 4. 配置原点、缩放、图层与场景引用，必要的本地渲染适配限定本Mod资源和实例生命周期，不盲目套修复或扫描全部宿主节点。
 5. 离线核对结构与预览，再由mod-verify检查战斗、卡片/选取/图鉴等需求相关实例的动画和表现；单帧或进入动画状态不证明完整播放。

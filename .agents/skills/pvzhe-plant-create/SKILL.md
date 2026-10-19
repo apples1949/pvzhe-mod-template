@@ -7,7 +7,7 @@ description: 为 PVZHE Mod 新建具有独立身份的植物，优先复用原�
 
 先经mod-guide明确植物用途、基础行为和可见入口，不要求玩家提供类名或图集。输入：已澄清的玩法和发行版。输出：独立植物内容、必要托管适配及验证记录。0.30的宿主骨架复用、新身份/卡片、正式生成与发射已实测；新脚本/自有动画另验。
 
-1. 读 [内容契约](../pvzhe-mod-develop/references/content-contract.md) 与 [植物骨架](references/plant-assembly.md)，优先选择行为最接近的原版基底。
+1. 读 [内容契约](../pvzhe-mod-develop/references/content-contract.md) 与 [植物骨架](references/plant-assembly.md)，优先选择行为最接近的原版基底。复刻外部已有植物且尚无行为方案时，先由 [plant-recreate](../pvzhe-plant-recreate/SKILL.md) 统筹，再接收本Skill的角色接入部分；图鉴说明与动画不能独自证明完整程序行为。
 2. 先决定新增植物还是覆盖原植物；仅改原对象参数转resource-edit。已有Mod不换ID，给新角色、卡片和配置分配稳定自有Key。
 3. 核对配置、卡片、角色场景、组件集、精灵与所需伴随类型，构成最小可创建链；不默认加入复杂大招或卡库改造。
 4. 按功能组合character-fire、character-skin或gameplay-feature；未改外观时直接引用宿主，素材问题由需要决定，不强制先索取新素材。

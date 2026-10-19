@@ -12,10 +12,12 @@
 | 已有资源的伤害、费用、血量等 | pvzhe-resource-edit | 短时局部规则可能组合gameplay-feature；不默认新建角色 |
 | 独立新子弹/投射物及命中效果 | pvzhe-projectile-create | 发射节奏走character-fire；修改原子弹字段走resource-edit |
 | 新植物 | pvzhe-plant-create | 负责身份/骨架/种植入口；发射/外观按需组合 |
-| 新僵尸 | pvzhe-zombie-create | 负责身份/基础行为/出现入口；护具/发射/外观按需组合 |
+| 新僵尸/复刻其他版本僵尸 | pvzhe-zombie-create | 统筹身份/出现入口与行为依据；复刻组合pvz资料/PAK与reanim导入，护具/发射按需组合 |
 | 射速、散射、连射或生成点 | pvzhe-character-fire | 新角色由相应create先建立骨架；单数值差量可由resource-edit完成 |
 | 护具、耐久、破甲行为 | pvzhe-character-armor | 本体血量不等于护具；不负责整套BOSS |
 | 换肤、动作、换头/部件对齐 | pvzhe-character-skin | 未要求新外观时优先复用宿主；不自动生成美术 |
+| 复刻经典PvZ/其他改版已有植物 | pvzhe-plant-recreate | 统筹行为依据、缺项、合理近似与完整验收；组合pvz资料/PAK与PVZHE制作，不在动画阶段结束 |
+| 识别经典PvZ/其他改版角色资料与素材 | pvz-source-identify | 与目标引擎无关；需要PAK时用pvz-pak-extract；PVZHE外观接入再用reanim-import |
 | 地图背景、行列、道路/地形 | pvzhe-map-create | 验证用关卡由level-create组合 |
 | 快捷键、改键、触摸触发 | pvzhe-input-bindings | 业务命令已有或单独实现；持久化组合mod-settings |
 | 只有pmod、调已有文本字段 | pvzhe-pmod-patch | 源项目存在优先回改源码；不恢复DLL源码 |
