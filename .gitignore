@@ -5,3 +5,5 @@ dist/
 **/obj/
 **/__pycache__/
 *.user
+# Generated from the player's own classic PAK; never distribute host/source artwork.
+examples/SuperGatling/mod/Assets/animation.dat

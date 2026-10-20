@@ -1,0 +1,1716 @@
+{
+  "format": "pvzhe.attack-plan",
+  "schemaVersion": 5,
+  "id": "623a2e95c71d564b882799caf7cae1c2",
+  "name": "超级机枪射手 · 300发大招",
+  "character": "mod/super-gatling-pea/SuperGatlingPea",
+  "intervalSeconds": 0.1,
+  "trigger": {
+    "kind": "rect",
+    "coordinates": "cell-boundaries",
+    "columns": [
+      0.0,
+      9.0
+    ],
+    "rows": [
+      0.0,
+      1.0
+    ],
+    "selection": "inherited-target"
+  },
+  "groups": [
+    {
+      "id": "895b324e6e184c9787b70d47a402b47f",
+      "name": "扇形",
+      "enabled": true,
+      "items": [
+        {
+          "id": "424dfcd2cb724779aae5b886838d8a06",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "0678a4c9e55248caad9073d2a9fb6119",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "3d12c081098a464d9514efa63d665d22",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "4cf8dd297b2d453b94e2daad90ca1bba",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "92add65efd2a4682851cd5ea77d7e040",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "201725fc0f794213887e13e5d834e9b6",
+      "name": "扇形",
+      "enabled": true,
+      "items": [
+        {
+          "id": "3ae52f987d404e928206fd515803f494",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -45.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "f8b573e1757f467686b3fbb343833afa",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -33.75,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "2137e9e9f9a84389ac76ecdafdab1878",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "ac2e6fadeeec456d8b22da546581a37d",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "f79e7ed5a4cd467b80b0e16786434d72",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "db9c4e1dc4b14330be1ffaf7127c9e1b",
+      "name": "扇形 副本",
+      "enabled": true,
+      "items": [
+        {
+          "id": "43b43f5a913b48e1b0956f967c6a18e2",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -45.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "52297c6a4d644fa0b9eab3a763e92f26",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -33.75,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "5221b79d2e494ac6a5740693b23775d9",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "e47563113aa94e3db03e17ba79807b4f",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "5dafcb30d09e4ba890dbbc93edfad391",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "9a2b5b3276024e439e6b33973a5e73d6",
+      "name": "扇形 副本",
+      "enabled": true,
+      "items": [
+        {
+          "id": "6dcd6263a0d6467a886e18afb54b2314",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "50a064005c354659a7e495b83ebffda0",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "d07ac3efb6f747768efdef0017935967",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "33c609fbf6c64c5c9f01813e51b784e1",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "704986f2c30449c39402d1a7d7942fab",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "94cf79af1ae44a8c91a0cadaf34d25d2",
+      "name": "扇形 副本",
+      "enabled": true,
+      "items": [
+        {
+          "id": "b0e910c75b2448369d4dbef260abbb96",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -45.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "7b4d9372f3f14777a902206e6896fc23",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -33.75,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "541e57586f494ec0a912c4fb2841cedd",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "d331f2dd411b40f4ac6484b16066e279",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "10ce8f5aa25e4934b1443393939a9c6a",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.25,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "id": "d2171876197b41e28721e318c6755b92",
+      "name": "扇形 副本 副本",
+      "enabled": true,
+      "items": [
+        {
+          "id": "ed4f6528d7f54e319a2a4938db31e335",
+          "name": "发射项 1",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -45.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "43135bc9a6334854bd90bd55c135070b",
+          "name": "发射项 2",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -33.75,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "14365f25dc2b468487b1ae157f4e8da0",
+          "name": "发射项 3",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -22.5,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "bb44f90451ef47b2b63e6e6696088ca9",
+          "name": "发射项 4",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -11.25,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        },
+        {
+          "id": "9390d746cbfc4a7caa2f7e680c872ad6",
+          "name": "发射项 5",
+          "enabled": true,
+          "time": 0.5,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              27,
+              -17
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 0.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 1.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          }
+        }
+      ]
+    }
+  ],
+  "implementation": {
+    "files": {
+      "examples/SuperGatling/AnimationData.cs": "f88601e82831a371f2ac845da4a086bf25f897b72b3805ba37d51fb53cbcc303",
+      "examples/SuperGatling/DemoLevel.cs": "0f0b8c9db9625526f83606b272ed7954a98930ed16008e9c152e930a32b67064",
+      "examples/SuperGatling/Entry.cs": "b31bf885809145edccef91df328251630d0e9584d431d5bc1cf04d45867013d1",
+      "examples/SuperGatling/PowerBurst.cs": "e34e56673bc346e6742de0f27a33778eddda04feed70a586cd61ff3fe324c8c4",
+      "examples/SuperGatling/PowerGuidance.cs": "9f361ce69550963ecffd28fa2f5ee07c364363c268c001b1c24ad49b0b788222",
+      "examples/SuperGatling/PowerPattern.cs": "5725ca7d74bc839d4239727acc6b1f2062ae5ed1a848d4c8d1550bd597d6bc90",
+      "examples/SuperGatling/SpriteRendering.cs": "f1b89e4eb48890df85deba28710f24cf835b102ba94c04e8a80fe7aa50ff83fe",
+      "examples/SuperGatling/WeakGuidanceMath.cs": "0bed7ccac01c375120b17443970f97d8d111f9be79321ea3b96c08eb9df6b5f7",
+      "examples/SuperGatling/prepare_attack.py": "f09d6689aa3bfa7237ac8283de2d1179a666a7b553701f6ce207c56acf188e0b",
+      "examples/SuperGatling/mod/mod.json": "e987c210f365d4a7b0a5233bed63de158bcebd97d00cf13c76ff75ee1e975a58",
+      "examples/SuperGatling/mod/Assets/power-pattern.json": "55290e557e3ad43d7366d88b96097b1f61b39d1581d5f646abdfd62e1bf04581",
+      "examples/SuperGatling/mod/Assets/animation.dat": "e874ec472faf7509f089296499df8a49330cfa3e4ced30b41382aff568c733ae"
+    },
+    "appliedPlanSha256": "784681b9df8973e8cb2f43494666a54eace91e02a8b4e8b2c1298185cca4efbf"
+  },
+  "reference": {
+    "releaseCacheKey": "b4f563c898ae264701fa9d410499e0862fc03a4128addaeea4942daf66c08b86",
+    "attackScope": "single-power-activation",
+    "activationProbability": 0.1,
+    "intervalPolicy": "power-round-start-interval",
+    "baselineKind": "captured-jitter-sample-with-authored-batch-timing",
+    "muzzleAnchorOffset": [
+      28.8394775390625,
+      -19.8001098632813
+    ],
+    "dynamicMuzzlePath": "SpriteGroup/TransformPoint/PeaShooterSingle/Head/SuperMuzzle/FirePoint",
+    "emissionWindowSeconds": 1.0,
+    "delayTailPolicy": "finish-started-rounds"
+  }
+}

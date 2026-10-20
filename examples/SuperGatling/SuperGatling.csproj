@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GameReferenceDir>$(MSBuildThisFileDirectory)../../.work/references</GameReferenceDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Verification/**/*.cs" />
+    <Reference Include="PlantsVsZombies"><HintPath>$(GameReferenceDir)/PlantsVsZombies.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="GodotSharp"><HintPath>$(GameReferenceDir)/GodotSharp.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="CheckReferences" BeforeTargets="ResolveReferences">
+    <Error Condition="!Exists('$(GameReferenceDir)/PlantsVsZombies.dll')" Text="Run tools/mod.py prepare first." />
+  </Target>
+</Project>

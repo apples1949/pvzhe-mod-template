@@ -21,6 +21,10 @@
 
 新增模式入口和独立导航页面由 [mode-create](.agents/skills/pvzhe-mode-create/SKILL.md) 指导；章节/关卡继续由level-create负责。可选 [模式导航配方](examples/ModeNavigation/README.md) 展示章节选关和直接开局两种路线，不加入默认Hello World；边界和运行证据见 [导航实验](docs/mode-navigation-experiment.md)。
 
+[超级机枪射手](examples/SuperGatling/README.md) 是可构建的外部植物案例，包含用户PAK素材准备、独立植物/动画/攻击、原版金色卡池及分离的验收脚本。运行`build --example super-gatling`，来源素材由玩家自行生成且不随仓库分发；默认Hello World无需这些素材。通用发现见[原版卡池与种植](docs/wiki/0.30.0/card-pools.md)。
+
+玩家明确想自己设计弹道/攻击方式时，可用[攻击方案编辑器](docs/attack-preview.md)：草坪与透明角色、单颗弹药/射线、组与可拖时间轴、相对网格偏移、地图触发区域、直线追踪强度及函数预设。方案保存在design/attacks，可继续编辑和恢复草稿，持续等待确认或取消。普通开发不自动打开；预览不代替游戏内命中验收，不影响默认模板。
+
 ## 初始化、构建
 
 ```powershell

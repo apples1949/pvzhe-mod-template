@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 3,
+  "id": "super-gatling-pea",
+  "name": "超级机枪射手",
+  "version": "0.1.6",
+  "author": "七弦",
+  "description": "超级机枪射手：普通七连发；10%概率大招，1秒内每0.1秒启动30发弱追踪编排。",
+  "playInstructions": "启用后重启游戏；在选卡界面的金色卡池里找到「超级机枪射手」即可种植。",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "SuperGatlingPea.Entry",
+  "runtimeApiVersion": 3,
+  "runtimeAssemblyPolicy": "required",
+  "contentEntries": [
+    {
+      "category": "Character",
+      "key": "SuperGatlingPea"
+    },
+    {
+      "category": "CharacterSprite",
+      "key": "SuperGatlingPea"
+    },
+    {
+      "category": "Packet",
+      "key": "SuperGatlingPea"
+    },
+    {
+      "category": "Level",
+      "key": "demo"
+    },
+    {
+      "category": "Projectile",
+      "key": "SuperPea"
+    }
+  ],
+  "resources": [
+    "Assets/animation.dat",
+    "Assets/level.json",
+    "Assets/power-pattern.json"
+  ],
+  "scripts": [],
+  "dependencies": [],
+  "overrides": {
+    "PacketBank": [
+      "GeneralPlant"
+    ]
+  }
+}

@@ -85,10 +85,20 @@ public static class Smoke
             Require(context.Game.Economy.TryGetBalance(out long balance) && balance == 350, "Starting sun must be 300 + 50");
             context.Log("LAB_TEST_BALANCE: " + balance);
             bool resultObserved = false;
+            var handledPauses = new HashSet<ulong>();
             // 订阅在 Initialize 才能建立；结果证据由常驻入口订阅输出，下面读取宿主终态。
             for (int i = 0; i < 180 && kills.Count < 2; i++)
             {
                 await Wait(tree, 0.2);
+                var prompt = Descendants(tree.Root).OfType<DialogBoxBase>().FirstOrDefault(d => d.GetType().Name == "DialogBoxGamePause");
+                if (prompt != null && handledPauses.Add(prompt.GetInstanceId()))
+                {
+                    Require(handledPauses.Count <= 4, "Repeated environment pause prompts");
+                    context.Log("LAB_ENV_PAUSE: known game pause prompt; treePaused=" + tree.Paused);
+                    tree.Root.GrabFocus();
+                    prompt.CloseDialog();
+                }
+                if (i == 0) context.Log("LAB_BATTLE_DIAGNOSTIC: treePaused=" + tree.Paused + "; battlePaused=" + (context.Game.TryGetBattle(out var state) && state.Paused) + "; dialogs=" + DialogManager.Instance.HasOpenDialogs);
                 foreach (var zombie in context.Game.Characters.Query().Where(x => x.Camp == 1 && !x.Dead && !x.Removing))
                 {
                     var damage = await context.Game.Combat.Damage(zombie.Handle, 100000);
@@ -116,6 +126,7 @@ public static class Smoke
         catch (Exception error)
         {
             context.Log("LAB_TEST_ERROR: " + error);
+            await Screenshot(tree, "feature-lab-failed");
             tree.Quit(2);
         }
     }

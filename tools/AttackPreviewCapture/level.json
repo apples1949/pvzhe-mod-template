@@ -1,0 +1,14 @@
+{
+  "Name": "attack-preview-capture.calibration", "LevelName": "Calibration", "LevelNumber": 1,
+  "NextLevel": "", "HomeWorld": "Morden", "Version": "1.0",
+  "Process": {"Name": "Wave", "Data": {"MowerUse": false, "EntryBroadcastDuration": 0, "CameraTravelDuration": 0, "EntryLabelDuration": 0.1}},
+  "Feature": [
+    {"Name": "Map", "Data": {"MapName": "Frontlawn"}},
+    {"Name": "BGM", "Data": {"BackgroundMusic": "Frontlawn"}},
+    {"Name": "Sun", "Data": {"Open": true, "Begin": 1000, "SpawnInterval": 600, "SpawnNum": 50}},
+    {"Name": "PacketBank", "Data": {"PacketBankName": "GeneralPlant"}},
+    {"Name": "SeedBank", "Data": {"Method": "PRESET", "Packet": ["PlantPeaShooterSingle", "PlantWallnut"], "ColdDownStart": false}},
+    {"Name": "Wave", "Data": {"FlagZombie": "ZombieFlag", "FlagWaveInterval": 5, "BeginCol": 8, "SpawnColStart": 10, "SpawnColEnd": 11, "Dynamic": [],
+      "Wave": [{"Spawn": [{"Zombie": "ZombieNormalBucket", "Line": 5, "Num": 2}], "Event": []}]}}
+  ]
+}

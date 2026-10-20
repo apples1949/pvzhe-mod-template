@@ -1,0 +1,81 @@
+{
+  "Name": "super-gatling-pea.demo",
+  "LevelName": "超级机枪射手体验",
+  "Description": "复用原版地图与卡牌，击败两只普通僵尸。",
+  "LevelNumber": 1,
+  "NextLevel": "",
+  "HomeWorld": "Morden",
+  "Version": "1.0",
+  "Process": {
+    "Name": "Wave",
+    "Data": {
+      "MowerUse": false,
+      "EntryBroadcastDuration": 0,
+      "CameraTravelDuration": 0,
+      "EntryLabelDuration": 0.1
+    }
+  },
+  "Feature": [
+    {
+      "Name": "Map",
+      "Data": {
+        "MapName": "Frontlawn"
+      }
+    },
+    {
+      "Name": "BGM",
+      "Data": {
+        "BackgroundMusic": "Frontlawn"
+      }
+    },
+    {
+      "Name": "Sun",
+      "Data": {
+        "Open": true,
+        "Begin": 2000,
+        "SpawnInterval": 600,
+        "SpawnNum": 50
+      }
+    },
+    {
+      "Name": "PacketBank",
+      "Data": {
+        "PacketBankName": "GeneralPlant"
+      }
+    },
+    {
+      "Name": "SeedBank",
+      "Data": {
+        "Method": "PRESET",
+        "Packet": [
+          "mod/super-gatling-pea/SuperGatlingPea",
+          "PlantWallnut"
+        ],
+        "ColdDownStart": false
+      }
+    },
+    {
+      "Name": "Wave",
+      "Data": {
+        "FlagZombie": "ZombieFlag",
+        "FlagWaveInterval": 5,
+        "BeginCol": 8,
+        "SpawnColStart": 10,
+        "SpawnColEnd": 11,
+        "Dynamic": [],
+        "Wave": [
+          {
+            "Spawn": [
+              {
+                "Zombie": "ZombieNormalBucket",
+                "Line": 3,
+                "Num": 2
+              }
+            ],
+            "Event": []
+          }
+        ]
+      }
+    }
+  ]
+}

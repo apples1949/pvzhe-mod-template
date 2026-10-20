@@ -12,9 +12,12 @@ import subprocess
 import sys
 import uuid
 import argparse
+import time
+import zipfile
 from pathlib import Path
 from pck import Pack
 from mod import check_package, sha
+from runtime_diagnostics import assess
 import mod as workflow
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,9 +44,17 @@ def variant_string(text):
     return struct.pack("<II", 4, len(data)) + data + b"\0" * (-len(data) % 4)
 
 
-def test(example="hello-world"):
+def test(example="hello-world", *, driver_code=None, package_path=None, runtime_dir=None,
+         user_args=(), required_markers=()):
     workflow.select_example(example)
-    runtime = WORK / ("runtime" if example == "hello-world" else "runtime-feature-lab")
+    custom = package_path is not None
+    if not custom and example not in ("hello-world", "feature-lab"):
+        raise ValueError("Use this example's documented verifier or supply explicit custom verification inputs.")
+    if custom and (driver_code is None or not required_markers or runtime_dir is None):
+        raise ValueError("Custom verification needs driver_code, runtime_dir and required_markers.")
+    runtime = Path(runtime_dir).resolve() if custom else WORK / ("runtime" if example == "hello-world" else "runtime-feature-lab")
+    if custom and (not runtime.is_relative_to(WORK.resolve()) or runtime.exists()):
+        raise ValueError("Use a new isolated runtime directory inside .work; preserve earlier evidence.")
     if os.name != "nt":
         raise ValueError("Runtime test currently supports Windows release only")
     evidence = json.loads((WORK / "release.json").read_text(encoding="utf-8"))
@@ -86,6 +97,8 @@ func capture():
 '''
     if example == "feature-lab":
         driver = driver.split(b'    var banner =')[0]
+    if custom:
+        driver = driver_code.encode("utf-8") if isinstance(driver_code, str) else driver_code
     data = b"ECFG" + struct.pack("<I", len(entries))
     for key, value in entries.items():
         k = key.encode()
@@ -116,10 +129,10 @@ func capture():
     (runtime / "userdata-path.txt").write_text(str(userdata), encoding="utf-8")
     mods = userdata / "Mods"
     mods.mkdir(parents=True, exist_ok=True)
-    package = workflow.PACKAGE
-    check_package(package)
+    package = Path(package_path).resolve() if custom else workflow.PACKAGE
+    package_manifest = check_package(package)
     shutil.copyfile(package, mods / package.name)
-    manifest = workflow.manifest()
+    manifest = package_manifest if custom else workflow.manifest()
     state = mods / "enabled_mods.json"
     previous = state.read_bytes() if state.exists() else None
     log = runtime / "game.log"
@@ -143,10 +156,50 @@ func capture():
                    "--quit-after", "3600", "--log-file", str(log)]
         if example == "feature-lab":
             command += ["--", "--feature-lab-test"]
-        print("Test driver presses the existing loading StartButton; " +
+        if custom and user_args:
+            command += ["--", *user_args]
+        print("Custom verification: identity-bound package, host-error gate and required results." if custom else
+              "Test driver presses the existing loading StartButton; " +
               ("FeatureLab verifies UI, battle and settings." if example == "feature-lab" else
                "captures the banner, then exits."), flush=True)
         print("Starting released game with isolated data:", userdata, flush=True)
+        if custom:
+            with zipfile.ZipFile(package) as archive:
+                binary_hash = hashlib.sha256(archive.read(manifest["runtimeAssembly"])).hexdigest()
+            identity = {"pckSha256": evidence["pckSha256"], "assemblies": evidence["assemblies"],
+                        "packageSha256": sha(package), "runtimeBinarySha256": binary_hash,
+                        "driverSha256": hashlib.sha256(driver).hexdigest(), "command": command,
+                        "requiredMarkers": list(required_markers), "userdata": str(userdata)}
+            shutil.copyfile(package, runtime / package.name)
+            (runtime / driver_name).write_bytes(driver)
+            workflow.write_json(runtime / "identity.json", identity)
+            with (runtime / "stdout.log").open("w", encoding="utf-8") as output:
+                with subprocess.Popen(command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT) as proc:
+                    deadline = time.monotonic() + 120
+                    reason = None
+                    while proc.poll() is None:
+                        time.sleep(.25)
+                        text = log.read_text(encoding="utf-8", errors="replace") if log.exists() else ""
+                        errors = assess(text)["errors"]
+                        if errors or time.monotonic() > deadline:
+                            reason = errors[0] if errors else "Runtime deadline exceeded"
+                            proc.terminate()
+                            break
+                    try:
+                        code = proc.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        code = proc.wait()
+            for screenshot in userdata.glob("*.png"):
+                shutil.copyfile(screenshot, runtime / screenshot.name)
+            text = log.read_text(encoding="utf-8", errors="replace") if log.exists() else ""
+            report = assess(text, required_markers)
+            report.update(exitCode=code, stoppedBecause=reason)
+            report["passed"] = report["passed"] and code == 0 and reason is None
+            workflow.write_json(runtime / "assessment.json", report)
+            if not report["passed"]:
+                raise ValueError(f"Custom verification failed; inspect {runtime / 'assessment.json'}")
+            return runtime
         with (runtime / "stdout.log").open("w", encoding="utf-8") as output:
             subprocess.run(command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT, timeout=120, check=True)
         subprocess.run([sys.executable, str(ROOT / "tools/mod.py"), "verify", "--example", example,

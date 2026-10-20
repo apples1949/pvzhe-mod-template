@@ -38,9 +38,13 @@ if (!data.HasPackedRuntimeData()) throw new InvalidDataException("Animation not 
 // 数据共享，播放实例分开；别把身体和头的clip混成一条。
 body.flashAnimeData = data;
 head.flashAnimeData = data;
-body.SetAnimation("anim_idle", true, 1);
-head.SetAnimation("anim_head_idle", true, 1);
+body.timeScale = 1;
+body.SetAnimation("anim_idle", loop: true, blendTime: 0);
+head.timeScale = 1;
+head.SetAnimation("anim_head_idle", loop: true, blendTime: 0);
 ```
+
+第三参是混合时间，不是播放速度。此示意只演示加载/播放，分体角色必须另外完成[动态挂接与坐标消重](../../../../docs/wiki/0.30.0/animation-import.md#分体动画跟随坐标与动作播放)才可作为完整外观。
 
 这里使用原始片段名。接入复用组件时，可以显式增加宿主需要的片段别名指向对应帧区间；别名不是重新合成的时间轴。示意没有实现跟随、眨眼调度、出膛或角色注册，不直接当完整植物代码。
 
@@ -49,3 +53,5 @@ head.SetAnimation("anim_head_idle", true, 1);
 该播放方式已作局部实验，不替代角色行为验收，也不默认强制开启 forceLocalRender/forceCpuPoseRender。只有默认路径出现可定位故障才针对该实例试对应后端，保留对照证据。
 
 动画帧推进但看不到时，先分开核对图集/矩形/透明度、显示状态与目标区域、实际CanvasLayer/Z和宿主绘制挂载点；不透明预览底板也可能盖住独立提交的精灵，子节点加入顺序不保证跨绘制路径的先后。用当前条件的图像对照判断，再决定局部层级或渲染后端。提高层级只适用于该预览容器，不作为战斗UI越过模态层的通用规则。
+
+渲染路径对照必须先确认实际实例采用了该路径：样板对象的运行时开关可能不随PackedScene保存。规则与反例见[打包/渲染边界](../../../../docs/wiki/0.30.0/animation-import.md#场景打包与真实渲染的边界)。证明挂接运动时另取画面证据，不用Node.Position日志替代可见头部的位移。

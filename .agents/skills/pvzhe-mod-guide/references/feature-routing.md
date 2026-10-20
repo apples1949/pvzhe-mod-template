@@ -16,6 +16,7 @@
 | 新植物 | pvzhe-plant-create | 负责身份/骨架/种植入口；发射/外观按需组合 |
 | 新僵尸/复刻其他版本僵尸 | pvzhe-zombie-create | 统筹身份/出现入口与行为依据；复刻组合pvz资料/PAK与reanim导入，护具/发射按需组合 |
 | 射速、散射、连射或生成点 | pvzhe-character-fire | 新角色由相应create先建立骨架；单数值差量可由resource-edit完成 |
+| 明确要自己在预览里自定义弹道/攻击方式 | pvzhe-attack-preview | 仅此明确意图触发；持续等待确认/取消，随后由character-fire落地，普通报错/不满意不自动打开 |
 | 护具、耐久、破甲行为 | pvzhe-character-armor | 本体血量不等于护具；不负责整套BOSS |
 | 换肤、动作、换头/部件对齐 | pvzhe-character-skin | 未要求新外观时优先复用宿主；不自动生成美术 |
 | 复刻经典PvZ/其他改版已有植物 | pvzhe-plant-recreate | 统筹行为依据、缺项、合理近似与完整验收；组合pvz资料/PAK与PVZHE制作，不在动画阶段结束 |

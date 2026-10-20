@@ -18,14 +18,15 @@ DIST = ROOT / "dist"
 PACKAGE = DIST / "hello-world.pmod"
 PROBE = ROOT / "tools/HostProbe/bin/Release/net9.0/HostProbe.dll"
 EXAMPLE = "hello-world"
+EXAMPLE_DIRS = {"feature-lab": "FeatureLab", "super-gatling": "SuperGatling"}
 
 
 def select_example(name):
     global EXAMPLE, DIST, PACKAGE
-    if name not in ("hello-world", "feature-lab"):
+    if name != "hello-world" and name not in EXAMPLE_DIRS:
         raise ValueError(f"Unknown example: {name}")
     EXAMPLE = name
-    DIST = ROOT / "dist" if name == "hello-world" else ROOT / "dist/feature-lab"
+    DIST = ROOT / "dist" if name == "hello-world" else ROOT / "dist" / name
     PACKAGE = DIST / (name + ".pmod")
     path = source_root() / "mod.json"
     if path.exists():
@@ -36,13 +37,14 @@ def select_example(name):
 
 
 def source_root():
-    return ROOT / "mod" if EXAMPLE == "hello-world" else ROOT / "examples/FeatureLab/mod"
+    return ROOT / "mod" if EXAMPLE == "hello-world" else ROOT / "examples" / EXAMPLE_DIRS[EXAMPLE] / "mod"
 
 
 def build_target():
-    """Optional player project selection; FeatureLab always remains independent."""
-    if EXAMPLE == "feature-lab":
-        return ROOT / "examples/FeatureLab/FeatureLab.csproj", "FeatureLab"
+    """Optional player project selection; bundled examples remain independent."""
+    if EXAMPLE in EXAMPLE_DIRS:
+        folder = EXAMPLE_DIRS[EXAMPLE]
+        return ROOT / "examples" / folder / (folder + ".csproj"), folder
     config_path = ROOT / "mod-project.json"
     if not config_path.exists():
         return ROOT / "src/HelloMod/HelloMod.csproj", "HelloMod"
@@ -259,6 +261,8 @@ def install(args):
 
 
 def verify(args):
+    if EXAMPLE not in ("hello-world", "feature-lab"):
+        raise ValueError("This example requires its documented functional verification; built-in log markers cover Hello World/FeatureLab only.")
     check_package(PACKAGE)
     log = Path(args.log).read_text(encoding="utf-8", errors="replace")
     m = manifest()
@@ -329,7 +333,7 @@ def main():
     group = a.add_mutually_exclusive_group(required=True); group.add_argument("--path", nargs="+"); group.add_argument("--prefix")
     a.set_defaults(func=extract)
     for command in ("build", "check", "install", "verify"):
-        sub.choices[command].add_argument("--example", choices=("hello-world", "feature-lab"), default="hello-world")
+        sub.choices[command].add_argument("--example", choices=("hello-world", *EXAMPLE_DIRS), default="hello-world")
     for command in ("build", "check"):
         parser = sub.choices[command]
         parser.add_argument("--release", action="store_true", help="Reject template/example metadata before distribution")

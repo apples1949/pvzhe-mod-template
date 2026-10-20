@@ -20,11 +20,11 @@
 
 直接 DemoLevel.Launch 是现有代码分支，但当前实测走目录按钮链路，不把直达分支标为已验证入口。自定义功能先建立最小夹具，通过后再验证用户要求的原版关卡范围；夹具通过不能证明全部原版模式适用。
 
-## BATTLE-02：原版冒险选关，结构已确认，完整运行待验证
+## BATTLE-02：原版冒险选关，部分业务路线已实测
 
 发行 PCK 中 MainMenu 的 `Background/MenuTexture/AdventureButton` 是 TextureButton；LevelChoose 中有章节项、关卡项和难度选项。原版配置见 `Asset/Config/Level/LevelResource.json`，Adventure 首关 SaveKey=Level1_1，Normal/Difficult/Ultimate 分别是配置项，不是三种不同的进入按钮。
 
-正确的待验收顺序是：满足新玩家/进度前提→主菜单选择冒险→等待 LevelChoose→选择章节→等章节相机/布局过渡完成→确认当前难度和目标关卡配置→选择关卡→等待 battle.Running。每一步记录状态与关键数据，不以睡眠时长代替成功条件。
+按需求验收的顺序是：满足新玩家/进度前提→主菜单选择冒险→等待 LevelChoose→选择章节→等章节相机/布局过渡完成→确认当前难度和目标关卡配置→选择关卡→等待 battle.Running。每一步记录状态与关键数据，不以睡眠时长代替成功条件。
 
 | 结构定位 | 作用及限制 |
 | --- | --- |
@@ -34,7 +34,9 @@
 | `GUI/GUIFollow/Choose/LevelMenuFlatten/ScrollContainer/MarginContainer/LevelContainer` | 平铺副本；其存在/大小非零不代表当前可点击 |
 | `GUI/GUIFollow` | CanvasLayer，follow_viewport_enabled=true；点击坐标按 [UI 配方](ui.md) 转换 |
 
-独立新目录下曾发生 LevelChoose.Select 的 KeyNotFoundException，但没有记录具体缺失键，根因尚未确认。不能宣称必然是用户名、难度或存档造成；先记录所选章节/关卡数据、难度键、模态和场景状态。没有成功证据前，不照搬反复点击、修改转盘或直接全局切场景的试错代码。
+本次[超级机枪案例](../../super-gatling-example.md)已在隔离用户中通过MainMenu.AdventureButtonPressed→LevelChoose.Select章节/Level1_12→原版Gold选卡/确认→Running→正式卡片Plant。明确设置测试关卡进度前提，等待章节过渡及真正选卡就绪；此为宿主业务调用，不是系统鼠标，也未覆盖所有难度/关卡。入场对话、预置花盆和过早确认的边界见[卡池配方](card-pools.md)。
+
+历史独立新目录下曾发生 LevelChoose.Select 的 KeyNotFoundException，但没有记录具体缺失键，根因尚未确认。不能宣称必然是用户名、难度或存档造成；先记录所选章节/关卡数据、难度键、模态和场景状态。没有成功证据前，不照搬反复点击、修改转盘或直接全局切场景的试错代码。
 
 ## BATTLE-03：暂停、恢复、退出与返回
 

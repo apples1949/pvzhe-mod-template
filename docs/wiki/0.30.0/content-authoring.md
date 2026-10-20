@@ -4,6 +4,8 @@
 
 ## 玩家输入与资源定位
 
+原版卡池接入、自动装卡、失败对照及多格Footprint的边界集中在[卡池与种植](card-pools.md)。完整外部植物案例见[超级机枪](../../../examples/SuperGatling/README.md)，其具体外观/行为证据不扩大为所有角色已验证。
+
 在自己的模板副本 prepare 后，从 PCK 读取三个注册表：
 
 ```powershell

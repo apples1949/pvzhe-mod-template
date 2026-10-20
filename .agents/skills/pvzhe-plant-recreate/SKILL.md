@@ -10,7 +10,7 @@ description: 将经典PvZ或其他改版的已有植物复刻到PVZHE，整理�
 1. 用 [pvz-source-identify](../pvz-source-identify/SKILL.md) 确认同版本角色与资料，按需组合pvz-pak-extract。已有调查/缓存可复用，源游戏程序不是必需输入；PAK通常不包含全部玩法代码，缺少精确参数不等于整项任务无法推进。
 2. 按 [行为方案与缺项处理](../pvzhe-mod-guide/references/recreation-plan.md) 建立精简行为表，区分资料确认、运行观察、推断、实现选择及未知项。先自行调查材料与宿主同类机制，再决定是否询问玩家；不要求玩家提供组件、角度、帧号等技术规格。
 3. 保留目标特征，主动确定实现方案。低影响缺项采用可调整的合理参数并简短说明；决定身份或核心玩法的分歧且无法推断时，只问最关键问题，同时继续独立工作。用户不清楚时不反复追问：可制作明确标注的近似版；用户明确要求精确还原且核心依据不足时，保留该部分待定，不伪称精确。
-4. 由 [plant-create](../pvzhe-plant-create/SKILL.md) 建自有身份/卡片/正常入口，按目标组合reanim-import、character-skin、character-fire、projectile-create等专项Skill。先复用宿主组件，只为缺失行为添加局部代码；专项Skill只接收本项需要的行为条件，不复制整份来源资料。
+4. 由 [plant-create](../pvzhe-plant-create/SKILL.md) 建自有身份/卡片/正常入口，按目标组合reanim-import、character-skin、character-fire、projectile-create等专项Skill。先复用宿主组件，只为缺失行为添加局部代码；专项Skill只接收本项需要的行为条件，不复制整份来源资料。原版卡池与本体分项验证，先建立可种植基线再叠加复杂攻击；例见[超级机枪](../../../examples/SuperGatling/README.md)。
 5. 将动画动作、实际攻击或生产/辅助效果、反馈及生命周期联接起来。生产/恢复类优先复用生产组件，按需读[状态与计时配方](../../../docs/wiki/0.30.0/production-and-locomotion.md)。分别检查数据、时间和空间关系；动画文件中的额外片段不自动产生技能，攻击成功也不能代替可见表现。
 6. 按mod-verify执行行为表中的正向与负向验收：入口/可种、有效属性，以及本类相关的索敌/命中或生产/恢复、状态切换、表现和宿主共存。测试生成、信号点击和普通卡片种植分别报告；原型入口可用于推进，但不能冒充已完成正式可玩链。
 

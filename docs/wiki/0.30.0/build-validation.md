@@ -40,11 +40,11 @@ Bash 中过滤输出时使用 pipefail 并显式失败即停止/检查每条命�
 
 ## 发布运行时的裁剪边界
 
-0.30随游戏发布的.NET经过裁剪。用完整SDK编译成功不保证所有BCL方法运行时存在；双例实验中的 `Enumerable.Sum(IEnumerable<long>)` 在首次进入方法时抛出MissingMethodException。此前捕获工具也遇到Path.GetFullPath和System.Text.Json的缺失，不能把一个方法可用推广为整个命名空间可用。按实际调用点用宿主可用能力或简单循环替代，检查首次执行与日志；不把完整系统DLL塞进pmod绕过。JIT可能在方法体try进入前就失败，验收驱动应同时观察宿主presentation/初始化失败诊断，有限退出，不等待业务标记到全局超时。
+0.30随游戏发布的.NET经过裁剪。用完整SDK编译成功不保证所有BCL方法运行时存在；双例实验中的 `Enumerable.Sum(IEnumerable<long>)` 与超级机枪夹具中的双序列 `Enumerable.Zip` 重载 在首次进入方法时抛出MissingMethodException。此前捕获工具也遇到Path.GetFullPath和System.Text.Json的缺失，不能把一个方法可用推广为整个命名空间可用。按实际调用点用宿主可用能力或简单循环替代，检查首次执行与日志；不把完整系统DLL塞进pmod绕过。JIT可能在方法体try进入前就失败，验收驱动应同时观察宿主presentation/初始化失败诊断，有限退出，不等待业务标记到全局超时。
 
 ## 固定工具的覆盖范围
 
-默认 runtime_test 复制发行版到独立用户目录，测试 Hello World 标签；FeatureLab 验证自己的目录/关卡/卡槽、UI事件、设置重启、阳光、死亡/HUD与胜利。完整命令与证据位置见 [示例验证](../../../.agents/skills/pvzhe-mod-verify/references/example-scenarios.md)。通用自定义项目、原版冒险自动进入与真实鼠标命中未由该工具统一实现。
+默认 runtime_test 复制发行版到独立用户目录，测试 Hello World 标签；FeatureLab 验证自己的目录/关卡/卡槽、UI事件、设置重启、阳光、死亡/HUD与胜利。完整命令与证据位置见 [示例验证](../../../.agents/skills/pvzhe-mod-verify/references/example-scenarios.md)。自定义采集可显式提供包、驱动和业务结果，复用隔离运行/错误门禁；[超级机枪案例](../../super-gatling-example.md)有原版冒险业务调用配方。任意自定义Mod场景与真实鼠标命中仍未由工具统一实现。
 
 发布版禁用 --main-pack，本机 headless 曾原生崩溃；当前图形 OpenGL 副本路径已实测。退出冻结扩展点撤销和曾出现的 ObjectDB 泄漏诊断不能一概过滤；JSON unsupported 诊断仅在明确自读 JSON 的已知场景可解释为非阻断。具体排查见 [运行排障](../../../.agents/skills/pvzhe-mod-verify/references/runtime-troubleshooting.md)。
 
