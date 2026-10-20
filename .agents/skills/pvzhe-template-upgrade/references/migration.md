@@ -93,4 +93,4 @@
 
 自有制导还须复核实际检测几何与目标资格、目标坐标、批处理槽位重用和更新时机。原版直接转向与编辑器有限纠正不是同一契约，不能升级时以开启追踪标志替换弱制导。分开验目标获取、实际转向/弹速与真实命中，暂停、来源死亡及离场结论分别保留；同步发射Wiki和character-fire参考，不将案例适配器当成通用SDK。复开/仅查看仍遵循[会话协议](../../../../docs/attack-preview.md#复开与仅查看)，不得沿用旧确认覆盖设计。
 
-涉及拖拽布局时同步pvzhe-ui-drag、components/RuntimeUi、ui_layout_feedback及布局协议：中键命中/输入消费、父层变换、始终右锚定、Local数据读写和初始化声明、READY/CHANGED来源身份、重启恢复及多Mod筛选。新版实测改变窗口尺寸及拖动中缩放，旧placement-preview保持弃用，不将升级变为重新启用外部窗口。
+涉及拖拽布局时同步pvzhe-ui-drag、components/RuntimeUi、ui_layout_feedback及布局协议：中键命中/输入消费、父层变换、始终右锚定、Local数据读写和初始化声明、READY/CHANGED来源身份、重启恢复及多Mod筛选。新版实测改变窗口尺寸及拖动中缩放，旧placement-preview保持弃用，不将升级变为重新启用外部窗口。同步复核[player-layout-review](../../pvzhe-ui-drag/references/player-layout-review.md)涉及的隔离场景就绪、停止自动驱动/退出、人工反馈边界、默认值与Local覆盖分离；更新后的最终截图绑定新版包和布局，不复用旧版效果图。

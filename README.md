@@ -189,7 +189,7 @@ python -m unittest discover -s tests -v
 
 ## 游戏内拖拽布局
 
-新增自有浮动控件默认接入[pvzhe-ui-drag](.agents/skills/pvzhe-ui-drag/SKILL.md)：按住鼠标中键拖动、松开保存，发布后仍可调整。横向始终右锚定，沿宿主逻辑画布适配窗口缩放；位置更改带Mod/控件/场景/会话及DLL身份反馈，AI开发时只采用目标Mod的记录。玩家本地覆盖和项目默认布局分开，初始位置仍由AI合理安排。AI首次交付组件就会主动告知中键拖动可永久保存位置，不必先提出换位置；开发过程中收到属于当前Mod/控件的拖动反馈后，AI会更新项目默认布局。
+新增自有浮动控件默认接入[pvzhe-ui-drag](.agents/skills/pvzhe-ui-drag/SKILL.md)：按住鼠标中键拖动、松开保存，发布后仍可调整。横向始终右锚定，沿宿主逻辑画布适配窗口缩放；位置更改带Mod/控件/场景/会话及DLL身份反馈，AI开发时只采用目标Mod的记录。玩家本地覆盖和项目默认布局分开，初始位置仍由AI合理安排。AI首次交付组件就会主动告知中键拖动可永久保存位置，不必先提出换位置；开发过程中收到属于当前Mod/控件的拖动反馈后，AI会更新项目默认布局。自动验收后，尚未亲自调过位置的玩家会收到一次试用邀请；默认居中弹窗不询问。人工调整默认在隔离游戏场景中进行，步骤见[玩家试用交接](.agents/skills/pvzhe-ui-drag/references/player-layout-review.md)。
 
 可复用组件、反馈工具和接入协议见[游戏内拖拽布局](docs/ui-drag.md)，可构建案例见[DragLayout](examples/DragLayout/README.md)。默认Hello World不增加拖动、截图或其他功能；旧[pvzhe-placement-preview](.agents/skills/pvzhe-placement-preview/SKILL.md)已弃用，保留工具与历史文档供明确要求的旧流程使用。
 
