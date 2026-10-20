@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "modId": "drag-layout-demo",
+  "placements": {
+    "main-menu/default/hello": {"anchorX": "right", "anchorY": "top", "rightInset": 24, "verticalInset": 30},
+    "main-menu/default/status": {"anchorX": "right", "anchorY": "bottom", "rightInset": 860, "verticalInset": 218}
+  }
+}

@@ -4,10 +4,11 @@
 
 | 需求 | 入口 | 边界/组合 |
 | --- | --- | --- |
-| 按钮/提示/弹窗 | pvzhe-ui-create | 快捷键另用input-bindings；位置预览只有用户认可才调用 |
+| 按钮/提示/弹窗 | pvzhe-ui-create | 浮动控件组合ui-drag；快捷键另用input-bindings，旧外部位置预览已弃用 |
 | 对局信息/统计 | pvzhe-battle-hud | 设置开关组合mod-settings |
 | 背景音乐、音效、局部音量 | pvzhe-audio-edit | 区分流键/战斗音乐方案/场景作用域；设置或选择界面按需组合 |
 | 设置持久化/热更新 | pvzhe-mod-settings | 不为配置新造完整界面 |
+| 在游戏里调整控件位置、发布后继续拖动 | pvzhe-ui-drag | 中键拖动、始终右锚定；按Mod/会话/控件筛选反馈，显式更新项目默认值 |
 | 简单对局规则、奖励/控制效果 | pvzhe-gameplay-feature | 新角色基础不是临时规则 |
 | 新模式入口、点进去的新页面、页面嵌套/返回 | pvzhe-mode-create | 先区分导航和玩法；特殊规则组合gameplay-feature，章节/关卡组合level-create |
 | 新章节、追加关卡、用原版地图做波次/关卡 | pvzhe-level-create | 章节组织见其references/chapters；新网格/地形/背景走map-create |

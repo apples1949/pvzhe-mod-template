@@ -13,7 +13,7 @@ python -X utf8 tools/attack_editor.py --customize --session .work/attack-preview
 
 每次新建会话和反馈路径，--plan沿用该角色原方案，存在就载入，不能从零重新调。命令行省略--plan时使用design/attacks/<角色键>.json；同角色多套方案由AI明确指定不同文件。后台隐藏终端、保留可见Tk窗口、PID及日志；waiting可结束回复让窗口保持，不替玩家确认，不因轮询超时杀进程。
 
-准备器复用.work/game-cache和发行/捕获器摘要缓存的草坪、透明角色及弹速基准，不每次完整解包或启动游戏。内置捕获只支持宿主已注册CharacterSprite。自有Mod角色须隔离加载后捕获或准确离线渲染，记录Mod/动画/导出器摘要及坐标；不能用默认豌豆或截图裁片冒充。角色键与素材不匹配拒绝打开。捕获约束见[位置预览指导](../.agents/skills/pvzhe-placement-preview/SKILL.md)。
+准备器复用.work/game-cache和发行/捕获器摘要缓存的草坪、透明角色及弹速基准，不每次完整解包或启动游戏。内置捕获只支持宿主已注册CharacterSprite。自有Mod角色须隔离加载后捕获或准确离线渲染，记录Mod/动画/导出器摘要及坐标；不能用默认豌豆或截图裁片冒充。角色键与素材不匹配拒绝打开。捕获约束见[资源缓存与捕获](resource-cache-and-capture.md)；攻击编辑器与已弃用的外部UI位置预览是独立工具。
 
 ## 复开与仅查看
 

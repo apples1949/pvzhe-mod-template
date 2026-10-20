@@ -24,4 +24,4 @@ python tools/mod.py check
 
 清单和自有资源仍在 mod/，包名仍取Mod ID，包内入口固定 Runtime/ModAssembly.dll。build-info.json记录实际项目和程序集名。配置文件不加入pmod，不改变资源允许名单或身份检查。
 
-FeatureLab与SuperGatling使用各自固定项目，--example不读取该配置。自定义项目选择不等于自定义运行场景：mod.py verify及runtime_test.py的内置CLI仍只提供Hello World/FeatureLab验收；SuperGatling使用自己的verify.py。其他自定义功能按 [验证执行策略](../.agents/skills/pvzhe-mod-verify/references/verification-strategy.md) 定义断言，可复用runtime_test.test的显式自定义采集接口。
+FeatureLab、SuperGatling与DragLayout使用各自固定项目，--example不读取该配置。自定义项目选择不等于自定义运行场景：mod.py verify及runtime_test.py的内置CLI仍只提供Hello World/FeatureLab验收；SuperGatling与DragLayout使用各自的verify.py。其他自定义功能按 [验证执行策略](../.agents/skills/pvzhe-mod-verify/references/verification-strategy.md) 定义断言，可复用runtime_test.test的显式自定义采集接口。

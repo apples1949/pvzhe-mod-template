@@ -18,7 +18,7 @@ DIST = ROOT / "dist"
 PACKAGE = DIST / "hello-world.pmod"
 PROBE = ROOT / "tools/HostProbe/bin/Release/net9.0/HostProbe.dll"
 EXAMPLE = "hello-world"
-EXAMPLE_DIRS = {"feature-lab": "FeatureLab", "super-gatling": "SuperGatling"}
+EXAMPLE_DIRS = {"feature-lab": "FeatureLab", "super-gatling": "SuperGatling", "drag-layout": "DragLayout"}
 
 
 def select_example(name):

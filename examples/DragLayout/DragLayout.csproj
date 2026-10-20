@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net9.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../components/RuntimeUi/DragLayout.cs" Link="RuntimeUi/DragLayout.cs" />
+    <Compile Remove="Verification/**/*.cs" />
+    <Reference Include="PlantsVsZombies"><HintPath>../../.work/references/PlantsVsZombies.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="GodotSharp"><HintPath>../../.work/references/GodotSharp.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

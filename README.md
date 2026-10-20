@@ -8,7 +8,7 @@
 
 - Windows x64；拥有完整的 0.30.0 C# 发布目录（EXE、PCK、`data_PlantsVsZombies_windows_x86_64/`）。其他版本先执行发布版分析，不能默认兼容。
 - .NET **9.0 SDK**，最低 9.0.100；`global.json` 允许同一主版本内的最新 feature band。实测 SDK 9.0.316，目标框架 `net9.0`。只装游戏自带运行时不足以编译。
-- Python **3.11+**，实测 3.12；核心构建/解包仅使用标准库。可选图片位置预览需要 Pillow，纯色预览无需额外依赖。
+- Python **3.11+**，实测 3.12；核心构建/解包仅使用标准库。可选攻击编辑器及旧版图片位置预览需要 Pillow；游戏内拖拽组件不依赖Python GUI。
 - PowerShell；以下命令在模板根目录执行。若系统使用 `py -3`，将 `python` 替换为 `py -3`。
 
 最小示例不需要安装 Godot 编辑器、导出模板或解包完整游戏工程。发布包携带 `GodotSharp.dll` 与 `PlantsVsZombies.dll`，工具直接使用这两个文件作为编译引用。需要编辑场景时，再安装与发布引擎匹配的 Godot .NET 版本；本次发布 PCK 标记为 **4.7.0**。
@@ -187,10 +187,10 @@ python -m unittest discover -s tests -v
 
 默认用户目录规则参考 [Godot 官方数据路径说明](https://docs.godotengine.org/en/stable/tutorials/io/data_paths.html)。本模板是基于发布包实测的社区示例，不是官方 SDK。
 
-## 可选的可视化位置输入
+## 游戏内拖拽布局
 
-默认由 AI 自主布局；如果你想直接拖动决定位置，可要求使用 pvzhe-placement-preview。工具支持本地背景/组件图片、多物件、布局切换、占位提示和60秒反馈，确认的画布位置不会自动避让，仍遵循游戏窗口缩放与锚点策略。试用纯色演示：`python tools/placement_editor.py`；协议与依赖见 [位置输入工具](docs/placement-preview.md)。无需游戏源码，游戏资源不随模板分发。
+新增自有浮动控件默认接入[pvzhe-ui-drag](.agents/skills/pvzhe-ui-drag/SKILL.md)：按住鼠标中键拖动、松开保存，发布后仍可调整。横向始终右锚定，沿宿主逻辑画布适配窗口缩放；位置更改带Mod/控件/场景/会话及DLL身份反馈，AI开发时只采用目标Mod的记录。玩家本地覆盖和项目默认布局分开，初始位置仍由AI合理安排。AI首次交付组件就会主动告知中键拖动可永久保存位置，不必先提出换位置；开发过程中收到属于当前Mod/控件的拖动反馈后，AI会更新项目默认布局。
 
-需要原版外观的位置预览时，开发测试分支先准备“隐藏待摆放组件→干净背景捕获→透明组件渲染”，资料齐全后才开窗口。字体、贴图和导入依赖缓存留在.work，版本变化由PCK/DLL哈希识别；详细流程见 [缓存与捕获](docs/resource-cache-and-capture.md)。默认Hello World不自动截图或打开预览。
+可复用组件、反馈工具和接入协议见[游戏内拖拽布局](docs/ui-drag.md)，可构建案例见[DragLayout](examples/DragLayout/README.md)。默认Hello World不增加拖动、截图或其他功能；旧[pvzhe-placement-preview](.agents/skills/pvzhe-placement-preview/SKILL.md)已弃用，保留工具与历史文档供明确要求的旧流程使用。
 
 自定义功能的运行用例与失败重验见 [验证执行策略](.agents/skills/pvzhe-mod-verify/references/verification-strategy.md)。AI应说明每轮目标，按变更选择用例；报告修复使用已采集证据离线复核，不反复启动完整游戏流程。

@@ -21,7 +21,7 @@
 
 ## 采集、判定、报告分别执行
 
-自定义采集可复用`tools.runtime_test.test`的显式driver_code/package_path/runtime_dir/user_args/required_markers接口；它绑定本轮包和DLL摘要、保存失败日志/截图，检测ERROR/SCRIPT ERROR及展示故障后停止。调用方仍需独立构建成功、整轮锁和业务断言，不能并行覆盖输入；可参考SuperGatling/verify.py。已有日志用`python tools/runtime_diagnostics.py --log '<本轮日志>' --require '<业务完成标记>'`离线检查，缺结果或有宿主错误均拒绝。日志检查不是鼠标/画面或包加载证明；未知warning仍需人工分析，不把未命中规则当作无问题。
+自定义采集可复用`tools.runtime_test.test`的显式driver_code/package_path/runtime_dir/user_args/required_markers接口；多Mod测试可显式传additional_packages并记录其包身份；它绑定本轮包和DLL摘要、保存失败日志/截图，检测ERROR/SCRIPT ERROR及展示故障后停止。调用方仍需独立构建成功、整轮锁和业务断言，不能并行覆盖输入；可参考SuperGatling/verify.py。已有日志用`python tools/runtime_diagnostics.py --log '<本轮日志>' --require '<业务完成标记>'`离线检查，缺结果或有宿主错误均拒绝。日志检查不是鼠标/画面或包加载证明；未知warning仍需人工分析，不把未命中规则当作无问题。
 
 设计自定义驱动时保留三个可独立调用的步骤；可以是已有脚本中的函数，不必须增加框架或新命令：
 
@@ -80,3 +80,5 @@
 画面运动断言与节点断言分别报告：节点X变化可能未反映到最终图像。若追加图像门禁，整体结论必须合并运行和图像结果，不能只读取运行assessment.json；保存校准前提及能拒绝旧错误画面的反例。切换后端或运行参数的对照先确认实际实例/实际配置已生效，样板值和打包前设置不等于运行条件。
 
 攻击方案将编排出生、实际运动和命中/伤害分开验证；转向或发射事件不证明碰撞生效，来源死亡后仍在飞行也不证明仍能伤害。用原版控制弹药时，隔离其命中，避免它替新攻击满足断言；护具命中次数与本体扣血分别记录。测试Hook同样受启动注册冻结约束，在初始化订阅、在场景中切换采集条件，不到运行中才临时注册。
+
+拖拽布局另验取消/无变化不提交、始终右锚定、拖动期间窗口缩放、左键业务与模态、同用户跨进程恢复；反馈按当前包DLL/会话/Mod/控件过滤，不因同名日志事件采用其他Mod位置。合成鼠标若在夹具开启GuiEmbedSubwindows须明确记录，该条件不进入生产Mod，也不替代原生窗口系统鼠标实测。

@@ -27,4 +27,6 @@
 
 第1～4阶段进阶代码放在独立 examples/FeatureLab 项目，默认 Hello World 不引用它。FeatureLab 使用自己的 Adapters/Features/Verification：适配宿主界面与启动状态，按功能组织业务，测试仅在明确命令行参数下运行。新增项目选择参数不改变默认构建/安装路径。
 
+可选`components/RuntimeUi/DragLayout.cs`提供中键拖动、右锚定、宿主Local数据及带身份的反馈。需要的Mod显式链接/复制源文件，不从默认入口自动注册；DragLayout示例独立构建，生产包保留拖动。布局覆盖不与本局Battle数据混存；AI把反馈定型为默认值是开发步骤，不是玩家日志自动改工程。接入和边界见[拖拽布局](ui-drag.md)。
+
 需求入口统一由 pvzhe-mod-guide 路由。组件资料库保存可复用事实与验证状态，制作 Skill 保存操作决策与验收，运行示例提供已验证配方；不把所有接口堆进一个巨大 Skill，也不要求玩家给出类名或资源路径。

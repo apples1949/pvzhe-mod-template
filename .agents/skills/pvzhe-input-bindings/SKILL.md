@@ -14,3 +14,5 @@ description: 为 PVZHE Mod 功能添加或修改快捷键、鼠标/触摸触发�
 5. 用mod-verify分别验目标设备的触发、去重、暂停/模态、取消及离场。合成输入只能报告对应证据，不替代系统鼠标或触屏实机。
 
 普通按钮制作走ui-create；验收脚本命中问题走mod-verify，不因测试失败擅自改变玩家绑定。未测试的移动端不宣称支持。
+
+自有浮动控件中键拖动由[pvzhe-ui-drag](../pvzhe-ui-drag/SKILL.md)统筹布局；GuiInput已转换为控件局部坐标，WindowInput是更早的输入入口，不混用或假设前者与后者具有相同消费时机。改绑/其他设备仍按本Skill专项适配。

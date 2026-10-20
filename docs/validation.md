@@ -173,3 +173,14 @@ prepare 初始化按 PCK/发布 DLL/引擎/提取器摘要隔离的本地缓存�
 本轮113项测试、9份受影响Skills格式检查、104份Markdown本地目标链接检查通过。默认Hello World重新build/check并在0.30发行隔离用户下实际启动通过。SuperGatling正式方案与实现摘要一致，0.1.6包与normal-01d53f34身份匹配，发布允许名单通过；弱追踪/真实伤害、300发间隔及普通启动沿用对应匹配包的guidance-5eb2031a/cadence-7c20a506/normal-01d53f34证据，未重复无关导航。
 
 FeatureLab首轮在“两次已提交死亡”断言处失败，日志保留.work/review/feature-lab-first-failure。补充失败截图、暂停/模态诊断与有限处理已知失焦提示后，第二轮功能链与真实进程重启的设置恢复通过；第二轮记录treePaused=false、battlePaused=false、dialogs=false，没有触发已知提示处理，因此不能认定首轮由暂停导致或已证明其唯一根因。生产默认流程未因此改变。退出冻结扩展点及ObjectDB诊断仍保留，不宣称热卸载/资源零泄漏。上述结果不扩展为任意弹道、来源死亡后伤害、多人或读档已经通过。
+
+
+## 游戏内拖拽与来源反馈（2026-10-20）
+
+新增pvzhe-ui-drag、可选components/RuntimeUi组件、ui_layout_feedback筛选/导入工具和独立DragLayout案例。中键拖动、始终右锚定、宿主Local位置覆盖及READY/CHANGED反馈在生产包保留。旧placement-preview在description及文档中标为弃用，需求/UI/HUD/输入/设置/模板升级指导同步；旧工具和历史捕获协议保留，攻击方案编辑器继续独立使用。
+
+1afe423a在0.30发行、隔离用户和两个同时启用的Mod中通过：两个Mod各自拖动并产生来源事件，目标有5次提交，取消/模态/无变化不提交；按钮左键业务、文字拖动、缩放父层、拖到左侧仍右锚定、恢复默认、运行中调整窗口和拖动中调整、按来源筛选及同一用户第二进程恢复。最终普通包ae9838a3不带Mod测试参数，合成中键拖动后rightInset=64且persisted=true，DRAG_PRODUCTION_PASS通过。包SHA-256为`a58556f00a770ba4c94283acd011c310061fe1c575ca5f500acb72db9ed1fc8e`；生产DLL不包含审计入口/标记，允许名单只有自己的DLL、清单与默认布局JSON。源码快照核对一致，未安装到正式玩家目录。
+
+上述鼠标证据是Godot引擎GUI派发；夹具设置GuiEmbedSubwindows=true以排除桌面指针当前窗口影响，生产Mod没有该设置，不能称为原生系统鼠标/触屏实测。初轮a141f6be/5d0ba836/6c1c2799未证明命中；c123c877/2a3c012d/27c7bc09/d254e7c0的取消起初被误判为缩放异常，7c1ef019识别了延迟出现的用户名框。修正为等待建档完成后，原生模态约束继续保留。中间失败轮不改标成功，记录保留.work；cf472d70普通夹具未获得匹配结果而超时；夹具补充暂停时继续运行的PROCESS_MODE_ALWAYS、输入路由和实际命中前提后重验通过。未把多因素修正归为单一根因，也未修改生产代码去跳过模态或创建玩家账号。
+
+117项工具测试通过，含其他Mod/旧会话/旧DLL/其他控件过滤、序号去重/冲突、非法几何拒绝和只改匹配预声明默认槽。默认Hello World构建/包检查通过，入口及清单未变。9份受影响Skills格式及106份Markdown本地目标检查通过；窗口小于控件、复杂SubViewport/Container、所有对局阶段、多设备与持久化错误分支仍需按功能另验，不能从菜单案例推广。

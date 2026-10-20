@@ -45,7 +45,7 @@ def variant_string(text):
 
 
 def test(example="hello-world", *, driver_code=None, package_path=None, runtime_dir=None,
-         user_args=(), required_markers=()):
+         user_args=(), required_markers=(), additional_packages=()):
     workflow.select_example(example)
     custom = package_path is not None
     if not custom and example not in ("hello-world", "feature-lab"):
@@ -133,6 +133,20 @@ func capture():
     package_manifest = check_package(package)
     shutil.copyfile(package, mods / package.name)
     manifest = package_manifest if custom else workflow.manifest()
+    if additional_packages and not custom:
+        raise ValueError("Additional packages require an explicit custom scenario")
+    enabled_ids = [manifest["id"]]
+    package_names = {package.name.casefold()}
+    companion_identity = []
+    for extra in additional_packages:
+        extra = Path(extra).resolve()
+        extra_manifest = check_package(extra)
+        if extra_manifest["id"] in enabled_ids or extra.name.casefold() in package_names:
+            raise ValueError("Duplicate Mod ID/package filename in custom scenario")
+        shutil.copyfile(extra, mods / extra.name)
+        enabled_ids.append(extra_manifest["id"])
+        package_names.add(extra.name.casefold())
+        companion_identity.append(dict(modId=extra_manifest["id"],packageSha256=sha(extra)))
     state = mods / "enabled_mods.json"
     previous = state.read_bytes() if state.exists() else None
     log = runtime / "game.log"
@@ -149,7 +163,7 @@ func capture():
                     raise ValueError(f"Released assembly changed: {dll}; prepare and build again")
             shutil.copytree(folder, target.parent / folder.name, dirs_exist_ok=True)
     try:
-        state.write_text(json.dumps({"schemaVersion": 2, "enabledIds": [manifest["id"]], "preferredOrder": [manifest["id"]]}), encoding="utf-8")
+        state.write_text(json.dumps({"schemaVersion": 2, "enabledIds": enabled_ids, "preferredOrder": enabled_ids}), encoding="utf-8")
         if log.exists():
             log.unlink()
         command = [str(exe), "--rendering-driver", "opengl3", "--windowed", "--resolution", "800x450",
@@ -169,7 +183,7 @@ func capture():
             identity = {"pckSha256": evidence["pckSha256"], "assemblies": evidence["assemblies"],
                         "packageSha256": sha(package), "runtimeBinarySha256": binary_hash,
                         "driverSha256": hashlib.sha256(driver).hexdigest(), "command": command,
-                        "requiredMarkers": list(required_markers), "userdata": str(userdata)}
+                        "requiredMarkers": list(required_markers), "userdata": str(userdata), "additionalPackages": companion_identity}
             shutil.copyfile(package, runtime / package.name)
             (runtime / driver_name).write_bytes(driver)
             workflow.write_json(runtime / "identity.json", identity)

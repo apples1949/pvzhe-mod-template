@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "drag-layout-demo",
+  "name": "控件拖拽示例",
+  "author": "Template Example",
+  "version": "0.1.0",
+  "description": "可选示例：中键拖动、右锚定、持久化和带身份的位置反馈。",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "DragLayoutDemo.Entry",
+  "runtimeApiVersion": 3,
+  "runtimeAssemblyPolicy": "required",
+  "resources": ["Assets/ui-layout.json"],
+  "scripts": [], "dependencies": [], "contentEntries": [], "overrides": {}
+}

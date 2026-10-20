@@ -1,9 +1,11 @@
 ---
 name: pvzhe-placement-preview
-description: 仅在玩家明确要求可视化拖动定位，或认可用预览解决位置表达困难/不满意时，打开本地 Python 位置输入窗口；返回用户在参考画布确认的位置，保留宿主窗口适配。普通 UI 制作默认不调用。
+description: 已弃用。仅用于用户明确要求兼容旧版外部Python位置预览；新开发和普通位置调整使用pvzhe-ui-drag，在游戏内中键拖动并保留发布能力。
 ---
 
 # 可视化位置反馈
+
+> 已弃用：下面保留历史协议。新开发使用[pvzhe-ui-drag](../pvzhe-ui-drag/SKILL.md)，不要按下面旧流程自动询问或打开外部窗口。
 
 输入：用户认可的可视化调整意图、目标界面/逻辑画布及组件。输出：当前会话的 confirmed/cancelled/timeout 结果和各布局参考画布坐标。协议、运行方式见 [位置输入工具](../../../docs/placement-preview.md)。本工具不自动修改 Mod 或安装产物。
 
