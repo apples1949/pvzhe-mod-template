@@ -101,7 +101,7 @@ def point(value, label, limit=4096):
 
 def validate_plan(plan):
     if plan.get("format")!=FORMAT or plan.get("schemaVersion")!=5: raise ValueError("不支持的攻击方案格式")
-    number(plan["intervalSeconds"],.1,30,"攻击间隔")
+    number(plan["intervalSeconds"],.1,60,"攻击间隔")
     if not isinstance(plan["character"],str) or not plan["character"]: raise ValueError("缺少角色关联")
     trigger=plan["trigger"]
     if trigger["kind"]!="rect" or trigger.get("coordinates")!="cell-boundaries" or trigger["selection"]!="inherited-target": raise ValueError("触发区域必须是矩形边界")
@@ -124,16 +124,24 @@ def validate_plan(plan):
     total=0
     for g in groups:
         identity(g)
+        if "startDelaySeconds" in g:number(g["startDelaySeconds"],0,30,"组发射延迟")
+        if "intervalSeconds" in g:number(g["intervalSeconds"],.01,60000,"组攻击间隔")
         if not g["items"]: raise ValueError("攻击组至少保留一个发射项，可禁用")
         for item in g["items"]:
             identity(item); total+=1
             if any(k in item for k in ("count","shotGap","arrangement")): raise ValueError("单个发射项不能包含批量生成字段")
-            number(item["time"],0,60,"发射时刻")
+            number(item["time"],0,600,"发射时刻")
             if item["carrier"] not in ("projectile","ray"): raise ValueError("未知攻击载体")
             launch=item["launch"]
             if launch["anchor"]!="plant-reference": raise ValueError("预览只支持已标定的植物参考点")
             point(launch["gridOffset"],"网格偏移",100); point(launch["offset"],"局部偏移")
             if any(v!=int(v) for v in launch["gridOffset"]): raise ValueError("网格偏移必须为整数")
+            deployment=launch.get("deployment")
+            if deployment is not None:
+                if not isinstance(deployment,dict) or set(deployment)!={"duration","offset"}:raise ValueError("展开配置无效")
+                number(deployment["duration"],.001,1,"展开时长")
+                point(deployment["offset"],"展开起点")
+                if item["carrier"]!="projectile" or item["trajectory"]["kind"]!="straight":raise ValueError("展开仅支持直线弹药")
             t=item["trajectory"]; guide=item["guidance"]
             if any(k in t for k in ("count","shotGap","spread")): raise ValueError("轨迹不包含弹数或扇形参数")
             if t["kind"] not in ("straight","parabola","function"): raise ValueError("未知轨迹模型，贝塞尔已移除")
@@ -143,6 +151,7 @@ def validate_plan(plan):
             if t.get("catapultProfile")!="pvzhe-0.30-standard": raise ValueError("未知发行抛射配置，请核验发行映射")
             for key,lo,hi in (("speed",1,5000),("direction",-180,180)):
                 number(t[key],lo,hi,key)
+            if "catapultSpeedScale" in t:number(t["catapultSpeedScale"],1/300,5000/300,"投掷射速倍率")
             if type(guide["initialAim"]) is not bool: raise ValueError("初始瞄准无效")
             number(guide["trackingStrength"],0,2,"追踪强度")
             if any(k in guide for k in ("maxTurnRate","response","angleFalloff")): raise ValueError("底层制导参数已归并为追踪强度")
@@ -151,7 +160,7 @@ def validate_plan(plan):
             if item["carrier"]=="projectile" and t["kind"] in ("function","parabola") and guide["trackingStrength"]:
                 raise ValueError("函数/抛物线暂不组合飞行中转向制导")
             if "lifetime" in item: raise ValueError("弹药以运动距离控制，不使用存活秒数")
-            if item["maxTravelCells"] is not None: number(item["maxTravelCells"],.5,1000,"最大运动距离（格）")
+            if item["maxTravelCells"] is not None: number(item["maxTravelCells"],0,1000,"最大运动距离（格）")
             if item["carrier"]=="projectile" and t["kind"]=="parabola" and item["maxTravelCells"] is not None: raise ValueError("自动瞄准抛物线不设射程限制")
             number(item["rayLength"],1,10000,"射线长度"); number(item["rayDuration"],0,30,"射线持续时间")
             number(item["route"]["rowOffset"],-100,100,"相对目标行")
@@ -173,8 +182,13 @@ def validate_plan(plan):
     return total
 
 
-def launch_position(item, plant, grid):
+def launch_position(item, plant, grid, target=None):
     if grid is None and any(item["launch"]["gridOffset"]): raise ValueError("网格偏移需要发行网格")
+    frame=item["launch"].get("aimFrame")
+    if frame and target is not None:
+        center=[plant[i]+frame["centerOffset"][i] for i in (0,1)]
+        local=rotate(frame["localOffset"],math.atan2(target[1]-center[1],target[0]-center[0]))
+        return [center[i]+local[i] for i in (0,1)]
     return [plant[i]+item["launch"]["offset"][i]+item["launch"]["gridOffset"][i]*(grid["size"][i] if grid else 0) for i in (0,1)]
 
 
@@ -353,6 +367,7 @@ def upgrade_plan(source):
 def steer_angle(angle,wanted,guide,dt):
     strength=guide["trackingStrength"]
     if strength==0: return angle
+    if guide.get("model") in ("web-homing-v1","web-homing-v2") and strength>=2:return wanted
     if strength<=1: maximum,response,falloff=120*strength,3*strength,2.
     else:
         f=strength-1; maximum,response,falloff=120+1320*f,3+21*f,2-1.5*f
@@ -381,6 +396,16 @@ def design_digest(plan):
     return digest(design)
 
 
+def same_design(left,right):
+    """Compare optional zero phase without weakening stored file/digest checks."""
+    def normalized(plan):
+        output=copy.deepcopy(plan)
+        for group in output['groups']:
+            if group.get('startDelaySeconds')==0:group.pop('startDelaySeconds',None)
+        return design_digest(output)
+    return normalized(left)==normalized(right)
+
+
 def bind_implementation(plan,paths,root):
     """Called by the developer after applying/verifying, never by preview confirmation."""
     output=copy.deepcopy(plan); root=Path(root).resolve(); files={}
@@ -399,7 +424,7 @@ def approach(point,target,speed,dt):
     return [point[i]+(target[i]-point[i])*f for i in (0,1)]
 
 
-def host_catapult_reference(origin, plant):
+def host_catapult_reference(origin, plant, speed_scale=1.):
     """0.30 standard catapult shape; static IL g=2000, launch ground Y=plant.Y+20.
 
     Returns a continuous visual approximation, not the host's discrete collision path.
@@ -408,7 +433,7 @@ def host_catapult_reference(origin, plant):
     gravity,height=2000.,300.
     launch_height=max(0.,plant[1]+20.-origin[1])
     duration=math.sqrt(2*height/gravity)+math.sqrt(2*(height+launch_height)/gravity)
-    return dict(gravity=gravity,flightTime=duration,height=height,launchHeight=launch_height)
+    return dict(gravity=gravity*speed_scale**2,flightTime=duration/speed_scale,height=height,launchHeight=launch_height)
 
 
 def ballistic_velocity(origin,target,flight_time,gravity):
@@ -423,25 +448,29 @@ class PlanSimulation:
         self.plan=copy.deepcopy(plan); self.plant=list(plant); self.grid=grid
         self.time=0.; self.next_round=0.; self.rounds_started=0; self.emitted=0
         self.discarded=0
+        self.group_next={g["id"]:g.get("startDelaySeconds",0.) for g in plan["groups"]} if any("intervalSeconds" in g or "startDelaySeconds" in g for g in plan["groups"]) else None
         self.events=[]; self.bullets=[]; self.repeat=repeat; self.only=only
         self.canvas=canvas
 
-    def start_round(self,at,target):
+    def start_round(self,at,target,group_id=None):
         if not can_trigger(self.plan,self.plant,target,self.grid): return
         colors={g["id"]:COLORS[n%len(COLORS)] for n,g in enumerate(self.plan["groups"])}
         for group,item in all_items(self.plan):
-            if group["enabled"] and item["enabled"] and (self.only is None or item["id"] in self.only):
+            if (group_id is None or group["id"]==group_id) and group["enabled"] and item["enabled"] and (self.only is None or item["id"] in self.only):
                 self.events.append((at+item["time"],item,colors[group["id"]]))
         self.rounds_started+=1
 
     def spawn(self,item,color,target):
-        t=item["trajectory"]; g=item["guidance"]; origin=launch_position(item,self.plant,self.grid)
+        t=item["trajectory"]; g=item["guidance"]; origin=launch_position(item,self.plant,self.grid,target)
         angle=math.radians(t["direction"])
-        if g["initialAim"]: angle+=math.atan2(target[1]-origin[1],target[0]-origin[0])
+        if g["initialAim"]:
+            frame=item["launch"].get("aimFrame")
+            reference=[self.plant[i]+frame["centerOffset"][i] for i in (0,1)] if frame else origin
+            angle+=math.atan2(target[1]-reference[1],target[0]-reference[0])
         velocity=[math.cos(angle)*t["speed"],math.sin(angle)*t["speed"]]
         ballistics=None
         if item["carrier"]=="projectile" and t["kind"]=="parabola":
-            ballistics=host_catapult_reference(origin,self.plant)
+            ballistics=host_catapult_reference(origin,self.plant,t.get("catapultSpeedScale",1.))
             velocity=ballistic_velocity(origin,target,ballistics["flightTime"],ballistics["gravity"])
             angle=math.atan2(velocity[1],velocity[0])
         b=dict(item=item,itemId=item["id"],color=color,origin=origin,position=list(origin),age=0.,velocity=velocity,
@@ -451,6 +480,17 @@ class PlanSimulation:
                carrier=item["carrier"],canHit=True,rayEnd=None)
         if item["carrier"]=="projectile" and t["kind"]=="parabola": b["targetSnapshot"]=list(target)
         if t["kind"]=="function": b["expressions"]=[Expression(t[k],t["parameters"]) for k in ("x","y")]
+        deployment=item["launch"].get("deployment")
+        if deployment:
+            start=[self.plant[i]+deployment["offset"][i] for i in (0,1)]
+            frame=item["launch"].get("aimFrame")
+            if frame:
+                center=[self.plant[i]+frame["centerOffset"][i] for i in (0,1)]
+                turn=math.atan2(target[1]-center[1],target[0]-center[0])
+                local=rotate([start[i]-center[i] for i in (0,1)],turn)
+                start=[center[i]+local[i] for i in (0,1)]
+            b["deployment"]=dict(start=start,end=list(origin),elapsed=0.,duration=deployment["duration"])
+            b["position"]=start[:];b["canHit"]=False
         self.bullets.append(b); self.emitted+=1
         self.trim_preview()
         if item["carrier"]=="ray": self.advance(b,0,target)
@@ -462,6 +502,14 @@ class PlanSimulation:
             self.discarded+=PREVIEW_EVICT_BATCH
 
     def advance(self,b,dt,target):
+        if b.get("deployment"):
+            d=b["deployment"];used=min(dt,d["duration"]-d["elapsed"]);d["elapsed"]+=used
+            k=min(1.,d["elapsed"]/d["duration"])
+            b["position"]=[d["start"][i]+(d["end"][i]-d["start"][i])*k for i in (0,1)]
+            b["canHit"]=False
+            if k<1.-1e-9:return
+            b["deployment"]=None;b["canHit"]=True;dt-=used
+            if dt<1e-9:return
         if b["item"]["carrier"]=="projectile" and b["item"]["maxTravelCells"] is not None and b["item"]["trajectory"]["kind"]!="straight" and dt>1/120:
             steps=math.ceil(dt*120)
             for _ in range(steps):
@@ -485,11 +533,15 @@ class PlanSimulation:
             b["position"]=[b["origin"][i]+rotate(local,b["angle"])[i] for i in (0,1)]
         else:
             angle=math.atan2(b["velocity"][1],b["velocity"][0])
-            if g["trackingStrength"]:
+            if g["trackingStrength"] and g.get("model")!="web-homing-v2":
                 wanted=math.atan2(target[1]-old[1],target[0]-old[0]); angle=steer_angle(angle,wanted,g,dt)
                 b["velocity"]=[math.cos(angle)*t["speed"],math.sin(angle)*t["speed"]]
             gravity=b["ballistics"]["gravity"] if t["kind"]=="parabola" else 0
             vx,vy=b["velocity"]; b["position"]=[old[0]+vx*dt,old[1]+vy*dt+.5*gravity*dt*dt]; b["velocity"][1]+=gravity*dt
+            if g.get("model")=="web-homing-v2" and g["trackingStrength"]:
+                wanted=math.atan2(target[1]-b["position"][1],target[0]-b["position"][0])
+                next_angle=steer_angle(angle,wanted,g,dt)
+                b["velocity"]=[math.cos(next_angle)*t["speed"],math.sin(next_angle)*t["speed"]]
         if item["carrier"]!="ray":
             route=item["route"] if t["kind"]!="parabola" else dict(rowOffset=0,duration=.25)
             height=self.grid["size"][1] if self.grid else 0
@@ -512,6 +564,13 @@ class PlanSimulation:
         number(dt,0,60,"预览步长")
         end=self.time+dt
         # Trigger is checked at each eligible start, not once at the end of a long step.
+        if self.group_next is not None:
+            for group in self.plan["groups"]:
+                while self.group_next[group["id"]]<=end+1e-9:
+                    self.start_round(self.group_next[group["id"]],target,group["id"])
+                    self.group_next[group["id"]]+=group.get("intervalSeconds",self.plan["intervalSeconds"]) if self.repeat else math.inf
+                    if len(self.events)+len(self.bullets)>20000:raise ValueError("同时待发/在途项超过20000，预览已暂停")
+            self.next_round=math.inf
         while self.next_round<=end+1e-9:
             self.start_round(self.next_round,target)
             if len(self.events)+len(self.bullets)>20000: raise ValueError("同时待发/在途项超过20000，预览已暂停")

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>攻击方案编辑器（远程）</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="shell">
+  <header><div class="brand"><div><h1>攻击方案编辑器（远程）</h1><span class="eyebrow">这里只配发射方案；复用原版植物攻击方式、穿透或爆炸请告诉 AI。</span></div></div><span class="badge" id="modeBadge">本地编辑</span></header>
+  <main>
+    <aside>
+      <section class="composition-nav">
+        <div class="layer-browser">
+          <div class="view-tabs"><button id="groupView" aria-label="组视图"><span>组视图</span></button></div>
+          <div id="treePanel">
+            <div id="layerList" class="layer-list" role="tree" aria-label="攻击图层树"></div>
+            <div class="layer-actions"><button id="addAttack">＋ 攻击</button><button id="addGroup">＋ 攻击组</button></div>
+          </div>
+        </div>
+      </section>
+      <section id="groupPanel" class="selection-properties">
+        <div class="property-heading">所选属性 <span id="selectionLabel">未选择图层</span></div>
+        <div class="field"><label for="groupRate">攻击频率倍率<span id="groupRateWarning" class="mixed-warning" tabindex="0" role="img" aria-label="攻击频率倍率不一致" hidden>⚠<span class="mixed-tooltip">所选项的攻击频率倍率不一致；修改后将统一为新值。</span></span></label><div class="parameter-input"><input id="groupRate" type="range" min="0.1" max="10" step="0.01"><input id="groupRateNumber" type="number" min="0.000001" max="1000" step="any" aria-label="组攻击频率倍率数值"><span class="parameter-unit">倍</span></div></div>
+        <div class="field"><label for="groupSpeed">射速倍率<span id="groupSpeedWarning" class="mixed-warning" tabindex="0" role="img" aria-label="射速倍率不一致" hidden>⚠<span class="mixed-tooltip">所选项的射速倍率不一致；修改后将统一为新值。</span></span></label><div class="parameter-input"><input id="groupSpeed" type="range" min="0.1" max="10" step="0.01"><input id="groupSpeedNumber" type="number" min="0.000001" max="1000" step="any" aria-label="组射速倍率数值"><span class="parameter-unit">倍</span></div></div>
+        <div class="field"><label for="groupDelay">发射延迟<span id="groupDelayWarning" class="mixed-warning" tabindex="0" role="img" aria-label="发射延迟不一致" hidden>⚠<span class="mixed-tooltip">所选项的发射延迟不一致；修改后将统一为新值。</span></span></label><div class="parameter-input"><input id="groupDelay" type="range" min="0" max="5" step="0.01"><input id="groupDelayNumber" type="number" min="0" max="5" step="0.01" aria-label="图层发射延迟数值"><span class="parameter-unit">秒</span></div></div>
+        <p class="hint">单击选择 · Ctrl 追加/取消 · Shift 连选</p>
+      </section>
+      <section data-attack-section class="pattern-settings"><h2>攻击样式</h2><div class="patterns" role="group" aria-label="攻击样式">
+        <button data-pattern="straight"><svg viewBox="0 0 64 36"><path d="M8 18H48"/><circle cx="52" cy="18" r="4"/></svg><span>直线</span></button>
+        <button data-pattern="fan"><svg viewBox="0 0 64 36"><path d="M8 18L48 5M8 18H48M8 18L48 31"/><circle cx="52" cy="4" r="3"/><circle cx="52" cy="18" r="3"/><circle cx="52" cy="32" r="3"/></svg><span>扇形</span></button>
+        <button data-pattern="ring"><svg viewBox="0 0 64 36"><circle cx="32" cy="18" r="13" class="outline"/><circle cx="32" cy="5" r="3"/><circle cx="45" cy="18" r="3"/><circle cx="32" cy="31" r="3"/><circle cx="19" cy="18" r="3"/></svg><span>环形</span></button>
+        <button data-pattern="starfruit" title="参考原版杨桃五向，起点和射速沿用当前设置"><svg viewBox="0 0 64 36"><path d="M32 18L55 5M32 18V2M32 18H8M32 18V34M32 18L55 31"/><circle cx="55" cy="5" r="3"/><circle cx="32" cy="2" r="3"/><circle cx="8" cy="18" r="3"/><circle cx="32" cy="34" r="3"/><circle cx="55" cy="31" r="3"/></svg><span>杨桃</span></button>
+        <button data-pattern="lob"><svg viewBox="0 0 64 36"><path d="M7 30Q29-16 55 30"/><circle cx="31" cy="8" r="3"/></svg><span>投掷</span></button>
+        <button data-pattern="parallel"><svg viewBox="0 0 64 36"><path d="M8 6h40M8 18h40M8 30h40"/><circle cx="52" cy="6" r="3"/><circle cx="52" cy="18" r="3"/><circle cx="52" cy="30" r="3"/></svg><span>排射</span></button>
+      </div>
+      <div id="countField" class="field"><label for="count">子弹数量</label><div class="parameter-input"><input id="count" type="range" min="1" max="40" step="1"><input id="countNumber" type="number" min="1" max="120" step="1" aria-label="子弹数量数值"><span class="parameter-unit">颗</span></div></div>
+      <div id="delayField" class="field"><label for="delay">发射延迟</label><div class="parameter-input"><input id="delay" type="range" min="0" max="5" step="0.01"><input id="delayNumber" type="number" min="0" max="5" step="0.01" aria-label="发射延迟数值"><span class="parameter-unit">秒</span></div><p class="hint">相邻弹药间隔，0 为同时发射。</p></div>
+      <div id="spacingField" class="field"><label for="spacing">弹药间距</label><div class="parameter-input"><input id="spacing" type="range" min="0" max="150" step="0.01"><input id="spacingNumber" type="number" min="0" max="400" step="any" aria-label="弹药间距数值"><span class="parameter-unit">像素</span></div></div>
+      <div id="spreadField" class="field"><label for="spread">展开角度</label><div class="parameter-input"><input id="spread" type="range" min="0" max="360" step="0.01"><input id="spreadNumber" type="number" min="0" max="360" step="any" aria-label="展开角度数值"><span class="parameter-unit">°</span></div></div>
+      <p class="hint" id="lobHint" hidden>固定投手出弹位置，发射时瞄准目标。</p></section>
+      <section data-attack-section class="origin-settings" id="originSection"><h2>出弹位置</h2><select id="originPreset" aria-label="出弹位置预设"></select><p class="hint" id="originHint" hidden>拖动白点可移动起点。</p><div class="field"><label for="radius">间距半径</label><div class="parameter-input"><input id="radius" type="range" min="0" max="200" step="0.01"><input id="radiusNumber" type="number" min="0" max="400" step="any" aria-label="间距半径数值"><span class="parameter-unit">像素</span></div></div><div class="field" id="directionField"><label for="direction">锚点旋转</label><div class="parameter-input"><input id="direction" type="range" min="0" max="360" step="0.01"><input id="directionNumber" type="number" min="0" max="360" step="any" aria-label="锚点旋转数值"><span class="parameter-unit">°</span></div><p class="hint" id="directionHint">0° 向右 · 90° 向下</p></div>
+      <div id="angleOffsetField" class="field"><label for="angleOffset" title="相对每颗弹药的向外方向：0°向外，90°切线，180°向内；六颗环形120°沿六边形边飞行。">角度偏移</label><div class="parameter-input"><input id="angleOffset" type="range" min="0" max="360" step="0.01"><input id="angleOffsetNumber" type="number" min="0" max="360" step="any" aria-label="角度偏移数值"><span class="parameter-unit">°</span></div></div>
+</section>
+      <section data-attack-section class="global"><div class="global-title"><h2>发射设置</h2><span></span></div><div class="global-fields">
+        <div class="field"><label for="interval">攻击间隔</label><div class="parameter-input"><input id="interval" type="range" min="0.1" max="60" step="0.01"><input id="intervalNumber" type="number" min="0.1" max="60" step="any" aria-label="攻击间隔数值"><span class="parameter-unit">秒</span></div></div>
+        <div class="field" id="speedField"><label for="speed">射速</label><div class="parameter-input"><input id="speed" type="range" min="0.1" max="10" step="0.01"><input id="speedNumber" type="number" min="0.1" max="10" step="any" aria-label="射速倍率数值"><span class="parameter-unit">倍</span></div></div>
+        <div class="field" id="rangeField"><label for="range">射程</label><div class="parameter-input"><input id="range" type="range" min="0" max="20" step="0.01"><input id="rangeNumber" type="number" min="0" max="1000" step="any" aria-label="射程格数数值"><span class="parameter-unit">格</span></div><p class="hint">0 为不限；飞行达到指定格数后消失。</p></div>
+      </div></section>
+      <section data-attack-section id="ammoSection"><h2>弹药类型</h2><div class="ammo" role="group" aria-label="弹药类型"><button data-ammo="normal"><span class="pellet"></span><span>普通弹药</span><small>沿发射方向飞行</small></button><button data-ammo="homing"><span class="pellet violet"></span><span>追踪弹药</span><small>飞向移动目标</small></button></div><div id="trackingField" class="field"><label for="tracking">追踪强度</label><div class="parameter-input"><input id="tracking" type="range" min="0" max="2" step="0.1"><input id="trackingNumber" type="number" min="0" max="2" step="0.1" aria-label="追踪强度数值"><span class="parameter-unit"></span></div><p class="hint" id="trackingHint"></p></div></section>
+    </aside>
+    <div class="workspace">
+      <div class="stage-head"><div><span class="live-dot"></span>草坪预览 <span id="assetNote"></span></div><div class="playback"><button id="targetMove" aria-pressed="false">目标移动</button></div></div>
+      <div class="stage-area"><div class="stage"><canvas id="preview" width="1080" height="600" aria-label="草坪攻击预览，自定义模式可拖动起点，也可拖动目标，起点以植物逻辑原点为参照"></canvas><div class="stage-caption"><span id="summary"></span><span id="counter">在场 0</span></div></div></div>
+      <section class="timeline-panel"><div class="timeline-head"><h2>时间轴</h2><span id="timelineTime">0.00 秒</span></div><div id="timelineTicks" class="timeline-ticks"></div><input id="timeline" type="range" min="0" max="5" value="0" step="0.01" aria-label="预览时间"><div class="timeline-actions"><button id="pause" aria-label="暂停" title="暂停" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button><button id="replay" aria-label="重新播放" title="重新播放"><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg></button></div></section>
+    </div>
+  </main>
+  <footer><span id="status" role="status">本地预览 · 不会修改游戏</span><div><button id="cancel" class="quiet">取消</button><button id="save" class="secondary">保存草稿</button><button id="confirm" class="primary">采用方案</button></div></footer>
+</div><div id="propertyTooltip" class="property-tooltip" role="tooltip" hidden></div><script type="module" src="app.js"></script>
+</body></html>

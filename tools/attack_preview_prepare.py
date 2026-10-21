@@ -86,7 +86,7 @@ def _prepare(output, plant="PlantPeaShooterSingle", target="ZombieNormal"):
             return json.loads(match.group(1))
         manifest = dict(assets=records, settings=settings, runtime=str(runtime), captureSourceSha256=file_sha(source),
                         grid=metadata("ATTACK_GRID"), plantGeometry=metadata("ATTACK_GEOMETRY_plant"), targetGeometry=metadata("ATTACK_GEOMETRY_target"),
-                        baseline=metadata("ATTACK_BASELINE"), sourceFiles=source_identity)
+                        baseline=metadata("ATTACK_BASELINE"), nativeHitBox=metadata("ATTACK_NATIVE_HITBOX"), sourceFiles=source_identity)
         save(manifest_path, manifest)
     output = Path(output).resolve()
     if output.exists(): raise ValueError("Use a new session path")
@@ -107,7 +107,7 @@ def _prepare(output, plant="PlantPeaShooterSingle", target="ZombieNormal"):
                   baseline=baseline,
                   provenance=dict(releaseCacheKey=cache.key, release=cache.identity, capture=manifest),
                   plant=dict(key=plant, position=[grid["begin"][0]+grid["size"][0]*.5, plant_y], imageOrigin=[128, 190]),
-                  target=dict(key=target, position=[830, target_y], imageOrigin=[128, 190], aimOffset=[0, 0], speed=0),
+                  target=dict(key=target, position=[830, target_y], imageOrigin=[128, 190], aimOffset=[0, 0], speed=0, hitBoxRect=manifest["targetGeometry"]["hitBoxRect"]),
                   binding=dict(space="plant-reference-pose", nodePath=None, requiresRuntimeBinding=True), plan=plan)
     save(output, config)
     print("Prepared session:", output)

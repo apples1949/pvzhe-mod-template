@@ -108,6 +108,11 @@ def load_session(path):
                 raise ValueError("Actor point must have two coordinates")
             for n in point:
                 number(n, -4096, 4096, key)
+    rect=config["target"].get("hitBoxRect")
+    if rect is not None:
+        if not isinstance(rect,list) or len(rect)!=4:raise ValueError("Invalid target hit rectangle")
+        for v in rect:number(v,-4096,4096,"target hit rectangle")
+        if rect[2]<=0 or rect[3]<=0:raise ValueError("Empty target hit rectangle")
     number(config["target"]["speed"], 0, 120, "target speed")
     return config
 

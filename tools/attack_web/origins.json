@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "release": "0.30.0",
+  "dllSha256": "e31986ec8fd26f349bd29cd5444e6649b76f3f722d13a6695b0ce089cd2e51d1",
+  "coordinateSpace": "plant-root-logical-pixels",
+  "presets": {
+    "pea-front": {
+      "label": "豌豆正",
+      "origin": [
+        26.1489868164063,
+        -14.8417358398438
+      ],
+      "radius": 0,
+      "reference": {
+        "character": "PlantPeaShooterSingle",
+        "clip": "BodyIdle",
+        "frame": 3,
+        "path": "SpriteGroup/TransformPoint/PeaShooterSingle/Head/Marker2D",
+        "x": 26.1489868164063,
+        "y": -14.8417358398438
+      },
+      "evidence": "released-scene-evaluated-idle-pose"
+    },
+    "center": {
+      "label": "中心",
+      "origin": [
+        0.0,
+        0.0
+      ],
+      "radius": 0.0,
+      "shotOffsets": [
+        [
+          29.9999980926514,
+          -18.0
+        ],
+        [
+          1.0,
+          -28.0
+        ],
+        [
+          -33.0,
+          1.0
+        ],
+        [
+          9.5367431640625e-07,
+          40.0
+        ],
+        [
+          35.0,
+          24.0
+        ]
+      ],
+      "reference": {
+        "character": "PlantStarfruit",
+        "paths": [
+          "SpriteGroup/TransformPoint/FireMarker",
+          "SpriteGroup/TransformPoint/FireMarker2",
+          "SpriteGroup/TransformPoint/FireMarker3",
+          "SpriteGroup/TransformPoint/FireMarker4",
+          "SpriteGroup/TransformPoint/FireMarker5"
+        ],
+        "directions": [
+          330,
+          270,
+          180,
+          90,
+          30
+        ],
+        "nativeSpeed": 500
+      },
+      "evidence": "release-scene-marker-transform-read; not live firing/impact verification",
+      "shotOffsetsPattern": "starfruit"
+    },
+    "pea-back": {
+      "label": "豌豆后",
+      "origin": [
+        -45.6860427856445,
+        -15.2293701171875
+      ],
+      "radius": 0,
+      "reference": {
+        "character": "PlantSplitPea",
+        "clip": "BodyIdle",
+        "frame": 2,
+        "path": "SpriteGroup/TransformPoint/SplitPea/HeadLeft/Marker2D",
+        "x": -45.6860427856445,
+        "y": -15.2293701171875
+      },
+      "evidence": "released-scene-evaluated-idle-pose"
+    },
+    "lobber": {
+      "label": "投手",
+      "origin": [
+        -2.271419999999978,
+        -74.74050903320312
+      ],
+      "radius": 0.0,
+      "reference": {
+        "character": "PlantCornpult",
+        "projectile": "Kernal",
+        "groundPosition": [
+          297.72858,
+          341
+        ],
+        "z": 94.74050903320312,
+        "plantPosition": [
+          300,
+          321
+        ]
+      },
+      "evidence": "documented-0.30-native-corn-shot; visual XY=(groundX,groundY-z)"
+    },
+    "puff": {
+      "label": "小喷菇",
+      "origin": [
+        14.0,
+        15.8244476318359
+      ],
+      "radius": 0,
+      "reference": {
+        "character": "PlantPuffShroom",
+        "clip": "Idle",
+        "frame": 2,
+        "path": "SpriteGroup/TransformPoint/PuffShroom/PuffShroomSlot/Marker2D",
+        "x": 14.0,
+        "y": 15.8244476318359
+      },
+      "evidence": "released-scene-evaluated-idle-pose"
+    }
+  }
+}

@@ -44,6 +44,10 @@ public sealed partial class Entry : IXWModRuntimeEntry
                 var geometry = new Godot.Collections.Dictionary { { "key", key },
                     { "visualOffset", new Godot.Collections.Array { transform.Origin.X, transform.Origin.Y } },
                     { "nativeSpritePath", prototype.GetPathTo(native).ToString() }, { "trackingOffset", new Godot.Collections.Array { 0, 0 } } };
+                var definition=prototype.HitBoxDefinition;
+                if(definition==null || !definition.TryGetWorldRect(prototype.Transform,out var hitRect))
+                    throw new InvalidOperationException("Missing released hitbox: "+key);
+                geometry["hitBoxRect"]=new Godot.Collections.Array {hitRect.Position.X,hitRect.Position.Y,hitRect.Size.X,hitRect.Size.Y};
                 context.Log("ATTACK_GEOMETRY_"+output+": " + Json.Stringify(geometry));
             }
             finally { prototype.Free(); }

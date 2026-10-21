@@ -56,6 +56,17 @@ public sealed partial class Entry
         var plant=card.Plant(new Vector2I(1,3)) ?? throw new Exception("Native card planting failed");
         var target=await context.Game.Characters.SpawnAsync("ZombieNormalBucket",8,3);
         if (!target.Succeeded) throw new Exception(target.Diagnostic);
+        var normalResult=await context.Game.Characters.SpawnAsync("ZombieNormal",8,5);
+        if(!normalResult.Succeeded)throw new Exception(normalResult.Diagnostic);
+        var normal=Nodes(tree.Root).OfType<TowerDefenseCharacter>().Single(n=>context.Game.Characters.TryGetHandle(n,out var handle)&&handle.Equals(normalResult.Value));
+        await tree.ToSignal(tree,SceneTree.SignalName.PhysicsFrame);
+        var hit=normal.WorldHitRect;var root=normal.GlobalPosition;
+        if(!normal.IsHitBoxEnabled || !hit.HasArea())throw new Exception("Normal zombie hitbox inactive");
+        context.Log("ATTACK_NATIVE_HITBOX: "+Json.Stringify(new Godot.Collections.Dictionary {
+            {"key","ZombieNormal"},{"root",new Godot.Collections.Array{root.X,root.Y}},
+            {"rect",new Godot.Collections.Array{hit.Position.X-root.X,hit.Position.Y-root.Y,hit.Size.X,hit.Size.Y}},
+            {"scale",new Godot.Collections.Array{normal.GlobalScale.X,normal.GlobalScale.Y}},
+            {"enabled",normal.IsHitBoxEnabled}}));
         var definition=plant.ComponentSet.GetFlattenedDefinitions().OfType<FireComponentDefinition>().First();
         var times=new List<double>(); var speeds=new List<float>(); var positions=new List<Vector2>();
         double clock=0, sampleStart=-1, sampleEnd=-1; Vector2 p0=default,p1=default; int tracked=-1;
