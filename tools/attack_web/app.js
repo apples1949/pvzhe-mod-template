@@ -1,4 +1,4 @@
-import {wrap,flatten,CompositionPreview,selectionValue,applySelectionValue,chooseLayers,moveLayers,modifiedLayer,groupDepth,roundParameter,copyLayers,pasteLayers,editLayerProperties} from './composition.mjs';
+import {wrap,flatten,CompositionPreview,selectionValue,applySelectionValue,chooseLayers,moveLayers,modifiedLayer,groupDepth,roundParameter,copyLayers,pasteLayers,editLayerProperties,checkLayerTree} from './composition.mjs';
 import {angles,shotTimes,launches,Preview} from './model.mjs';
 const $=id=>document.getElementById(id), status=$('status');
 let state,recipe,rootDoc,currentNode,lastAttack,sim,images={},paused=false,moving=false,drag=null,dirty=false,locked=false,timelineDuration=5,timelineWindow=-1;
@@ -6,11 +6,94 @@ const canvas=$('preview'),ctx=canvas.getContext('2d');
 const labels={straight:'直线',fan:'扇形',ring:'环形',lob:'投掷',parallel:'排射',starfruit:'杨桃'};
 const targetBase=[];
 const collapsedLayers=new Set();let renameId=null,menuId=null,selectedLayers=new Set(),selectionAnchor=null,draggedLayers=null;
+const patternCounts=new Map(),defaultCounts={straight:1,fan:5,ring:12,starfruit:5,lob:1,parallel:5};
+let draftTimer,toastTimer,toastHideTimer;
+function positionSaveToast(){
+  const toast=$('saveToast');if(toast.hidden)return;const r=$('saveTemplate').getBoundingClientRect(),w=Math.min(390,innerWidth-24);
+  toast.style.width=w+'px';toast.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';
+  const h=toast.getBoundingClientRect().height;toast.style.top=(r.top-h-12>=8?r.top-h-12:Math.min(innerHeight-h-12,r.bottom+12))+'px';
+}
+function showSaveToast(path,error=false){
+  clearTimeout(toastTimer);clearTimeout(toastHideTimer);const toast=$('saveToast');
+  $('saveToastTitle').textContent=error?'保存失败':'保存成功';$('saveToastPath').textContent=path;
+  toast.classList.toggle('error',error);toast.hidden=false;toast.classList.remove('visible');positionSaveToast();
+  requestAnimationFrame(()=>toast.classList.add('visible'));
+  toastTimer=setTimeout(()=>{toast.classList.remove('visible');toastHideTimer=setTimeout(()=>toast.hidden=true,240);},6000);
+}
+function positionTemplateMenu(){
+  const r=$('loadTemplate').getBoundingClientRect(),menu=$('templateMenu'),w=Math.min(260,innerWidth-24);
+  menu.style.width=w+'px';menu.style.left=Math.max(12,Math.min(innerWidth-w-12,r.right-w))+'px';menu.style.top=(r.bottom+8)+'px';
+}
+$('templateMenu').addEventListener('beforetoggle',e=>{if(e.newState==='open')positionTemplateMenu();});
+$('templateMenu').addEventListener('keydown',e=>{
+  if(!['ArrowDown','ArrowUp'].includes(e.key))return;const items=[...$('templateList').querySelectorAll('button')];if(!items.length)return;
+  e.preventDefault();const index=items.indexOf(document.activeElement);items[(index+(e.key==='ArrowDown'?1:-1)+items.length)%items.length].focus();
+});
+window.addEventListener('resize',()=>{positionSaveToast();positionTemplateMenu();});
+function askConfirmation(message){return new Promise(resolve=>{const dialog=$('confirmation');$('confirmationText').textContent=message;const finish=value=>{dialog.close();resolve(value);};$('confirmationCancel').onclick=()=>finish(false);$('confirmationAccept').onclick=()=>finish(true);dialog.oncancel=e=>{e.preventDefault();finish(false);};dialog.showModal();});}
+function scheduleDraft(){if(!state||state.done)return;dirty=true;clearTimeout(draftTimer);draftTimer=setTimeout(flushDraft,400);}
+function flushDraft(){
+  if(!state||state.done)return true;
+  try{localStorage.setItem(state.storageKey,JSON.stringify({format:'pvzhe.attack-editor-draft',schemaVersion:1,document:rootDoc,ui:{patternCounts:[...patternCounts],currentId:currentNode.id,lastAttackId:lastAttack.id,selected:[...selectedLayers],selectionAnchor,collapsed:[...collapsedLayers],name:$('templateName').value,target:[...targetBase],paused,moving,scroll:document.querySelector('aside').scrollTop}}));dirty=false;return true;}
+  catch(error){announce('自动保存失败：'+error.message,true);return false;}
+}
+function installDesign(document){
+  checkLayerTree(document);rootDoc=document;selectedLayers.clear();collapsedLayers.clear();
+  lastAttack=flatten(rootDoc)[0]?.node??{kind:'attack',recipe:structuredClone(state.defaultRecipe)};
+  currentNode=flatten(rootDoc)[0]?.node??rootDoc.root;recipe=lastAttack.recipe;
+}
+function restoreDraft(){
+  if(state.done)return;
+  try{const raw=localStorage.getItem(state.storageKey);if(!raw)return;const data=JSON.parse(raw);
+    if(data.format!=='pvzhe.attack-editor-draft'||data.schemaVersion!==1||data.document.character!==rootDoc.character)throw Error('草稿身份或版本不匹配');
+    data.document.id=rootDoc.id;installDesign(data.document);const ui=data.ui;for(const [id,counts] of ui.patternCounts||[])if(counts&&Object.entries(counts).every(([key,value])=>key in defaultCounts&&Number.isInteger(value)&&value>=1&&value<=120))patternCounts.set(id,counts);
+    currentNode=locate(ui.currentId)?.node??currentNode;lastAttack=locate(ui.lastAttackId)?.node??lastAttack;recipe=lastAttack.recipe;
+    selectedLayers=new Set(ui.selected.filter(id=>locate(id)));selectionAnchor=locate(ui.selectionAnchor)?.node.id??null;for(const id of ui.collapsed)if(locate(id))collapsedLayers.add(id);
+    $('templateName').value=ui.name;targetBase.splice(0,2,...ui.target);paused=!!ui.paused;moving=!!ui.moving;$('targetMove').setAttribute('aria-pressed',moving);
+    requestAnimationFrame(()=>document.querySelector('aside').scrollTop=ui.scroll||0);announce('已恢复本地未采用的调整');
+  }catch(error){announce('未恢复本地草稿：'+error.message,true);}
+}
+async function templateRequest(action,extra){
+  const response=await fetch('api/template',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,sessionId:state.sessionId,transactionId:state.transactionId,...extra})});
+  const data=await response.json();return {response,data};
+}
+async function refreshTemplates(){
+  try{const response=await fetch('api/templates'),data=await response.json();if(!response.ok)throw Error(data.error);
+    $('templateList').replaceChildren();for(const item of data.templates){const button=document.createElement('button');button.type='button';button.setAttribute('role','menuitem');button.textContent=item.name;button.onclick=()=>loadTemplate(item.name);$('templateList').append(button);}if(!data.templates.length){const empty=document.createElement('span');empty.className='template-empty';empty.textContent='暂无模板';$('templateList').append(empty);}
+  }catch(error){announce('模板列表读取失败：'+error.message,true);}
+}
+$('saveTemplate').onclick=async()=>{
+  if(locked||state.done)return;const name=$('templateName').value.trim();if(!name){announce('请先输入模板名称',true);$('templateName').focus();return;}
+  locked=true;try{
+    const snapshot=structuredClone(rootDoc);let result=await templateRequest('save',{name,recipe:snapshot});
+    if(result.response.status===409){if(!await askConfirmation(`模板“${name}”已存在，是否覆盖？`))return;result=await templateRequest('save',{name,recipe:snapshot,expectedSha256:result.data.sha256});}
+    if(!result.response.ok)throw Error(result.data.error);await refreshTemplates();
+    showSaveToast(result.data.path);flushDraft();
+  }catch(error){announce(error.message,true);showSaveToast(error.message,true);}finally{locked=false;}
+};
+async function loadTemplate(name){
+  if(!name||locked||state.done)return;$('templateMenu').hidePopover();locked=true;
+  try{const {response,data}=await templateRequest('load',{name});if(!response.ok)throw Error(data.error);
+    const doc=wrap(data.design);doc.id=rootDoc.id;doc.character=rootDoc.character;
+    function rebind(node){node.id=crypto.randomUUID();if(node.kind==='group')node.children.forEach(rebind);else{node.recipe.id=crypto.randomUUID();node.recipe.character=doc.character;}}
+    rebind(doc.root);installDesign(doc);$('templateName').value=data.name;change();announce('已加载模板 · 尚未采用');
+  }catch(error){announce(error.message,true);}finally{locked=false;}
+};
+$('resetDesign').onclick=async()=>{
+  if(locked||state.done)return;locked=true;const accepted=await askConfirmation('重置为直线单发默认方案？已保存的模板不会删除。');locked=false;if(!accepted)return;
+  const base=structuredClone(state.defaultRecipe);base.id=rootDoc.id;installDesign(wrap(base));$('templateName').value='';
+  targetBase.splice(0,2,...state.target.position);paused=false;moving=false;$('targetMove').setAttribute('aria-pressed',false);syncPlayback();change();flushDraft();announce('已重置为默认方案');
+};
+document.addEventListener('input',scheduleDraft);
+document.addEventListener('change',scheduleDraft);
+document.addEventListener('click',()=>{if(state&&!state.done)scheduleDraft();});
+document.querySelector('aside').addEventListener('scroll',scheduleDraft,{passive:true});
+window.addEventListener('pagehide',()=>{if(dirty)flushDraft();});
 function origin(){const offset=recipe.pattern==='lob'?state.originPresets.presets.lobber.origin:recipe.origin;return state.plant.position.map((v,i)=>v+offset[i]);}
 function effectiveRecipe(){return {...recipe,radius:recipe.pattern==='lob'?0:recipe.radius,originShotOffsets:recipe.originPreset==='center'&&recipe.pattern==='starfruit'?state.originPresets.presets.center.shotOffsets:undefined};}
 function previewEntries(){return flatten(rootDoc).filter(e=>e.path.includes(currentNode.id));}
 function reset(){sim=new CompositionPreview(previewEntries(),state,[...targetBase]);sim.step(0,[...targetBase]);}
-function announce(text,error=false){status.textContent=text;status.classList.toggle('error',error);}
+function announce(text,error=false){status.textContent=text;status.title=text;status.classList.toggle('error',error);}
 function sync(){
   for(const b of document.querySelectorAll('[data-pattern]')){const active=b.dataset.pattern===recipe.pattern;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',active);}
   for(const b of document.querySelectorAll('[data-ammo]')){const active=b.dataset.ammo===recipe.ammo;b.classList.toggle('selected',active);b.setAttribute('aria-pressed',active);}
@@ -52,8 +135,12 @@ function renderTimeline(time){
   }
   $('timelineTicks').replaceChildren();for(const {at,count} of bins.values()){const tick=document.createElement('span');tick.style.left=((at-begin)/timelineDuration*100)+'%';tick.title=at.toFixed(2)+' 秒 · '+count+' 颗';$('timelineTicks').appendChild(tick);}
 }
-function change(){dirty=true;try{sync();reset();announce('有未保存的调整');}catch(e){announce(e.message,true);}}
-for(const b of document.querySelectorAll('[data-pattern]')) b.onclick=()=>{recipe.pattern=b.dataset.pattern;if(recipe.pattern==='ring'&&recipe.count===5)recipe.count=12;change();};
+function change(){dirty=true;scheduleDraft();try{sync();reset();announce('调整将自动暂存 · 尚未采用');}catch(e){announce(e.message,true);}}
+for(const b of document.querySelectorAll('[data-pattern]')) b.onclick=()=>{
+  const next=b.dataset.pattern;if(next===recipe.pattern)return;
+  const counts=patternCounts.get(recipe.id)??{};counts[recipe.pattern]=recipe.count;
+  recipe.count=counts[next]??defaultCounts[next];recipe.pattern=next;patternCounts.set(recipe.id,counts);change();
+};
 for(const b of document.querySelectorAll('[data-ammo]'))b.onclick=()=>{recipe.ammo=b.dataset.ammo;change();};
 for(const [id,key,factor] of [['count','count',1],['spread','spread',1],['interval','intervalSeconds',1],['speed','speed',300],['radius','radius',1],['range','rangeCells',1],['direction','direction',1],['spacing','spacing',1],['angleOffset','angleOffset',1],['tracking','trackingStrength',1],['delay','shotDelaySeconds',1]]){
   const update=e=>{const input=e.target;if(!input.checkValidity()||input.value===''){announce('请输入范围内的有效数值',true);return;}
@@ -77,7 +164,7 @@ canvas.onpointerdown=e=>{
 };
 canvas.onpointermove=e=>{
   if(!drag)return;const p=point(e);p[0]=Math.max(0,Math.min(canvas.width,p[0]));p[1]=Math.max(0,Math.min(canvas.height,p[1]));
-  if(drag==='origin'){recipe.origin=p.map((v,i)=>v-state.plant.position[i]);recipe.originPreset='custom';dirty=true;sync();announce('起点已调整');}else targetBase.splice(0,2,...p);reset();
+  if(drag==='origin'){recipe.origin=p.map((v,i)=>v-state.plant.position[i]);recipe.originPreset='custom';dirty=true;sync();announce('起点已调整');}else targetBase.splice(0,2,...p);reset();scheduleDraft();
 };
 canvas.onpointerup=canvas.onpointercancel=()=>{drag=null;};
 function actor(key,position){
@@ -107,7 +194,7 @@ async function act(action){
   locked=true;
   try{const response=await fetch('api/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,recipe:rootDoc,sessionId:state.sessionId,transactionId:state.transactionId})});const data=await response.json();if(!response.ok)throw Error(data.error);
     dirty=false;announce(data.status==='draft'?'草稿已保存，尚未采用':data.status==='confirmed'?'方案已确认 · 等待AI落地并验证':data.status==='viewed'?'查看已结束，未采用任何修改':'已取消，原方案未更改');
-    if(data.status!=='draft'){paused=true;state.done=true;document.body.classList.add('finished');for(const b of document.querySelectorAll('button,input,select'))b.disabled=true;}
+    if(data.status!=='draft'){paused=true;state.done=true;localStorage.removeItem(state.storageKey);document.body.classList.add('finished');for(const b of document.querySelectorAll('button,input,select'))b.disabled=true;}
   }catch(e){announce(e.message,true);}finally{locked=false;}
 }
 
@@ -251,11 +338,11 @@ for(const [id,key] of [['groupRate','rateMultiplier'],['groupSpeed','speedMultip
   $(id).oninput=update;$(id+'Number').oninput=update;
   $(id+'Number').onblur=()=>renderSelectionProperties();
 }
-$('save').onclick=()=>act('save');$('confirm').onclick=()=>act('confirm');$('cancel').onclick=()=>act('cancel');
-window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+$('confirm').onclick=()=>act('confirm');$('cancel').onclick=()=>act('cancel');
+window.addEventListener('beforeunload',e=>{if(dirty&&!flushDraft()){e.preventDefault();e.returnValue='';}});
 async function start(){
   state=await(await fetch('api/state')).json();rootDoc=wrap(state.recipe);lastAttack=flatten(rootDoc)[0]?.node??{kind:'attack',recipe:structuredClone(state.defaultRecipe)};currentNode=flatten(rootDoc)[0]?.node??rootDoc.root;recipe=lastAttack.recipe;if(currentNode.kind==='attack')selectedLayers.add(currentNode.id);if(!state.target.hitBoxRect)throw Error('素材会话缺少发行受击矩形，请重新运行 attack_preview_prepare.py');canvas.width=state.canvas[0];canvas.height=state.canvas[1];
-  if(state.viewOnly){$('modeBadge').textContent='仅查看';$('confirm').textContent='结束查看';$('save').textContent='保存试调';announce('仅查看 · 试调不会修改正式方案');}
+  if(state.viewOnly){$('saveTemplate').disabled=true;$('confirm').textContent='结束查看';announce('仅查看 · 试调不会修改正式方案');}
   // Older live prototype servers did not include the crop in their state response.
   state.backgroundCrop??=[0,0,...state.canvas];
   for(const [id,p] of Object.entries(state.originPresets.presets)){const option=document.createElement('option');option.value=id;option.textContent=p.label;$('originPreset').appendChild(option);}
@@ -271,7 +358,7 @@ async function start(){
   const area=document.querySelector('.stage-area'),stage=document.querySelector('.stage');
   function fitStage(){const w=Math.max(1,Math.min(area.clientWidth-2,(area.clientHeight-2)*canvas.width/canvas.height));stage.style.width=(w+2)+'px';stage.style.height=(w*canvas.height/canvas.width+2)+'px';}
   new ResizeObserver(fitStage).observe(area);fitStage();
-  sync();reset();if(state.migrationNote)announce(state.migrationNote);if(state.done){document.body.classList.add('finished');for(const b of document.querySelectorAll('button,input,select'))b.disabled=true;announce('本轮已结束，请由AI创建新会话');paused=true;}
+  restoreDraft();sync();reset();syncPlayback();refreshTemplates();if(state.migrationNote)announce(state.migrationNote);if(state.done){document.body.classList.add('finished');for(const b of document.querySelectorAll('button,input,select'))b.disabled=true;announce('本轮已结束，请由AI创建新会话');paused=true;}
   let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=[targetBase[0],targetBase[1]+(moving?Math.sin(sim.time*.9)*85:0)];if(!paused)sim.step(dt,t);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
 }
 start().catch(e=>announce('无法打开预览：'+e.message,true));

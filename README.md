@@ -24,6 +24,7 @@
 [超级机枪射手](examples/SuperGatling/README.md) 是可构建的外部植物案例，包含用户PAK素材准备、独立植物/动画/攻击、原版金色卡池及分离的验收脚本。运行`build --example super-gatling`，来源素材由玩家自行生成且不随仓库分发；默认Hello World无需这些素材。通用发现见[原版卡池与种植](docs/wiki/0.30.0/card-pools.md)。
 
 玩家明确想自己调整攻击方式时，由[pvzhe-attack-editor](.agents/skills/pvzhe-attack-editor/SKILL.md)组织，使用[网页攻击方案编辑器](docs/attack-web.md)：用组视图组合独立攻击图层，支持嵌套组倍率相乘；每层选择直线/扇形/环形/杨桃/投掷/排射，默认同时发射，可设置逐颗间隔；普通/追踪弹药独立选择，攻击间隔、射速与小数格射程在外层统一调节。出弹位置支持豌豆正等预设、仅自定义时显示并可拖动的起点、半径与0～360°锚点旋转和独立角度偏移，新方案默认豌豆正。recipe和编译方案保存在design/attacks，支持草稿恢复、仅查看、确认校验与实现关联；持续等待玩家操作，不自动安装Mod。已有复杂时间轴/射线/函数方案按[兼容流程](docs/attack-web.md#旧方案与能力边界)保留，不静默简化。普通开发不自动打开，网页预览不代替游戏内命中验收；工具的[验收记录](docs/attack-editor-acceptance.md)区分模型、浏览器与实际协议证据。
+命名攻击模板存放于参与版本控制的 `.attack-templaates/`，交换格式与自动恢复见[模板存储说明](docs/attack-template-format.md)。
 
 ## 初始化、构建
 

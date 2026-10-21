@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 from attack_model import digest, load_session, save, file_sha
 from attack_plan import default_plan, new_item, validate_plan, load_plan, design_digest, same_design, implementation_changes
+from attack_templates import TemplateStore, TemplateConflict
 
 STATIC = Path(__file__).with_name("attack_web")
 ORIGIN_PRESETS = json.loads((STATIC / "origins.json").read_text(encoding="utf-8"))
@@ -267,6 +268,7 @@ class Editor:
     def state(self):
         c = self.config
         return dict(recipe=self.recipe, defaultRecipe=default_recipe(self.recipe["character"]), done=self.done, demo=c is None, viewOnly=self.view_only, migrationNote=self.migration_note,
+                    storageKey="pvzhe.attack-editor:" + digest([str(self.project_root), str(self.recipe_path), self.source_recipe_sha, self.source_plan_sha, ORIGIN_PRESETS["dllSha256"], self.view_only]),
                     originPresets=ORIGIN_PRESETS,
                     canvas=c["canvas"] if c else [1080, 600],
                     backgroundCrop=c.get("backgroundCrop", [0, 0, *c["canvas"]]) if c else None,
@@ -341,6 +343,11 @@ def make_server(editor, port=0):
 
         def do_GET(self):
             route = self.route()
+            if route == "api/templates":
+                try:
+                    return self.reply(200, dict(templates=TemplateStore(editor.project_root, validate_recipe).catalog()))
+                except (ValueError, OSError) as error:
+                    return self.reply(400, dict(error=str(error)))
             if route == "api/state":
                 return self.reply(200, editor.state())
             if route in ("", "index.html", "app.js", "style.css", "model.mjs", "composition.mjs"):
@@ -353,16 +360,40 @@ def make_server(editor, port=0):
 
         def do_POST(self):
             origin = self.headers.get("Origin")
-            if self.route() != "api/action" or (origin and origin != f"http://127.0.0.1:{self.server.server_port}"):
+            if self.route() not in ("api/action", "api/template") or (origin and origin != f"http://127.0.0.1:{self.server.server_port}"):
                 return self.reply(403, dict(error="拒绝非本轮请求"))
             try:
                 size = int(self.headers.get("Content-Length", "0"))
-                if not 0 < size <= 16384 or self.headers.get_content_type() != "application/json":
+                if not 0 < size <= 1048576 or self.headers.get_content_type() != "application/json":
                     raise ValueError("请求格式无效")
                 data = json.loads(self.rfile.read(size))
                 if data.get("transactionId") != editor.transaction_id or data.get("sessionId") != editor.session_id:
                     raise ValueError("页面来自旧会话，请刷新当前页面后再操作")
-                answer = editor.accept(data["action"], data.get("recipe"))
+                if self.route() == "api/template":
+                    with editor.lock:
+                        if editor.done:
+                            raise ValueError("本轮已经结束")
+                        store = TemplateStore(editor.project_root, validate_recipe)
+                        if data["action"] == "load":
+                            answer = store.read(data["name"])
+                            if answer["reference"].get("presetDllSha256") != ORIGIN_PRESETS["dllSha256"]:
+                                raise ValueError("模板的游戏基准不同，请交给AI核对兼容性")
+                        elif data["action"] == "save":
+                            if editor.view_only:
+                                raise ValueError("仅查看会话不能写入项目模板")
+                            editor.check_sources()
+                            answer = store.write(data["name"], data["recipe"], dict(
+                                presetDllSha256=ORIGIN_PRESETS["dllSha256"],
+                                coordinateSpace="plant-root-logical-pixels", speedBaseline=300,
+                                speedUnit="logical-pixels/second", timeUnit="seconds",
+                                rangeUnit="grid-columns", semantics="docs/attack-template-format.md"),
+                                data.get("expectedSha256"))
+                        else:
+                            raise ValueError("未知模板操作")
+                else:
+                    answer = editor.accept(data["action"], data.get("recipe"))
+            except TemplateConflict as error:
+                return self.reply(409, dict(error=str(error), path=error.path, sha256=error.sha))
             except (ValueError, KeyError, TypeError) as error:
                 return self.reply(400, dict(error=str(error)))
             except OSError:

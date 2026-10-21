@@ -2,7 +2,7 @@
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>攻击方案编辑器（远程）</title><link rel="stylesheet" href="style.css"></head>
 <body>
 <div class="shell">
-  <header><div class="brand"><div><h1>攻击方案编辑器（远程）</h1><span class="eyebrow">这里只配发射方案；复用原版植物攻击方式、穿透或爆炸请告诉 AI。</span></div></div><span class="badge" id="modeBadge">本地编辑</span></header>
+  <header><div class="brand"><div><h1>攻击方案编辑器（远程）</h1><span class="eyebrow">这里只配发射方案；复用原版植物攻击方式、穿透或爆炸请告诉 AI。</span></div></div><div class="template-bar"><input id="templateName" type="text" maxlength="120" placeholder="模板名称" aria-label="模板名称"><button id="saveTemplate" class="secondary">保存</button><div class="template-picker"><button id="loadTemplate" class="secondary" popovertarget="templateMenu" aria-label="加载模板">加载模板 <span aria-hidden="true">⌄</span></button><div id="templateMenu" popover="auto" role="menu" aria-label="已保存模板"><div id="templateList"></div></div></div></div></header>
   <main>
     <aside>
       <section class="composition-nav">
@@ -50,6 +50,6 @@
       <section class="timeline-panel"><div class="timeline-head"><h2>时间轴</h2><span id="timelineTime">0.00 秒</span></div><div id="timelineTicks" class="timeline-ticks"></div><input id="timeline" type="range" min="0" max="5" value="0" step="0.01" aria-label="预览时间"><div class="timeline-actions"><button id="pause" aria-label="暂停" title="暂停" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button><button id="replay" aria-label="重新播放" title="重新播放"><svg viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></svg></button></div></section>
     </div>
   </main>
-  <footer><span id="status" role="status">本地预览 · 不会修改游戏</span><div><button id="cancel" class="quiet">取消</button><button id="save" class="secondary">保存草稿</button><button id="confirm" class="primary">采用方案</button></div></footer>
-</div><div id="propertyTooltip" class="property-tooltip" role="tooltip" hidden></div><script type="module" src="app.js"></script>
+  <footer><span id="status" role="status">本地预览 · 不会修改游戏</span><div><button id="cancel" class="quiet">取消</button><button id="resetDesign" class="secondary">重置</button><button id="confirm" class="primary">采用方案</button></div></footer>
+</div><div id="saveToast" class="save-toast" role="status" aria-live="polite" hidden><strong id="saveToastTitle"></strong><span id="saveToastPath"></span></div><dialog id="confirmation"><p id="confirmationText"></p><div class="confirmation-actions"><button id="confirmationCancel" class="secondary">取消</button><button id="confirmationAccept" class="primary">确认</button></div></dialog><div id="propertyTooltip" class="property-tooltip" role="tooltip" hidden></div><script type="module" src="app.js"></script>
 </body></html>
