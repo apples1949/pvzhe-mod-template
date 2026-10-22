@@ -1,0 +1,48 @@
+{
+  "format": "pvzhe.attack-composition",
+  "schemaVersion": 2,
+  "id": "attack-lab-parallel",
+  "character": "PlantPeaShooterSingle",
+  "root": {
+    "kind": "group",
+    "id": "root",
+    "name": "root",
+    "enabled": true,
+    "speedMultiplier": 1,
+    "rateMultiplier": 1,
+    "rangeMultiplier": 1,
+    "children": [
+      {
+        "kind": "attack",
+        "id": "parallel-layer",
+        "name": "parallel",
+        "enabled": true,
+        "recipe": {
+          "format": "pvzhe.attack-recipe",
+          "schemaVersion": 19,
+          "id": "parallel",
+          "character": "PlantPeaShooterSingle",
+          "pattern": "parallel",
+          "count": 5,
+          "spread": 45,
+          "direction": 0.0,
+          "spacing": 40,
+          "angleOffset": 0.0,
+          "trackingStrength": 2.0,
+          "ammo": "normal",
+          "deploymentSeconds": 0.15,
+          "shotDelaySeconds": 0.07,
+          "intervalSeconds": 0.7,
+          "speed": 300.0,
+          "rangeCells": 0.0,
+          "radius": 0,
+          "origin": [
+            26.1489868164063,
+            -14.8417358398438
+          ],
+          "originPreset": "pea-front"
+        }
+      }
+    ]
+  }
+}

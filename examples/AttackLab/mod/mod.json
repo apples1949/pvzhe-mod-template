@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 3,
+  "id": "local.attack-lab",
+  "name": "攻击方案实验",
+  "version": "0.1.0",
+  "author": "Template Lab",
+  "description": "多样式与组合攻击映射验证案例",
+  "playInstructions": "从模组关卡目录选择各攻击方案，种植豌豆射手体验。",
+  "runtimeAssembly": "Runtime/ModAssembly.dll",
+  "runtimeEntryType": "AttackLab.Entry",
+  "runtimeApiVersion": 3,
+  "runtimeAssemblyPolicy": "required",
+  "contentEntries": [
+    {
+      "category": "Level",
+      "key": "lab"
+    },
+    {
+      "category": "Projectile",
+      "key": "Pea"
+    },
+    {
+      "category": "Projectile",
+      "key": "Lob"
+    },
+    {
+      "category": "Projectile",
+      "key": "Track"
+    }
+  ],
+  "resources": [
+    "Assets/level.json",
+    "Assets/straight.json",
+    "Assets/fan.json",
+    "Assets/ring.json",
+    "Assets/parallel.json",
+    "Assets/starfruit.json",
+    "Assets/homing.json",
+    "Assets/lob.json",
+    "Assets/nested.json"
+  ],
+  "settings": []
+}

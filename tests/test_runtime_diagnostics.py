@@ -16,6 +16,11 @@ class RuntimeDiagnosticsTests(unittest.TestCase):
     def test_clean_exit_without_business_result_is_incomplete(self):
         self.assertEqual(assess("game exit 0", ["BUSINESS_PASS"])["missingMarkers"], ["BUSINESS_PASS"])
 
+    def test_loader_rollback_warning_is_a_fatal_runtime_failure(self):
+        report=assess("WARNING: [ModLoader] package rolled back after runtime entry failure: local.example\nDONE",["DONE"])
+        self.assertFalse(report["passed"])
+        self.assertEqual(len(report["errors"]),1)
+
     def test_script_and_presentation_faults_are_detected(self):
         for text in ["SCRIPT ERROR: invalid property", "WARNING: Local presentation stopped: frozen", "AUDIT_TEST_ERROR: not planted"]:
             self.assertFalse(assess(text)["passed"])

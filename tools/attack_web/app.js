@@ -1,5 +1,5 @@
 import {wrap,flatten,CompositionPreview,selectionValue,applySelectionValue,chooseLayers,moveLayers,modifiedLayer,groupDepth,roundParameter,copyLayers,pasteLayers,editLayerProperties,checkLayerTree} from './composition.mjs';
-import {angles,shotTimes,launches,Preview} from './model.mjs';
+import {angles,shotTimes,launches,Preview,targetPosition} from './model.mjs';
 const $=id=>document.getElementById(id), status=$('status');
 let state,recipe,rootDoc,currentNode,lastAttack,sim,images={},paused=false,moving=false,drag=null,dirty=false,locked=false,timelineDuration=5,timelineWindow=-1;
 const canvas=$('preview'),ctx=canvas.getContext('2d');
@@ -102,14 +102,15 @@ function sync(){
   for(const option of $('originPreset').options)option.disabled=!!state.originPresets.presets[option.value]?.patternOnly&&state.originPresets.presets[option.value].patternOnly!==recipe.pattern;
   $('originHint').hidden=recipe.originPreset!=='custom';
   const lob=recipe.pattern==='lob';
-  for(const id of ['originSection','ammoSection','directionField','directionHint','rangeField'])$(id).hidden=lob;
+  for(const id of ['originSection','ammoSection','directionField','directionHint','rangeField','speedField'])$(id).hidden=lob;
   $('angleOffsetField').hidden=lob;
   $('delayField').hidden=lob||recipe.pattern==='straight';
   $('delayNumber').max=5;$('delay').max=5;
   $('trackingField').hidden=lob||recipe.ammo!=='homing';
-  $('trackingHint').textContent=recipe.trackingStrength===0?'仅发射时瞄准':recipe.trackingStrength===2?'强追踪 · 持续飞向目标':recipe.trackingStrength===1?'弱追踪 · 有限偏转':recipe.trackingStrength<1?'轻微追踪 · 低偏转力':'增强追踪 · 更快转向';
+  for(const b of document.querySelectorAll('[data-tracking]')){const active=Number(b.dataset.tracking)===recipe.trackingStrength;b.setAttribute('aria-checked',active);b.tabIndex=active?0:-1;}
+  $('trackingHint').textContent=recipe.trackingStrength===0?'逐颗瞄准发射瞬间的位置，之后不再转向':recipe.trackingStrength===2?'发射后立即追踪目标':'先直飞0.5秒，再追踪目标';
   $('lobHint').hidden=!lob;document.body.classList.toggle('is-lob',lob);
-  for(const [id,value] of [['count',recipe.count],['spread',recipe.spread],['interval',recipe.intervalSeconds],['speed',recipe.speed/300],['radius',recipe.radius],['range',recipe.rangeCells],['direction',recipe.direction],['spacing',recipe.spacing],['angleOffset',recipe.angleOffset],['tracking',recipe.trackingStrength],['delay',recipe.shotDelaySeconds]]){
+  for(const [id,value] of [['count',recipe.count],['spread',recipe.spread],['interval',recipe.intervalSeconds],['speed',recipe.speed/300],['radius',recipe.radius],['range',recipe.rangeCells],['direction',recipe.direction],['spacing',recipe.spacing],['angleOffset',recipe.angleOffset],['delay',recipe.shotDelaySeconds]]){
     $(id).value=roundParameter(value);if(document.activeElement!==$(id+'Number'))$(id+'Number').value=roundParameter(value);
   }
   const intervals=previewEntries().filter(e=>e.enabled).map(e=>e.recipe.intervalSeconds);const interval=intervals.length?Math.min(...intervals):1;timelineDuration=Math.ceil(5/interval)*interval;
@@ -119,7 +120,7 @@ function sync(){
   $('summary').textContent=`${labels[recipe.pattern]} · ${n} 颗${shotTimes(recipe).some(t=>t>0)?'依次发射':'齐射'} · ${recipe.pattern==='lob'?'发射时瞄准':recipe.ammo==='normal'?'普通弹药':'追踪弹药'}`;
   renderComposition();
   const entries=previewEntries().filter(e=>e.enabled);
-  $('summary').textContent=currentNode.kind==='group'?`${currentNode.name} · ${entries.length} 个攻击图层`:`${currentNode.name} · ${labels[recipe.pattern]} · 射速 ${Number((entries[0]?.recipe.speed/300||0).toFixed(2))} 倍 · 间隔 ${Number((entries[0]?.recipe.intervalSeconds||0).toFixed(3))} 秒`;
+  $('summary').textContent=currentNode.kind==='group'?`${currentNode.name} · ${entries.length} 个攻击图层`:`${currentNode.name} · ${labels[recipe.pattern]} · ${recipe.pattern==='lob'?'原生投掷':`射速 ${Number((entries[0]?.recipe.speed/300||0).toFixed(2))} 倍`} · 间隔 ${Number((entries[0]?.recipe.intervalSeconds||0).toFixed(3))} 秒`;
 
 }
 function renderTimeline(time){
@@ -142,17 +143,25 @@ for(const b of document.querySelectorAll('[data-pattern]')) b.onclick=()=>{
   recipe.count=counts[next]??defaultCounts[next];recipe.pattern=next;patternCounts.set(recipe.id,counts);change();
 };
 for(const b of document.querySelectorAll('[data-ammo]'))b.onclick=()=>{recipe.ammo=b.dataset.ammo;change();};
-for(const [id,key,factor] of [['count','count',1],['spread','spread',1],['interval','intervalSeconds',1],['speed','speed',300],['radius','radius',1],['range','rangeCells',1],['direction','direction',1],['spacing','spacing',1],['angleOffset','angleOffset',1],['tracking','trackingStrength',1],['delay','shotDelaySeconds',1]]){
+for(const [id,key,factor] of [['count','count',1],['spread','spread',1],['interval','intervalSeconds',1],['speed','speed',300],['radius','radius',1],['range','rangeCells',1],['direction','direction',1],['spacing','spacing',1],['angleOffset','angleOffset',1],['delay','shotDelaySeconds',1]]){
   const update=e=>{const input=e.target;if(!input.checkValidity()||input.value===''){announce('请输入范围内的有效数值',true);return;}
     recipe[key]=roundParameter(roundParameter(Number(input.value))*factor);change();};
   $(id).oninput=update;$(id+'Number').oninput=update;
   $(id+'Number').onblur=()=>{$(id+'Number').value=roundParameter(recipe[key]/factor);};
 }
+for(const b of document.querySelectorAll('[data-tracking]')){
+  b.onclick=()=>{if(locked)return;recipe.trackingStrength=Number(b.dataset.tracking);change();};
+  b.onkeydown=e=>{
+    const buttons=[...document.querySelectorAll('[data-tracking]')],index=buttons.indexOf(b);
+    let next;if(e.key==='Home')next=0;else if(e.key==='End')next=buttons.length-1;else if(['ArrowRight','ArrowDown'].includes(e.key))next=(index+1)%buttons.length;else if(['ArrowLeft','ArrowUp'].includes(e.key))next=(index+buttons.length-1)%buttons.length;else return;
+    e.preventDefault();buttons[next].focus();buttons[next].click();
+  };
+}
 function syncPlayback(){const label=paused?'继续':'暂停';$('pause').setAttribute('aria-label',label);$('pause').title=label;$('pause').setAttribute('aria-pressed',paused);$('pause').innerHTML=paused?'<svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>'; }
 $('pause').onclick=()=>{paused=!paused;syncPlayback();};
 $('targetMove').onclick=()=>{moving=!moving;$('targetMove').setAttribute('aria-pressed',moving);};
 $('replay').onclick=()=>reset();
-$('timeline').oninput=()=>{const goal=Number($('timeline').value);paused=true;syncPlayback();reset();while(sim.time<goal-1e-9)sim.step(Math.min(.05,goal-sim.time),[...targetBase]);};
+$('timeline').oninput=()=>{const goal=Number($('timeline').value);paused=true;syncPlayback();reset();while(sim.time<goal-1e-9)sim.step(Math.min(.05,goal-sim.time),t=>targetPosition(targetBase,t,moving));};
 $('originPreset').onchange=()=>{const id=$('originPreset').value,p=state.originPresets.presets[id];if(id==='custom'){recipe.originPreset=id;change();return;}if(!p)return;recipe.origin=[...p.origin];recipe.originPreset=id;change();};
 $('originPreset').onwheel=e=>e.preventDefault();
 function point(event){const r=canvas.getBoundingClientRect();return [(event.clientX-r.left)*canvas.width/r.width,(event.clientY-r.top)*canvas.height/r.height];}
@@ -177,10 +186,12 @@ function draw(){
   const [w,h]=state.canvas;ctx.clearRect(0,0,w,h);
   if(images.background){const [x,y,right,bottom]=state.backgroundCrop;ctx.drawImage(images.background,x,y,right-x,bottom-y,0,0,w,h);}
   else{ctx.fillStyle='#d8c593';ctx.fillRect(0,0,w,h);const g=state.grid;for(let row=0;row<5;row++)for(let col=0;col<9;col++){ctx.fillStyle=(row+col)%2?'#9cbb72':'#a7c67c';ctx.fillRect(g.begin[0]+col*g.size[0],g.begin[1]+row*g.size[1],g.size[0],g.size[1]);}}
-  const target=[targetBase[0],targetBase[1]+(moving?Math.sin(sim.time*.9)*85:0)];
+  const target=targetPosition(targetBase,sim.time,moving);
+  // DOM-backed diagnostics for the canvas: verify the rendered simulation, not a second model.
+  canvas.dataset.motion=JSON.stringify({time:sim.time,target,parts:sim.parts.map(p=>({ammo:p.recipe.ammo,tracking:p.recipe.trackingStrength,origin:p.origin,first:p.bullets[0]?{x:p.bullets[0].x,y:p.bullets[0].y,angle:p.bullets[0].angle}:null}))});
   actor('plant',state.plant.position);actor('target',target);
   const o=origin();ctx.save();ctx.strokeStyle='#ffdb8b99';ctx.lineWidth=1.5;ctx.setLineDash([4,7]);
-  for(const shot of (currentNode.kind==='group'||recipe.pattern==='lob'?[]:launches(effectiveRecipe(),o,target))){if(recipe.radius>0){ctx.save();ctx.strokeStyle='#ffffff50';ctx.beginPath();ctx.moveTo(...o);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.restore();}ctx.beginPath();ctx.moveTo(shot.x,shot.y);ctx.lineTo(shot.x+Math.cos(shot.angle+recipe.angleOffset*Math.PI/180)*150,shot.y+Math.sin(shot.angle+recipe.angleOffset*Math.PI/180)*150);ctx.stroke();}ctx.restore();
+  for(const shot of (currentNode.kind==='group'||recipe.pattern==='lob'?[]:launches(effectiveRecipe(),o,target))){const heading=recipe.ammo==='homing'&&recipe.trackingStrength===2?Math.atan2(target[1]-shot.y,target[0]-shot.x):shot.angle+recipe.angleOffset*Math.PI/180;if(recipe.radius>0){ctx.save();ctx.strokeStyle='#ffffff50';ctx.beginPath();ctx.moveTo(...o);ctx.lineTo(shot.x,shot.y);ctx.stroke();ctx.restore();}ctx.beginPath();ctx.moveTo(shot.x,shot.y);ctx.lineTo(shot.x+Math.cos(heading)*150,shot.y+Math.sin(heading)*150);ctx.stroke();}ctx.restore();
   const highlighted=new Set(flatten(rootDoc).filter(e=>e.path.some(id=>selectedLayers.has(id))).map(e=>e.node.id));
   for(const b of sim.bullets){ctx.save();if(selectedLayers.size&&!highlighted.has(b.layerId))ctx.globalAlpha=.35;ctx.beginPath();ctx.arc(b.x,b.y,5.5,0,Math.PI*2);ctx.fillStyle=(b.pattern==='lob'||b.ammo==='normal')?'#dce889':'#ccb5ed';ctx.fill();ctx.strokeStyle=(b.pattern==='lob'||b.ammo==='normal')?'#628e34':'#8361ac';ctx.lineWidth=2;ctx.stroke();ctx.restore();}
   ctx.save();ctx.strokeStyle='#fff8';ctx.setLineDash([4,5]);if(currentNode.kind==='attack'&&recipe.pattern!=='lob'&&recipe.radius>0){ctx.beginPath();ctx.arc(...o,recipe.radius,0,Math.PI*2);ctx.stroke();}ctx.setLineDash([]);if(currentNode.kind==='attack'&&recipe.pattern!=='lob'&&recipe.originPreset==='custom'){ctx.fillStyle='rgba(255,255,255,.55)';ctx.beginPath();ctx.arc(...o,4,0,Math.PI*2);ctx.fill();}ctx.restore();
@@ -313,7 +324,7 @@ function renderSelectionProperties(){
   const nodes=selectionNodes();$('selectionLabel').textContent=nodes.length?`已选 ${nodes.length} 项`:'未选择图层';
   for(const [id,key] of [['groupRate','rateMultiplier'],['groupSpeed','speedMultiplier'],['groupDelay','startDelaySeconds']]){
     const value=selectionValue(nodes,key),mixed=nodes.length>0&&value===null;
-    $(id+'Warning').hidden=!mixed;if(!mixed)hidePropertyTooltip();$(id).disabled=$(id+'Number').disabled=!nodes.length;
+    $(id+'Warning').hidden=!mixed;if(!mixed)hidePropertyTooltip();$(id).disabled=$(id+'Number').disabled=!nodes.length||(key==='speedMultiplier'&&nodes.every(n=>n.kind==='attack'&&n.recipe.pattern==='lob'));
     $(id).classList.toggle('mixed',mixed);$(id).setAttribute('aria-valuetext',mixed?'多个不同值':value??'未选择');
     $(id).value=value===null?1:roundParameter(value);
     if(document.activeElement!==$(id+'Number'))$(id+'Number').value=value===null?'':roundParameter(value);
@@ -359,6 +370,6 @@ async function start(){
   function fitStage(){const w=Math.max(1,Math.min(area.clientWidth-2,(area.clientHeight-2)*canvas.width/canvas.height));stage.style.width=(w+2)+'px';stage.style.height=(w*canvas.height/canvas.width+2)+'px';}
   new ResizeObserver(fitStage).observe(area);fitStage();
   restoreDraft();sync();reset();syncPlayback();refreshTemplates();if(state.migrationNote)announce(state.migrationNote);if(state.done){document.body.classList.add('finished');for(const b of document.querySelectorAll('button,input,select'))b.disabled=true;announce('本轮已结束，请由AI创建新会话');paused=true;}
-  let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;const t=[targetBase[0],targetBase[1]+(moving?Math.sin(sim.time*.9)*85:0)];if(!paused)sim.step(dt,t);draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
+  let last=performance.now();function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(!paused)sim.step(dt,t=>targetPosition(targetBase,t,moving));draw();requestAnimationFrame(frame);}requestAnimationFrame(frame);
 }
 start().catch(e=>announce('无法打开预览：'+e.message,true));

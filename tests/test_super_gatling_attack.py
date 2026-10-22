@@ -22,6 +22,12 @@ class SuperAttackAdapterTests(unittest.TestCase):
                     configSha256=digest(session),planSha256=digest(plan))
         return result,session
 
+    def test_native_guidance_not_silently_interpreted_as_legacy(self):
+        result,session=self.inputs();item=result["plan"]["groups"][0]["items"][0]
+        item["guidance"].update(model="host-guidance-v1",trackingStrength=2)
+        result["planSha256"]=digest(result["plan"])
+        with self.assertRaisesRegex(ValueError,"native-first"):adapter.compile_pattern(result,session)
+
     def test_pixel_offset_velocity_and_duplicates_preserved(self):
         result,session=self.inputs();plan=result["plan"]
         first=plan["groups"][0]["items"][0];first["trajectory"]["direction"]=90

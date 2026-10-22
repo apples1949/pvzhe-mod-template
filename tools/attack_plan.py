@@ -104,12 +104,15 @@ def validate_plan(plan):
     number(plan["intervalSeconds"],.1,60,"攻击间隔")
     if not isinstance(plan["character"],str) or not plan["character"]: raise ValueError("缺少角色关联")
     trigger=plan["trigger"]
-    if trigger["kind"]!="rect" or trigger.get("coordinates")!="cell-boundaries" or trigger["selection"]!="inherited-target": raise ValueError("触发区域必须是矩形边界")
-    for key in ("columns","rows"):
-        point(trigger[key],key,100)
-        quantum=.5 if key=="columns" else 1.
-        if trigger[key][1]-trigger[key][0]<quantum or any(abs(v/quantum-round(v/quantum))>1e-8 for v in trigger[key]):
-            raise ValueError("触发区域至少0.5列、1行，按半列/整行吸附")
+    if trigger.get("kind")=="inherited":
+        if set(trigger)!={"kind","selection"} or trigger["selection"]!="inherited-target":raise ValueError("继承触发条件不包含自定义检测区域")
+    else:
+        if trigger["kind"]!="rect" or trigger.get("coordinates")!="cell-boundaries" or trigger["selection"]!="inherited-target": raise ValueError("触发区域必须是矩形边界")
+        for key in ("columns","rows"):
+            point(trigger[key],key,100)
+            quantum=.5 if key=="columns" else 1.
+            if trigger[key][1]-trigger[key][0]<quantum or any(abs(v/quantum-round(v/quantum))>1e-8 for v in trigger[key]):
+                raise ValueError("触发区域至少0.5列、1行，按半列/整行吸附")
     if "domain" in plan: raise ValueError("命中有效域已移除")
     ids=set()
     def identity(obj):
@@ -152,6 +155,15 @@ def validate_plan(plan):
             for key,lo,hi in (("speed",1,5000),("direction",-180,180)):
                 number(t[key],lo,hi,key)
             if "catapultSpeedScale" in t:number(t["catapultSpeedScale"],1/300,5000/300,"投掷射速倍率")
+            if "distanceModel" in item:
+                if item["distanceModel"]!="host-displacement-grid-width-v1":raise ValueError("未知消失距离模型")
+                if "catapultSpeedScale" in t:raise ValueError("宿主优先方案不缩放投掷时间")
+            if "model" in guide and guide["model"] not in ("web-homing-v1","web-homing-v2","host-guidance-v1","host-guidance-v2"):raise ValueError("未知追踪模型")
+            if guide.get("model") in ("host-guidance-v1","host-guidance-v2") and guide["trackingStrength"] not in (0,1,2):raise ValueError("未知宿主追踪方式")
+            if guide.get("model")=="host-guidance-v2" and guide["trackingStrength"]==1:
+                if "trackingDelaySeconds" not in guide:raise ValueError("延迟追踪缺少启动延迟")
+                number(guide["trackingDelaySeconds"],.01,10,"追踪启动延迟")
+            elif "trackingDelaySeconds" in guide:raise ValueError("启动延迟仅适用于延迟追踪模型")
             if type(guide["initialAim"]) is not bool: raise ValueError("初始瞄准无效")
             number(guide["trackingStrength"],0,2,"追踪强度")
             if any(k in guide for k in ("maxTurnRate","response","angleFalloff")): raise ValueError("底层制导参数已归并为追踪强度")
@@ -206,6 +218,7 @@ def region_bounds(region,plant,grid):
 
 def can_trigger(plan,plant,target,grid):
     if target is None: return False
+    if plan["trigger"].get("kind")=="inherited":return True # Preview assumes an eligible host target; it does not define acquisition rules.
     if grid is None: raise ValueError("触发区域需要发行网格")
     a,b=region_bounds(plan["trigger"],plant,grid)
     return all(a[i]<=target[i]<b[i] for i in (0,1))
@@ -367,6 +380,13 @@ def upgrade_plan(source):
 def steer_angle(angle,wanted,guide,dt):
     strength=guide["trackingStrength"]
     if strength==0: return angle
+    if guide.get("model")=="host-guidance-v2":
+        return wanted if strength==2 or guide.get("elapsedSeconds",0)>=guide["trackingDelaySeconds"]-1e-9 else angle
+    if guide.get("model")=="host-guidance-v1":
+        if strength>=2:return wanted
+        error=math.atan2(math.sin(wanted-angle),math.cos(wanted-angle));cap=math.radians(120)*dt
+        correction=error*(-math.expm1(-2*dt))
+        return angle+max(-cap,min(cap,correction))
     if guide.get("model") in ("web-homing-v1","web-homing-v2") and strength>=2:return wanted
     if strength<=1: maximum,response,falloff=120*strength,3*strength,2.
     else:
@@ -471,9 +491,9 @@ class PlanSimulation:
         ballistics=None
         if item["carrier"]=="projectile" and t["kind"]=="parabola":
             ballistics=host_catapult_reference(origin,self.plant,t.get("catapultSpeedScale",1.))
-            velocity=ballistic_velocity(origin,target,ballistics["flightTime"],ballistics["gravity"])
+            velocity=ballistic_velocity(origin,[target[0]-10,target[1]] if item.get("distanceModel")=="host-displacement-grid-width-v1" else target,ballistics["flightTime"],ballistics["gravity"])
             angle=math.atan2(velocity[1],velocity[0])
-        b=dict(item=item,itemId=item["id"],color=color,origin=origin,position=list(origin),age=0.,velocity=velocity,
+        b=dict(item=item,itemId=item["id"],color=color,origin=origin,position=list(origin),age=0.,guidanceAge=0.,velocity=velocity,
                creationIndex=self.emitted,ballistics=ballistics,
                travelCells=0.,rangeReached=False,
                angle=angle,travel=0.,endpoint=list(target),
@@ -502,6 +522,13 @@ class PlanSimulation:
             self.discarded+=PREVIEW_EVICT_BATCH
 
     def advance(self,b,dt,target):
+        guidance_age=b.get("guidanceAge",0.)
+        guide=b["item"]["guidance"]
+        delay=guide.get("trackingDelaySeconds",0.)
+        if guide.get("model")=="host-guidance-v2" and guide["trackingStrength"]==1 and guidance_age<delay-1e-9 and guidance_age+dt>delay+1e-9:
+            first=delay-guidance_age
+            self.advance(b,first,target);self.advance(b,dt-first,target);return
+        b["guidanceAge"]=guidance_age+dt
         if b.get("deployment"):
             d=b["deployment"];used=min(dt,d["duration"]-d["elapsed"]);d["elapsed"]+=used
             k=min(1.,d["elapsed"]/d["duration"])
@@ -534,7 +561,7 @@ class PlanSimulation:
         else:
             angle=math.atan2(b["velocity"][1],b["velocity"][0])
             if g["trackingStrength"] and g.get("model")!="web-homing-v2":
-                wanted=math.atan2(target[1]-old[1],target[0]-old[0]); angle=steer_angle(angle,wanted,g,dt)
+                wanted=math.atan2(target[1]-old[1],target[0]-old[0]); angle=steer_angle(angle,wanted,{**g,"elapsedSeconds":guidance_age},dt)
                 b["velocity"]=[math.cos(angle)*t["speed"],math.sin(angle)*t["speed"]]
             gravity=b["ballistics"]["gravity"] if t["kind"]=="parabola" else 0
             vx,vy=b["velocity"]; b["position"]=[old[0]+vx*dt,old[1]+vy*dt+.5*gravity*dt*dt]; b["velocity"][1]+=gravity*dt
@@ -553,6 +580,11 @@ class PlanSimulation:
             if self.grid is None and item["maxTravelCells"] is not None: raise ValueError("格数射程需要发行网格")
             segment=math.hypot(*(delta[i]/self.grid["size"][i] for i in (0,1))) if self.grid else 0.
             maximum=item["maxTravelCells"] if t["kind"]!="parabola" else None
+            if item.get("distanceModel")=="host-displacement-grid-width-v1":
+                b["travelCells"]=math.dist(b["origin"],b["position"])/self.grid["size"][0]
+                b["rangeReached"]=maximum is not None and b["travelCells"]>maximum
+                b["canHit"]=not b["rangeReached"]
+                return
             if maximum is not None and b["travelCells"]+segment>=maximum-1e-9:
                 fraction=max(0.,min(1.,(maximum-b["travelCells"])/segment)) if segment else 0.
                 b["position"]=[old[i]+delta[i]*fraction for i in (0,1)]; segment=maximum-b["travelCells"]

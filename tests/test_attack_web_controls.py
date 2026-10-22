@@ -28,6 +28,6 @@ class DecimalControlTests(unittest.TestCase):
                 self.assert_representable(name+'Number',value)
     def test_integer_count_and_guidance_tenths_stay_constrained(self):
         self.assertEqual(self.inputs['countNumber']['step'],'1')
-        self.assertEqual(self.inputs['trackingNumber']['step'],'0.1')
+        self.assertNotIn('trackingNumber',self.inputs)
         self.assert_representable('groupDelay',.25)
         self.assert_representable('groupDelayNumber',.25)

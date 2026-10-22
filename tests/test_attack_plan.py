@@ -18,6 +18,18 @@ PLANT,TARGET=[300,321],[830,320]
 
 
 class AttackPlanTests(unittest.TestCase):
+    def test_unknown_guidance_and_invalid_delay_contracts_are_rejected(self):
+        from attack_web import default_recipe,compile_recipe
+        recipe=default_recipe();recipe.update(ammo='homing',trackingStrength=1)
+        plan=compile_recipe(recipe);self.assertTrue(validate_plan(plan))
+        for change in ('unknown','missing','negative','misplaced'):
+            bad=copy.deepcopy(plan);guide=bad['groups'][0]['items'][0]['guidance']
+            if change=='unknown':guide['model']='host-guidance-typo'
+            elif change=='missing':guide.pop('trackingDelaySeconds')
+            elif change=='negative':guide['trackingDelaySeconds']=-1
+            else:guide['trackingStrength']=2
+            with self.subTest(change=change),self.assertRaises(ValueError):validate_plan(bad)
+
     def test_one_item_one_carrier_and_presets_are_groups(self):
         plan=default_plan(); plan["groups"]=[preset("扇形",count=5,spread=60)]
         self.assertEqual(validate_plan(plan),5)

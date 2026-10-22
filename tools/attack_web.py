@@ -22,7 +22,7 @@ ORIGIN_PRESETS = json.loads((STATIC / "origins.json").read_text(encoding="utf-8"
 
 def default_recipe(character="PlantPeaShooterSingle"):
     preset = ORIGIN_PRESETS["presets"]["pea-front"]
-    return dict(format="pvzhe.attack-recipe", schemaVersion=18, id=uuid.uuid4().hex,
+    return dict(format="pvzhe.attack-recipe", schemaVersion=19, id=uuid.uuid4().hex,
                 character=character, pattern="straight", count=1, spread=45, direction=0., spacing=20., angleOffset=0., trackingStrength=2.,
                 ammo="normal", deploymentSeconds=.15, shotDelaySeconds=0., intervalSeconds=1.5, speed=300., rangeCells=0., radius=preset["radius"],
                 origin=list(preset["origin"]), originPreset="pea-front")
@@ -32,7 +32,7 @@ def validate_single_recipe(r):
     keys = set(default_recipe())
     if not isinstance(r, dict) or set(r) != keys:
         raise ValueError("方案字段不完整或不支持；复杂旧方案请保留原设计并交给AI分析差量修改")
-    if r["format"] != "pvzhe.attack-recipe" or r["schemaVersion"] != 18:
+    if r["format"] != "pvzhe.attack-recipe" or r["schemaVersion"] != 19:
         raise ValueError("不支持的简易方案格式")
     for key in ("id", "character"):
         if not isinstance(r[key], str) or not r[key] or len(r[key]) > 128:
@@ -46,8 +46,8 @@ def validate_single_recipe(r):
             raise ValueError("参数超出范围：" + key)
     if type(r["count"]) is not int:
         raise ValueError("弹数必须是整数")
-    if abs(r["trackingStrength"]*10-round(r["trackingStrength"]*10))>1e-8:
-        raise ValueError("追踪强度以0.1为步进")
+    if r["trackingStrength"] not in (0,1,2):
+        raise ValueError("追踪方式仅支持首次瞄准、延迟追踪和立即追踪")
     gap=r["shotDelaySeconds"]
     if abs(gap*100-round(gap*100))>1e-8:raise ValueError("发射延迟以0.01秒为步进")
     if r["deploymentSeconds"]!=.15:raise ValueError("排射固定先展开0.15秒再发射")
@@ -131,6 +131,10 @@ def load_recipe(path):
         if isinstance(r.get("angleOffset"),(int,float)) and 360<r["angleOffset"]<=365:
             r["angleOffset"]%=360
             note=(note or "")+"旧角度偏移已换算为0～360°内的等效角度。"
+    if isinstance(r,dict) and r.get("schemaVersion")==18:
+        r["schemaVersion"]=19
+        r["trackingStrength"]=0 if r["trackingStrength"]==0 else 1 if r["trackingStrength"]<2 else 2
+        note=(note or "")+"追踪改为三种明确方式，消失距离改用宿主直线距离，投掷恢复原生弹道；请重新确认。"
     return validate_recipe(r), note
 
 
@@ -139,6 +143,7 @@ def compile_single_recipe(recipe):
     r = validate_single_recipe(recipe)
     plan = default_plan(r["character"], r["intervalSeconds"])
     plan["id"] = r["id"]
+    plan["trigger"]=dict(kind="inherited",selection="inherited-target")
     origin = ORIGIN_PRESETS["presets"]["lobber"]["origin"] if r["pattern"]=="lob" else r["origin"]
     radius = 0. if r["pattern"]=="lob" else r["radius"]
     group = plan["groups"][0]
@@ -174,16 +179,21 @@ def compile_single_recipe(recipe):
         if heading>180:heading-=360
         item["trajectory"].update(speed=r["speed"], direction=heading)
         item["maxTravelCells"] = r["rangeCells"] or None
+        item["distanceModel"]="host-displacement-grid-width-v1"
         # Homing is an explicit ammo choice; normal straight shots never steer.
         if r["ammo"]=="homing" and r["pattern"]!="lob":
-            item["guidance"].update(initialAim=r["trackingStrength"]==0,trackingStrength=r["trackingStrength"],model="web-homing-v2")
+            item["guidance"].update(initialAim=r["trackingStrength"]==0,trackingStrength=r["trackingStrength"],model="host-guidance-v2")
+            if r["trackingStrength"]==1:item["guidance"]["trackingDelaySeconds"]=.5
             if r["trackingStrength"]==0:
-                item["launch"]["aimFrame"]=dict(centerOffset=list(origin),localOffset=[item["launch"]["offset"][j]-origin[j] for j in (0,1)])
+                # Each shot aims from its own configured birth point. Pattern angles
+                # arrange births; only the explicit velocity offset remains after aim.
+                heading=r["angleOffset"]%360
+                item["trajectory"]["direction"]=heading-360 if heading>180 else heading
         if r["pattern"]=="lob":
             item["trajectory"].update(kind="parabola",speed=300.,direction=0.)
             item["guidance"].update(initialAim=True,trackingStrength=0.,endBinding="snapshot")
             item["maxTravelCells"]=None
-            if r["speed"]!=300.:item["trajectory"]["catapultSpeedScale"]=r["speed"]/300.
+
         group["items"].append(item)
     validate_plan(plan)
     return plan
@@ -268,7 +278,7 @@ class Editor:
     def state(self):
         c = self.config
         return dict(recipe=self.recipe, defaultRecipe=default_recipe(self.recipe["character"]), done=self.done, demo=c is None, viewOnly=self.view_only, migrationNote=self.migration_note,
-                    storageKey="pvzhe.attack-editor:" + digest([str(self.project_root), str(self.recipe_path), self.source_recipe_sha, self.source_plan_sha, ORIGIN_PRESETS["dllSha256"], self.view_only]),
+                    storageKey="pvzhe.attack-editor:" + digest([str(self.project_root), str(self.recipe_path), self.source_recipe_sha, self.source_plan_sha, ORIGIN_PRESETS["dllSha256"], self.view_only, "host-guidance-v1"]),
                     originPresets=ORIGIN_PRESETS,
                     canvas=c["canvas"] if c else [1080, 600],
                     backgroundCrop=c.get("backgroundCrop", [0, 0, *c["canvas"]]) if c else None,
@@ -386,7 +396,7 @@ def make_server(editor, port=0):
                                 presetDllSha256=ORIGIN_PRESETS["dllSha256"],
                                 coordinateSpace="plant-root-logical-pixels", speedBaseline=300,
                                 speedUnit="logical-pixels/second", timeUnit="seconds",
-                                rangeUnit="grid-columns", semantics="docs/attack-template-format.md"),
+                                rangeUnit="spawn-displacement-grid-width", guidanceModel="host-guidance-v2", semantics="docs/attack-template-format.md"),
                                 data.get("expectedSha256"))
                         else:
                             raise ValueError("未知模板操作")

@@ -35,7 +35,8 @@ def layers(document):
             if r["character"]!=document["character"]:raise ValueError("图层角色不同")
             if r["id"] in recipe_ids:raise ValueError("攻击方案ID重复")
             recipe_ids.add(r["id"])
-            speed=r["speed"]*multipliers[0];interval=r["intervalSeconds"]/multipliers[1];distance=r["rangeCells"]*multipliers[2]
+            speed=300. if r["pattern"]=="lob" else r["speed"]*multipliers[0]
+            interval=r["intervalSeconds"]/multipliers[1];distance=r["rangeCells"]*multipliers[2]
             if not 1<=speed<=5000 or not .01<=interval<=60000 or distance>1000:raise ValueError("叠加后射速需1～5000逻辑单位/秒、攻击间隔0.01～60000秒、射程最多1000格")
             yield node,dict(speed=speed,interval=interval,range=distance,enabled=enabled,path=path,delay=delay)
     ids=set();recipe_ids=set()
@@ -55,13 +56,14 @@ def compile_document(document):
     if not list(layers(document)):raise ValueError("请先添加一个攻击图层再采用方案；空组可保存草稿")
     from attack_web import compile_single_recipe
     plan=default_plan(document["character"]);plan["id"]=document["id"];plan["name"]=document["root"]["name"];plan["groups"]=[]
+    plan["trigger"]=dict(kind="inherited",selection="inherited-target")
     for node,effective in layers(document):
         child=compile_single_recipe(node["recipe"])
         group=child["groups"][0];group["id"]=node["id"];group["name"]=node["name"];group["enabled"]=effective["enabled"];group["intervalSeconds"]=effective["interval"]
         if effective["delay"]:group["startDelaySeconds"]=effective["delay"]
         for item in group["items"]:
             item["trajectory"]["speed"]=effective["speed"] if node["recipe"]["pattern"]!="lob" else 300.
-            if node["recipe"]["pattern"]=="lob":item["trajectory"]["catapultSpeedScale"]=effective["speed"]/300.
+            if node["recipe"]["pattern"]=="lob":item["trajectory"].pop("catapultSpeedScale",None)
             item["maxTravelCells"]=(effective["range"] or None) if node["recipe"]["pattern"]!="lob" else None
         plan["groups"].append(group)
     validate_plan(plan)

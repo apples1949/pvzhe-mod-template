@@ -1,0 +1,302 @@
+{
+  "format": "pvzhe.attack-plan",
+  "schemaVersion": 5,
+  "id": "attack-lab-starfruit",
+  "name": "root",
+  "character": "PlantPeaShooterSingle",
+  "intervalSeconds": 1.5,
+  "trigger": {
+    "kind": "inherited",
+    "selection": "inherited-target"
+  },
+  "groups": [
+    {
+      "id": "starfruit-layer",
+      "name": "starfruit",
+      "enabled": true,
+      "items": [
+        {
+          "id": "starfruit-shot-0",
+          "name": "发射项",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              29.9999980926514,
+              -18.0
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -30.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 0.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          },
+          "distanceModel": "host-displacement-grid-width-v1"
+        },
+        {
+          "id": "starfruit-shot-1",
+          "name": "发射项",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              1.0,
+              -28.0
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": -90.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 0.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          },
+          "distanceModel": "host-displacement-grid-width-v1"
+        },
+        {
+          "id": "starfruit-shot-2",
+          "name": "发射项",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              -33.0,
+              1.0
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 180.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 0.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          },
+          "distanceModel": "host-displacement-grid-width-v1"
+        },
+        {
+          "id": "starfruit-shot-3",
+          "name": "发射项",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              9.5367431640625e-07,
+              40.0
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 90.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 0.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          },
+          "distanceModel": "host-displacement-grid-width-v1"
+        },
+        {
+          "id": "starfruit-shot-4",
+          "name": "发射项",
+          "enabled": true,
+          "time": 0.0,
+          "carrier": "projectile",
+          "launch": {
+            "anchor": "plant-reference",
+            "gridOffset": [
+              0,
+              0
+            ],
+            "offset": [
+              35.0,
+              24.0
+            ]
+          },
+          "trajectory": {
+            "kind": "straight",
+            "speed": 300.0,
+            "direction": 30.0,
+            "catapultProfile": "pvzhe-0.30-standard",
+            "parabolaMode": "target-snapshot",
+            "x": "v*t",
+            "y": "A*sin(2*pi*v*t/L)",
+            "parameters": {
+              "A": {
+                "value": 30.0,
+                "min": 0.0,
+                "max": 120.0,
+                "step": 1.0
+              },
+              "L": {
+                "value": 160.0,
+                "min": 20.0,
+                "max": 500.0,
+                "step": 5.0
+              }
+            }
+          },
+          "guidance": {
+            "initialAim": false,
+            "trackingStrength": 0.0,
+            "endBinding": "fixed",
+            "endpointFollowSpeed": null
+          },
+          "maxTravelCells": null,
+          "rayLength": 500.0,
+          "rayDuration": 0.3,
+          "route": {
+            "rowOffset": 0,
+            "duration": 0.25
+          },
+          "distanceModel": "host-displacement-grid-width-v1"
+        }
+      ],
+      "intervalSeconds": 0.8
+    }
+  ],
+  "implementation": {
+    "files": {},
+    "appliedPlanSha256": null
+  },
+  "reference": {}
+}

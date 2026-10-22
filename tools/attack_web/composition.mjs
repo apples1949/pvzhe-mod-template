@@ -12,7 +12,7 @@ export function flatten(doc){
     enabled&&=node.enabled;path=[...path,node.id];const localDelay=node.startDelaySeconds??0;if(!Number.isFinite(localDelay)||localDelay<0||localDelay>5)throw Error('发射延迟应为0～5秒');delay+=localDelay;
     if(node.kind==='group')for(const child of node.children)walk(child,factors.map((x,i)=>x*node[['speedMultiplier','rateMultiplier','rangeMultiplier'][i]]),enabled,path,delay);
     else {
-      const r={...node.recipe,speed:node.recipe.speed*factors[0],intervalSeconds:node.recipe.intervalSeconds/factors[1],rangeCells:node.recipe.rangeCells*factors[2]};
+      const r={...node.recipe,speed:node.recipe.pattern==='lob'?300:node.recipe.speed*factors[0],intervalSeconds:node.recipe.intervalSeconds/factors[1],rangeCells:node.recipe.rangeCells*factors[2]};
       if(r.speed<1||r.speed>5000||r.intervalSeconds<.01||r.intervalSeconds>60000||r.rangeCells>1000)throw Error('叠加后的射速、攻击间隔或射程超出支持范围');
       out.push({node,recipe:r,enabled,path,startDelaySeconds:delay});
     }
@@ -105,8 +105,9 @@ export function checkLayerTree(doc){
       for(const child of node.children)visit(child,depth+1);
     }else{
       const r=node.recipe;if(++attacks>32)throw Error('最多32个攻击图层');
-      if(!r||r.format!=='pvzhe.attack-recipe'||r.schemaVersion!==18||r.character!==doc.character||typeof r.id!=='string'||recipeIds.has(r.id)||!['straight','fan','ring','starfruit','lob','parallel'].includes(r.pattern)||!['normal','homing'].includes(r.ammo)||!Array.isArray(r.origin)||r.origin.length!==2||!r.origin.every(Number.isFinite))throw Error('攻击方案数据无效');
+      if(!r||r.format!=='pvzhe.attack-recipe'||r.schemaVersion!==19||r.character!==doc.character||typeof r.id!=='string'||recipeIds.has(r.id)||!['straight','fan','ring','starfruit','lob','parallel'].includes(r.pattern)||!['normal','homing'].includes(r.ammo)||!Array.isArray(r.origin)||r.origin.length!==2||!r.origin.every(Number.isFinite))throw Error('攻击方案数据无效');
       recipeIds.add(r.id);
+      if(![0,1,2].includes(r.trackingStrength))throw Error('未知追踪方式');
       const limits={speed:[30,3000],intervalSeconds:[.1,60],rangeCells:[0,1000],radius:[0,400],count:[1,120],spread:[0,360],direction:[0,360],spacing:[0,400],angleOffset:[0,360],trackingStrength:[0,2],shotDelaySeconds:[0,5],deploymentSeconds:[0,1]};
       for(const [key,[low,high]] of Object.entries(limits))if(!Number.isFinite(r[key])||r[key]<low||r[key]>high)throw Error('攻击参数无效');
       if(!Number.isInteger(r.count)||!['pea-front','pea-back','center','lobber','puff','custom'].includes(r.originPreset))throw Error('弹数或起点预设无效');

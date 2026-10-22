@@ -33,6 +33,8 @@ def compile_pattern(result,session,emission_window=1.):
     for group,item in all_items(plan):
         if not group["enabled"] or not item["enabled"]: continue
         trajectory=item["trajectory"]
+        if item["guidance"].get("model")in ("host-guidance-v1","host-guidance-v2"):
+            raise ValueError("This legacy finite-turn adapter cannot apply host-guidance-v1; use the native-first mapping instead of silently changing tracking")
         if (item["carrier"]!="projectile" or trajectory["kind"]!="straight"
                 or item["guidance"]["initialAim"]
                 or item["route"]["rowOffset"] or item["maxTravelCells"] is not None):

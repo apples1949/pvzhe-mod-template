@@ -1,0 +1,175 @@
+{
+  "format": "pvzhe.attack-composition",
+  "schemaVersion": 2,
+  "id": "attack-lab-nested",
+  "character": "PlantPeaShooterSingle",
+  "root": {
+    "kind": "group",
+    "id": "root",
+    "name": "root",
+    "enabled": true,
+    "speedMultiplier": 1,
+    "rateMultiplier": 1.5,
+    "rangeMultiplier": 1,
+    "children": [
+      {
+        "kind": "group",
+        "id": "twice",
+        "name": "twice",
+        "enabled": true,
+        "speedMultiplier": 1.5,
+        "rateMultiplier": 2,
+        "rangeMultiplier": 1,
+        "children": [
+          {
+            "kind": "attack",
+            "id": "layer-a-layer",
+            "name": "layer-a",
+            "enabled": true,
+            "recipe": {
+              "format": "pvzhe.attack-recipe",
+              "schemaVersion": 19,
+              "id": "layer-a",
+              "character": "PlantPeaShooterSingle",
+              "pattern": "fan",
+              "count": 3,
+              "spread": 45,
+              "direction": 0.0,
+              "spacing": 20.0,
+              "angleOffset": 0.0,
+              "trackingStrength": 2.0,
+              "ammo": "normal",
+              "deploymentSeconds": 0.15,
+              "shotDelaySeconds": 0.1,
+              "intervalSeconds": 1.2,
+              "speed": 300.0,
+              "rangeCells": 0.0,
+              "radius": 0,
+              "origin": [
+                26.1489868164063,
+                -14.8417358398438
+              ],
+              "originPreset": "pea-front"
+            }
+          },
+          {
+            "kind": "group",
+            "id": "nested-speed",
+            "name": "nested-speed",
+            "enabled": true,
+            "speedMultiplier": 1.5,
+            "rateMultiplier": 1,
+            "rangeMultiplier": 1,
+            "children": [
+              {
+                "kind": "attack",
+                "id": "layer-b-layer",
+                "name": "layer-b",
+                "enabled": true,
+                "recipe": {
+                  "format": "pvzhe.attack-recipe",
+                  "schemaVersion": 19,
+                  "id": "layer-b",
+                  "character": "PlantPeaShooterSingle",
+                  "pattern": "parallel",
+                  "count": 3,
+                  "spread": 45,
+                  "direction": 0.0,
+                  "spacing": 20.0,
+                  "angleOffset": 0.0,
+                  "trackingStrength": 2.0,
+                  "ammo": "normal",
+                  "deploymentSeconds": 0.15,
+                  "shotDelaySeconds": 0.0,
+                  "intervalSeconds": 1.8,
+                  "speed": 450,
+                  "rangeCells": 0.0,
+                  "radius": 0,
+                  "origin": [
+                    26.1489868164063,
+                    -14.8417358398438
+                  ],
+                  "originPreset": "pea-front"
+                }
+              }
+            ],
+            "startDelaySeconds": 0.2
+          }
+        ],
+        "startDelaySeconds": 0.15
+      },
+      {
+        "kind": "attack",
+        "id": "plain-layer",
+        "name": "plain",
+        "enabled": true,
+        "recipe": {
+          "format": "pvzhe.attack-recipe",
+          "schemaVersion": 19,
+          "id": "plain",
+          "character": "PlantPeaShooterSingle",
+          "pattern": "straight",
+          "count": 1,
+          "spread": 45,
+          "direction": 0.0,
+          "spacing": 20.0,
+          "angleOffset": 0.0,
+          "trackingStrength": 2.0,
+          "ammo": "normal",
+          "deploymentSeconds": 0.15,
+          "shotDelaySeconds": 0.0,
+          "intervalSeconds": 0.7,
+          "speed": 300.0,
+          "rangeCells": 0.0,
+          "radius": 0,
+          "origin": [
+            26.1489868164063,
+            -14.8417358398438
+          ],
+          "originPreset": "pea-front"
+        }
+      },
+      {
+        "kind": "attack",
+        "id": "disabled-layer",
+        "name": "disabled",
+        "enabled": false,
+        "recipe": {
+          "format": "pvzhe.attack-recipe",
+          "schemaVersion": 19,
+          "id": "disabled",
+          "character": "PlantPeaShooterSingle",
+          "pattern": "ring",
+          "count": 12,
+          "spread": 45,
+          "direction": 0.0,
+          "spacing": 20.0,
+          "angleOffset": 0.0,
+          "trackingStrength": 2.0,
+          "ammo": "normal",
+          "deploymentSeconds": 0.15,
+          "shotDelaySeconds": 0.0,
+          "intervalSeconds": 1.5,
+          "speed": 300.0,
+          "rangeCells": 0.0,
+          "radius": 0,
+          "origin": [
+            26.1489868164063,
+            -14.8417358398438
+          ],
+          "originPreset": "pea-front"
+        }
+      },
+      {
+        "kind": "group",
+        "id": "empty",
+        "name": "empty",
+        "enabled": true,
+        "speedMultiplier": 1,
+        "rateMultiplier": 1,
+        "rangeMultiplier": 1,
+        "children": []
+      }
+    ]
+  }
+}

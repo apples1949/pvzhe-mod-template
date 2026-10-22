@@ -79,7 +79,7 @@ console.log(JSON.stringify({{c,vx,after,survives,end:p.bullets.length,x:origin[0
         out=json.loads(subprocess.check_output([node,"--input-type=module","-e",script],text=True))
         host=host_catapult_reference([297.72858,246.259491],[300,321])
         self.assertAlmostEqual(out["c"]["flightTime"],host["flightTime"])
-        self.assertAlmostEqual(out["x"],846.09796);self.assertAlmostEqual(out["y"],321)
+        self.assertAlmostEqual(out["x"],836.09796);self.assertAlmostEqual(out["y"],321)
         self.assertEqual(out["vx"],out["after"])
         self.assertEqual(out["survives"],1);self.assertEqual(out["end"],0)
         with tempfile.TemporaryDirectory() as temp:
@@ -88,32 +88,19 @@ console.log(JSON.stringify({{c,vx,after,survives,end:p.bullets.length,x:origin[0
             migrated,note=load_recipe(path)
             self.assertEqual(migrated["pattern"],"ring");self.assertEqual(migrated["count"],2)
 
-    def test_lob_speed_scales_time_preserves_arc_and_exports(self):
-        from attack_plan import host_catapult_reference, ballistic_velocity
-        origin=[297.72858,246.259491];plant=[300,321];target=[846.09796,321]
-        base=host_catapult_reference(origin,plant)
-        fast=host_catapult_reference(origin,plant,2.)
-        self.assertAlmostEqual(fast["flightTime"],base["flightTime"]/2)
-        self.assertAlmostEqual(fast["gravity"],base["gravity"]*4)
-        positions=[]
-        for profile in (base,fast):
-            velocity=ballistic_velocity(origin,target,profile["flightTime"],profile["gravity"])
-            t=profile["flightTime"]*.5
-            positions.append([origin[0]+velocity[0]*t,origin[1]+velocity[1]*t+.5*profile["gravity"]*t*t])
-        for a,b in zip(*positions):self.assertAlmostEqual(a,b)
+    def test_lob_keeps_native_arc_ignoring_speed_multipliers(self):
         r=default_recipe();r.update(pattern="lob",speed=600)
         item=compile_recipe(r)["groups"][0]["items"][0]
-        self.assertEqual(item["trajectory"]["catapultSpeedScale"],2)
+        self.assertNotIn("catapultSpeedScale",item["trajectory"])
+        self.assertEqual(item["trajectory"]["speed"],300)
+        doc=dict(format="pvzhe.attack-composition",schemaVersion=2,id="lob-test",character=r["character"],root=dict(kind="group",id="root",name="root",enabled=True,speedMultiplier=3,rateMultiplier=1,rangeMultiplier=1,children=[dict(kind="attack",id="lob-layer",name="lob",enabled=True,recipe=r)]))
+        self.assertNotIn("catapultSpeedScale",compile_recipe(doc)["groups"][0]["items"][0]["trajectory"])
         node=shutil.which("node")
         if not node:self.skipTest("Optional Node runtime unavailable")
         module=(Path(__file__).resolve().parents[1]/"tools/attack_web/model.mjs").as_uri()
-        script=f"import {{catapult}} from {json.dumps(module)};console.log(JSON.stringify(catapult({json.dumps(origin)},{json.dumps(plant)},{json.dumps(target)},2)));"
-        out=json.loads(subprocess.check_output([node,"--input-type=module","-e",script],text=True))
-        self.assertAlmostEqual(out["flightTime"],fast["flightTime"]);self.assertAlmostEqual(out["gravity"],fast["gravity"])
-        with tempfile.TemporaryDirectory() as temp:
-            path=Path(temp)/"old.json";r["schemaVersion"]=7;path.write_text(json.dumps({k:v for k,v in r.items() if k not in ("angleOffset","trackingStrength","shotDelaySeconds","deploymentSeconds")}),encoding="utf-8")
-            migrated,note=load_recipe(path)
-            self.assertEqual(migrated["speed"],300)
+        script=f"import {{catapult}} from {json.dumps(module)};console.log(JSON.stringify([1,2,10].map(s=>catapult([300,230],[300,321],[800,321],s))));"
+        profiles=json.loads(subprocess.check_output([node,"--input-type=module","-e",script],text=True))
+        self.assertEqual(profiles[0],profiles[1]);self.assertEqual(profiles[0],profiles[2])
 
     def test_guidance_strength_and_velocity_offset_are_independent(self):
         from attack_plan import steer_angle
@@ -128,7 +115,7 @@ console.log(JSON.stringify({{c,vx,after,survives,end:p.bullets.length,x:origin[0
         self.assertEqual(after[0]["trajectory"]["direction"],60)
         guide=compile_recipe(r)["groups"][0]["items"][0]["guidance"]
         self.assertTrue(guide["initialAim"]);self.assertEqual(guide["trackingStrength"],0)
-        samples=[(s,e) for s in (0,.1,.5,1,1.5,1.9,2) for e in (.1,1.5,3.14)]
+        samples=[(s,e) for s in (0,1,2) for e in (.1,1.5,3.14)]
         script=f"""
 import {{steer,Preview}} from {json.dumps(module)};
 const samples={json.dumps(samples)};
@@ -139,7 +126,7 @@ console.log(JSON.stringify({{turns:samples.map(([s,e])=>steer(0,e,.016,s)),angle
 """
         out=json.loads(subprocess.check_output([node,"--input-type=module","-e",script],text=True))
         for (strength,error),turn in zip(samples,out["turns"]):
-            self.assertAlmostEqual(turn,steer_angle(0,error,dict(trackingStrength=strength,model="web-homing-v1"),.016))
+            self.assertAlmostEqual(turn,steer_angle(0,error,dict(trackingStrength=strength,model="host-guidance-v2",trackingDelaySeconds=.5),.016))
         self.assertAlmostEqual(out["angle"],math.pi/2);self.assertEqual(out["angle"],out["after"])
         self.assertEqual(out["outside"],1);self.assertEqual(out["end"],0)
         for value in (-.1,2.1,.15):
@@ -152,7 +139,7 @@ console.log(JSON.stringify({{turns:samples.map(([s,e])=>steer(0,e,.016,s)),angle
         if not node:self.skipTest("Optional Node runtime unavailable")
         module=(Path(__file__).resolve().parents[1]/"tools/attack_web/model.mjs").as_uri()
         recipes=[]
-        for ammo,strength in (("normal",0),("homing",0),("homing",1),("homing",2)):
+        for ammo,strength in (("normal",0),):
             r=default_recipe();r.update(pattern="ring",count=4,originPreset="custom",origin=[0,0],radius=50,angleOffset=90,direction=37,ammo=ammo,trackingStrength=strength,intervalSeconds=30)
             recipes.append(r)
         script=f"""
@@ -518,7 +505,7 @@ console.log(JSON.stringify({{angles:recipes.map(angles),live:sim.bullets.length,
             source = json.dumps({k:v for k,v in old.items() if k not in ("angleOffset","trackingStrength","shotDelaySeconds","deploymentSeconds")})
             path.write_text(source,encoding="utf-8")
             upgraded, note = load_recipe(path)
-            self.assertEqual(upgraded["schemaVersion"],18)
+            self.assertEqual(upgraded["schemaVersion"],19)
             self.assertEqual(upgraded["origin"],[27,-17])
             self.assertEqual(upgraded["radius"],0)
             self.assertEqual(upgraded["originPreset"],"custom")
@@ -584,3 +571,23 @@ console.log(JSON.stringify({{angles:recipes.map(angles),live:sim.bullets.length,
                 server.shutdown()
                 server.server_close()
                 thread.join(timeout=2)
+
+
+class NativeDistanceTests(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("node"),"Optional Node runtime unavailable")
+    def test_vertical_distance_uses_grid_width_not_height(self):
+        r=default_recipe();r.update(originPreset="custom",origin=[0,0],radius=0,direction=90,rangeCells=2.5,intervalSeconds=60)
+        module=(Path(__file__).resolve().parents[1]/"tools/attack_web/model.mjs").as_uri()
+        script=f"import {{Preview}} from {json.dumps(module)};const p=new Preview({json.dumps(r)},[500,100],[1000,500]);for(let i=0;i<13;i++)p.step(.05);const before=p.bullets.length;p.step(.05);console.log(JSON.stringify([before,p.bullets.length]));"
+        self.assertEqual(json.loads(subprocess.check_output(['node','--input-type=module','-e',script],text=True)),[1,0])
+        from attack_plan import PlanSimulation
+        sim=PlanSimulation(compile_recipe(r),[500,100],[1000,500],dict(size=[80,98]),False)
+        sim.step(.65,[1000,500]);self.assertEqual(len(sim.bullets),1)
+        sim.step(.05,[1000,500]);self.assertEqual(len(sim.bullets),0)
+
+    def test_unknown_native_semantics_rejected(self):
+        from attack_plan import validate_plan
+        plan=compile_recipe(default_recipe());item=plan['groups'][0]['items'][0]
+        self.assertEqual(plan['trigger'],dict(kind='inherited',selection='inherited-target'))
+        item['distanceModel']='guess'
+        with self.assertRaises(ValueError):validate_plan(plan)

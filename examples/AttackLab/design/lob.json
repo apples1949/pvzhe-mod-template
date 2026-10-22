@@ -1,0 +1,91 @@
+{
+  "format": "pvzhe.attack-composition",
+  "schemaVersion": 2,
+  "id": "attack-lab-lob",
+  "character": "PlantPeaShooterSingle",
+  "root": {
+    "kind": "group",
+    "id": "root",
+    "name": "root",
+    "enabled": true,
+    "speedMultiplier": 1,
+    "rateMultiplier": 1,
+    "rangeMultiplier": 1,
+    "children": [
+      {
+        "kind": "attack",
+        "id": "lob-layer",
+        "name": "lob",
+        "enabled": true,
+        "recipe": {
+          "format": "pvzhe.attack-recipe",
+          "schemaVersion": 19,
+          "id": "lob",
+          "character": "PlantPeaShooterSingle",
+          "pattern": "lob",
+          "count": 1,
+          "spread": 45,
+          "direction": 0.0,
+          "spacing": 20.0,
+          "angleOffset": 0.0,
+          "trackingStrength": 2.0,
+          "ammo": "normal",
+          "deploymentSeconds": 0.15,
+          "shotDelaySeconds": 0.0,
+          "intervalSeconds": 1.4,
+          "speed": 300.0,
+          "rangeCells": 0.0,
+          "radius": 0,
+          "origin": [
+            26.1489868164063,
+            -14.8417358398438
+          ],
+          "originPreset": "pea-front"
+        }
+      },
+      {
+        "kind": "group",
+        "id": "fast",
+        "name": "delayed-native-lob",
+        "enabled": true,
+        "speedMultiplier": 2,
+        "rateMultiplier": 1,
+        "rangeMultiplier": 1,
+        "children": [
+          {
+            "kind": "attack",
+            "id": "fast-lob-layer",
+            "name": "fast-lob",
+            "enabled": true,
+            "recipe": {
+              "format": "pvzhe.attack-recipe",
+              "schemaVersion": 19,
+              "id": "fast-lob",
+              "character": "PlantPeaShooterSingle",
+              "pattern": "lob",
+              "count": 1,
+              "spread": 45,
+              "direction": 0.0,
+              "spacing": 20.0,
+              "angleOffset": 0.0,
+              "trackingStrength": 2.0,
+              "ammo": "normal",
+              "deploymentSeconds": 0.15,
+              "shotDelaySeconds": 0.0,
+              "intervalSeconds": 1.4,
+              "speed": 300.0,
+              "rangeCells": 0.0,
+              "radius": 0,
+              "origin": [
+                26.1489868164063,
+                -14.8417358398438
+              ],
+              "originPreset": "pea-front"
+            }
+          }
+        ],
+        "startDelaySeconds": 0.25
+      }
+    ]
+  }
+}

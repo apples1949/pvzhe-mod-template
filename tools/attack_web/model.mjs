@@ -12,27 +12,31 @@ export function shotTimes(recipe) {
 }
 export function launches(recipe,origin,target=null) {
   const directions=angles(recipe);
-  const frame=recipe.ammo==='homing'&&recipe.trackingStrength===0&&target&&recipe.pattern!=='lob'?Math.atan2(target[1]-origin[1],target[0]-origin[0]):0;
+  // Aiming changes velocity, never the configured birth arrangement.
   return directions.map((degrees,i)=>{
-    const angle=degrees*Math.PI/180+frame,side=recipe.pattern==='parallel'?(i-(directions.length-1)/2)*recipe.spacing:0;
-    const port=recipe.originShotOffsets?.[i]??[0,0],turn=(recipe.direction??0)*Math.PI/180+frame;
-    return {x:port[0]*Math.cos(turn)-port[1]*Math.sin(turn)+origin[0]+Math.cos(angle)*recipe.radius-Math.sin(angle)*side,y:port[0]*Math.sin(turn)+port[1]*Math.cos(turn)+origin[1]+Math.sin(angle)*recipe.radius+Math.cos(angle)*side,angle};
+    const angle=degrees*Math.PI/180,side=recipe.pattern==='parallel'?(i-(directions.length-1)/2)*recipe.spacing:0;
+    const port=recipe.originShotOffsets?.[i]??[0,0],turn=(recipe.direction??0)*Math.PI/180;
+    const x=port[0]*Math.cos(turn)-port[1]*Math.sin(turn)+origin[0]+Math.cos(angle)*recipe.radius-Math.sin(angle)*side;
+    const y=port[0]*Math.sin(turn)+port[1]*Math.cos(turn)+origin[1]+Math.sin(angle)*recipe.radius+Math.cos(angle)*side;
+    const aim=recipe.ammo==='homing'&&recipe.trackingStrength===0&&target&&recipe.pattern!=='lob';
+    return {x,y,angle:aim?Math.atan2(target[1]-y,target[0]-x):angle};
   });
 }
-export function catapult(origin,plant,target,speedScale=1) {
+export function catapult(origin,plant,target) {
   const gravity=2000,height=300,launchHeight=Math.max(0,plant[1]+20-origin[1]);
   const flightTime=Math.sqrt(2*height/gravity)+Math.sqrt(2*(height+launchHeight)/gravity);
-  const duration=flightTime/speedScale,g=gravity*speedScale**2;
-  return {gravity:g,flightTime:duration,vx:(target[0]-origin[0])/duration,vy:(target[1]-origin[1])/duration-.5*g*duration};
+  const duration=flightTime,g=gravity; // Native catapult owns its time scale.
+  return {gravity:g,flightTime:duration,vx:(target[0]-10-origin[0])/duration,vy:(target[1]-origin[1])/duration-.5*g*duration};
 }
-export function steer(angle,wanted,dt,strength=2) {
-  if(strength===0)return angle;
-  if(strength>=2)return wanted;
-  const f=Math.max(0,strength-1),maximum=strength<=1?120*strength:120+1320*f,response=strength<=1?3*strength:3+21*f,falloff=strength<=1?2:2-1.5*f;
-  const error = Math.atan2(Math.sin(wanted-angle),Math.cos(wanted-angle));
-  const alignment=.05+.95*Math.pow(Math.max(0,Math.cos(Math.abs(error)/2)),falloff);
-  const correction=error*(-Math.expm1(-response*alignment*dt)), cap=maximum*Math.PI/180*dt;
-  return angle+Math.max(-cap,Math.min(cap,correction));
+export function guidanceActive(strength,age,delay=.5) {
+  return strength===2||strength===1&&age>=delay-1e-9;
+}
+export function steer(angle,wanted,dt,strength=2,age=0) {
+  return guidanceActive(strength,age)?wanted:angle;
+}
+export function touchesCircle(x,y,dx,dy,target,radius=30) {
+  const length=dx*dx+dy*dy,t=length?Math.max(0,Math.min(1,((target[0]-x)*dx+(target[1]-y)*dy)/length)):0;
+  return Math.hypot(x+dx*t-target[0],y+dy*t-target[1])<=radius;
 }
 export function touchesTarget(x,y,dx,dy,target,rect=[-20,-40,40,80],halfSize=[15,15]) {
   // Same segment-vs-expanded-AABB geometry as the released swept hit check.
@@ -46,6 +50,9 @@ export function touchesTarget(x,y,dx,dy,target,rect=[-20,-40,40,80],halfSize=[15
   }
   return true;
 }
+export function targetPosition(base,time,moving=false){
+  return [base[0],base[1]+(moving?Math.sin(time*.9)*85:0)];
+}
 export class Preview {
   constructor(recipe,origin,target,width=1080,height=600,gridSize=[80,98],plant=origin,targetHitBox=[-20,-40,40,80]) { this.reset(recipe,origin,target,width,height,gridSize,plant,targetHitBox); }
   reset(recipe,origin,target,width=1080,height=600,gridSize=[80,98],plant=origin,targetHitBox=[-20,-40,40,80]) {
@@ -58,21 +65,30 @@ export class Preview {
   spawn(index) {
     const shot=launches(this.recipe,this.origin,this.target)[index];
     const heading=shot.angle+(this.recipe.angleOffset??0)*Math.PI/180;
-    this.bullets.push({...shot,index,angle:heading,born:this.time,age:0,travelCells:0,ballistics:this.recipe.pattern==='lob'?catapult([shot.x,shot.y],this.plant,this.target,this.recipe.speed/300):null});
+    this.bullets.push({...shot,index,angle:heading,born:this.time,age:0,travelCells:0,start:[shot.x,shot.y],ballistics:this.recipe.pattern==='lob'?catapult([shot.x,shot.y],this.plant,this.target):null});
     const b=this.bullets.at(-1);
     if(this.recipe.pattern==='parallel'&&this.recipe.deploymentSeconds>0){
+      const placementAngle=angles(this.recipe)[index]*Math.PI/180;
       const side=(index-(angles(this.recipe).length-1)/2)*this.recipe.spacing;
-      b.deployment={from:[shot.x+Math.sin(shot.angle)*side,shot.y-Math.cos(shot.angle)*side],to:[shot.x,shot.y],elapsed:0,duration:this.recipe.deploymentSeconds};
+      b.deployment={from:[shot.x+Math.sin(placementAngle)*side,shot.y-Math.cos(placementAngle)*side],to:[shot.x,shot.y],elapsed:0,duration:this.recipe.deploymentSeconds};
       [b.x,b.y]=b.deployment.from;b.canHit=false;
     }
     this.emitted++;
     if(this.bullets.length>1000){this.bullets.splice(0,50);this.evicted+=50;}
   }
   flushPending() {
-    while(this.pending.length&&this.pending[0].at<=this.time+1e-9)this.spawn(this.pending.shift().index);
+    while(this.pending.length&&this.pending[0].at<=this.time+1e-9){
+      const event=this.pending.shift();this.spawn(event.index);
+      if(--event.count>0){event.at+=this.recipe.intervalSeconds;this.pending.push(event);this.pending.sort((a,b)=>a.at-b.at);}
+    }
   }
   volley() {
-    for(const [index,offset] of shotTimes(this.recipe).entries())this.pending.push({at:this.time+offset,index});
+    // Repeated rounds form arithmetic sequences: store their counts, not every future shot.
+    for(const [index,offset] of shotTimes(this.recipe).entries()){
+      const at=this.time+offset;
+      const stream=this.pending.find(e=>e.index===index&&Math.abs(e.at+e.count*this.recipe.intervalSeconds-at)<1e-7);
+      if(stream)stream.count++;else this.pending.push({at,index,count:1});
+    }
     this.pending.sort((a,b)=>a.at-b.at);this.flushPending();this.rounds++;
   }
   dispatch() {
@@ -80,31 +96,37 @@ export class Preview {
     this.flushPending();
   }
   step(dt,target=this.target) {
-    const end=this.time+Math.min(.05,Math.max(0,dt));this.target=target;
+    const end=this.time+Math.min(.05,Math.max(0,dt));
+    const sampleTarget=typeof target==='function'?target:()=>target;this.target=sampleTarget(this.time);
     while(this.time<end-1e-9) {
+      const target=this.target=sampleTarget(this.time);
       this.dispatch();
-      const h=Math.min(1/120,end-this.time,Math.max(1e-8,this.next-this.time),Math.max(1e-8,(this.pending[0]?.at??Infinity)-this.time));
+      let guidanceEvent=Infinity;
+      if(this.recipe.ammo==='homing'&&this.recipe.trackingStrength===1)for(const b of this.bullets){const until=b.born+.5-this.time;if(until>1e-9)guidanceEvent=Math.min(guidanceEvent,until);}
+      const h=Math.min(1/120,end-this.time,guidanceEvent,Math.max(1e-8,this.next-this.time),Math.max(1e-8,(this.pending[0]?.at??Infinity)-this.time));
       for(const b of this.bullets){
         let motionStep=h;
         if(b.deployment){
           const d=b.deployment,used=Math.min(h,d.duration-d.elapsed);d.elapsed+=used;
           const k=Math.min(1,d.elapsed/d.duration);b.x=d.from[0]+(d.to[0]-d.from[0])*k;b.y=d.from[1]+(d.to[1]-d.from[1])*k;
           if(k<1-1e-9)continue;
-          b.deployment=null;b.canHit=true;motionStep-=used;if(motionStep<1e-9)continue;
+          b.deployment=null;b.start=[b.x,b.y];b.canHit=true;motionStep-=used;if(motionStep<1e-9)continue;
         }
         if(b.ballistics){
           const t=b.ballistics,step=Math.min(h,t.flightTime-b.age);
           b.x+=t.vx*step;b.y+=t.vy*step+.5*t.gravity*step*step;t.vy+=t.gravity*step;b.age+=step;
           continue;
         }
+        const tracking=this.recipe.ammo==='homing'&&guidanceActive(this.recipe.trackingStrength??2,this.time-b.born);
+        b.trackingActive=tracking;
+        if(tracking)b.angle=Math.atan2(target[1]-b.y,target[0]-b.x);
         const dx=Math.cos(b.angle)*this.recipe.speed*motionStep,dy=Math.sin(b.angle)*this.recipe.speed*motionStep;
-        b.reached=touchesTarget(b.x,b.y,dx,dy,target,this.targetHitBox);
-        b.x+=dx;b.y+=dy;b.travelCells+=Math.hypot(dx/this.gridSize[0],dy/this.gridSize[1]);
-        if(this.recipe.ammo==='homing') b.angle=steer(b.angle,Math.atan2(target[1]-b.y,target[0]-b.x),motionStep,this.recipe.trackingStrength??2);
+        b.reached=tracking?touchesCircle(b.x,b.y,dx,dy,target,30):touchesTarget(b.x,b.y,dx,dy,target,this.targetHitBox);
+        b.x+=dx;b.y+=dy;b.travelCells=Math.hypot(b.x-b.start[0],b.y-b.start[1])/this.gridSize[0];
       }
       this.time+=h;
-      this.bullets=this.bullets.filter(b=>!b.reached&&(b.ballistics?b.age<b.ballistics.flightTime-1e-9:(!this.recipe.rangeCells||b.travelCells<this.recipe.rangeCells-1e-9)&&(this.recipe.ammo==='homing'&&this.recipe.trackingStrength>=2||b.x>-256&&b.x<this.width+256&&b.y>-256&&b.y<this.height+256)));
+      this.bullets=this.bullets.filter(b=>!b.reached&&(b.ballistics?b.age<b.ballistics.flightTime-1e-9:(!this.recipe.rangeCells||b.travelCells<=this.recipe.rangeCells+1e-9)&&(b.trackingActive||b.x>-256&&b.x<this.width+256&&b.y>-256&&b.y<this.height+256)));
     }
-    this.dispatch();
+    this.target=sampleTarget(this.time);this.dispatch();
   }
 }

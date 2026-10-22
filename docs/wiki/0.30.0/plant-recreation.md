@@ -109,3 +109,18 @@ data.EventFrameIndices = null;
 2026-10-21通过发行版隔离对局生成ZombieNormal，IsHitBoxEnabled=true、GlobalScale=(1,1)，读取WorldHitRect并减去当帧根位置得到(-18,-37,44,70)。同轮发行场景原型的HitBoxDefinition.TryGetWorldRect(prototype.Transform)结果一致。矩形随影子/物理帧全局变换计算（TowerDefenseCharacter.WorldHitRect），不是Sprite图片包围框；实际游戏还筛选阵营、高度、逻辑行和目标资格。BulletField默认弹药半尺寸(15,15)乘hitBoxScale，SweptCollisionIntersectsRect对目标矩形加弹药半尺寸后作线段裁剪；特殊追踪另有半径30提前命中路径，不能混同。
 
 证据：.work/attack-preview/capture-2d296b0a/runtime/game.log的ATTACK_NATIVE_HITBOX（根860,517，矩形局部-18,-37,44,70），ATTACK_GEOMETRY_target和assessment.json；发行/素材/捕获源码摘要存assets.json与会话provenance。已运行核对读取和几何一致性，未以此声称伤害、穿透或所有弹药真实命中均已验收。换目标或版本需重新捕获匹配定义，不硬套这组数值。
+
+
+### 编辑器映射：宿主优先（2026-10-22）
+
+匹配本页0.30 DLL。发行BulletField.TrySpawnFromConfig接收float fireLength，先计算checkDistance=地图格宽×fireLength，再将fireLength另存整数哨兵；ProcessShooterData/ProcessTrackData以savePos.DistanceSquaredTo(pos)与checkDistance²比较，-1不限。因此支持小数格，度量是离出弹点直线距离，不是累计弯路，也不是目标进入检测范围。传入0表示零距离，网页0不限需转换为-1。
+
+ProcessTrackData有效目标分支每物理步直接以目标物理帧位置计算vel=dir×speed；LerpAngle只平滑显示朝向，不代表有限转向。立即追踪默认复用最终PeaTrack配置。发行SetTrackData(index,target)会更新行桶、gridY/gridPos、trackOpen、checkAll、目标及寻敌间隔，可将仍活跃的普通弹药交给原生追踪；不能只写trackOpen而漏掉行桶。当前延迟追踪在生成0.5秒后调用此接口，计时阶段保持普通运动/碰撞，启动后遵循原生分支。
+
+catapult在调用方height上加20后解算高度，默认目标水平偏移-10×target.Scale.X×spriteGroup.Scale.X。原生固定g=2000；网页保持标准H=300配置，不通过逐帧改z/ySpeed模拟额外射速倍率。缩放/特殊配置仍需另查。
+
+发行静态依据：本地.work/attack-lab-analysis/BulletField.cs。真实八用例及生产普通启动、失败修复和未验范围见[实验报告](../../attack-lab-experiment.md)。追踪接触预览现按原生专用半径30扫掠，普通及延迟启动前仍为身体矩形示意，不承诺预览等同完整战斗判定。
+
+追加边界实测（2026-10-22）：0.5格八方向和0.25格追踪排射均由宿主正确销毁，展开后重置距离参考点；普通僵尸仅关闭受击区即可使原生追踪重新寻敌，不能只按注册字段或die判断有效。弱转向扩展也应排除受击区关闭/nearDie，来源死亡后仍保留的在途弹药可独立重新寻敌。原生投掷目标移动后保持旧快照，后发弹药取新快照；三层组射速倍率不改变投掷飞行时间。实际条件、失败修复及证据身份见[追加实验](../../attack-lab-experiment.md#进一步边界验证2026-10-22)，不泛化为任意角色/目标的完整行为。
+
+延迟追踪追加实测：`.work/attack-lab/homing-22934fcc/runtime`与`weak-owner-f6f9331a/runtime`确认0.5秒前维持初始速度，之后trackOpen=true并发生转向；原目标关闭受击区后切换备用，来源死亡后在途弹药继续由宿主寻敌。网页、编译和示例现使用host-guidance-v2；上文旧弱转向记录只表示当时实现，不再作为当前编辑器映射。

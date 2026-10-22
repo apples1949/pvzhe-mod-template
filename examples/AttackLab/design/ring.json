@@ -1,0 +1,48 @@
+{
+  "format": "pvzhe.attack-composition",
+  "schemaVersion": 2,
+  "id": "attack-lab-ring",
+  "character": "PlantPeaShooterSingle",
+  "root": {
+    "kind": "group",
+    "id": "root",
+    "name": "root",
+    "enabled": true,
+    "speedMultiplier": 1,
+    "rateMultiplier": 1,
+    "rangeMultiplier": 1,
+    "children": [
+      {
+        "kind": "attack",
+        "id": "ring-layer",
+        "name": "ring",
+        "enabled": true,
+        "recipe": {
+          "format": "pvzhe.attack-recipe",
+          "schemaVersion": 19,
+          "id": "ring",
+          "character": "PlantPeaShooterSingle",
+          "pattern": "ring",
+          "count": 6,
+          "spread": 45,
+          "direction": 30,
+          "spacing": 20.0,
+          "angleOffset": 120,
+          "trackingStrength": 2.0,
+          "ammo": "normal",
+          "deploymentSeconds": 0.15,
+          "shotDelaySeconds": 0.0,
+          "intervalSeconds": 1.2,
+          "speed": 300.0,
+          "rangeCells": 2.5,
+          "radius": 55,
+          "origin": [
+            26.1489868164063,
+            -14.8417358398438
+          ],
+          "originPreset": "pea-front"
+        }
+      }
+    ]
+  }
+}
