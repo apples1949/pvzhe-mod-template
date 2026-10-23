@@ -32,11 +32,13 @@ new-session不将素材会话内遗留plan当成当前设计；设计只从明�
 python -X utf8 tools/attack_web.py --customize --session '.work/attack-web/<run>/session.json' --recipe 'design/attacks/<动作>.recipe.json' --plan 'design/attacks/<动作>.json' --output '.work/attack-web/<run>/result.json' --root '<Mod项目根目录>' --no-browser
 ```
 
-AI通过Start-Process的-WindowStyle Hidden启动上述命令，重定向stdout/stderr至本轮目录；ArgumentList中的路径按PowerShell规则独立引用。不要拼接玩家文本为命令。也可用前台命令自行调试。无--no-browser时启动器打开默认浏览器；AI可从result.server.json读取URL后打开到用户可见页面。
+AI通过Start-Process的-WindowStyle Hidden启动上述命令，重定向stdout/stderr至本轮目录；ArgumentList中的路径按PowerShell规则独立引用。不要拼接玩家文本为命令。也可用前台命令自行调试。这里的--no-browser只用于先完成健康与身份检查，不表示省略浏览器交接。检查通过后从本轮result.server.json读取实际URL，主动用系统默认浏览器打开，例如`python -X utf8 -m webbrowser -t '<经核验的实际URL>'`；不要只发送链接，也不要仅打开AI内置浏览器。无--no-browser时启动器本身会请求默认浏览器打开，已成功打开则不重复创建标签页。
 
 服务仅监听127.0.0.1，随机端口与本轮路径令牌；没有CDN或资源上传。server.json记录PID、URL、session/transaction、配置摘要及设计路径。只有state=waiting不足以证明HTTP启动成功：核对服务进程、HTTP响应及api/state中的session与目标角色，再交接。已有同一会话服务仍健康时直接重开原地址，不启动第二份。明确需要重启时先保存命名模板（跨端口时localStorage不共享），结束记录中匹配本服务的进程，用新会话/输出并可加--reuse-url '<旧server.json>'保留地址；端口被占用时定位所属进程，不随机杀游戏或Python进程。若URL改变必须给出新链接，不能继续发送旧地址。
 
-保持服务与可见页面等待，不替玩家确认；轮询超时、关闭标签页或页面刷新都不是取消。收集结果后且用户不再试用时，可停止记录中匹配的本服务进程，不终止其他Python。浏览器关闭后可重新打开同一健康URL。
+完成打开后主动告诉玩家：“我已经帮你用浏览器打开了一个页面：<本轮实际URL>。请在这个页面操作，保存方案后告诉我。”链接必须包含本轮真实端口与路径令牌；打开失败如实告知并提供手动链接，不能声称已打开。仅查看时改为提示“查看完成后告诉我”，不要求保存。
+
+保持服务与可见页面等待，不替玩家确认；轮询超时、关闭标签页或页面刷新都不是取消。玩家说已保存后检查本轮保存内容及身份；命名模板保存仍不等于采用，不绕过下文confirmed/check/export条件。收集结果后且用户不再试用时，可停止记录中匹配的本服务进程，不终止其他Python。浏览器关闭或玩家再次要求打开时，先检查原服务健康，再主动用默认浏览器重开同一URL并附链接。
 
 ## 草稿、继续编辑与仅查看
 

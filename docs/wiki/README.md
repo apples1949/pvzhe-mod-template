@@ -36,3 +36,5 @@
 外部社区资料的范围、版本与取舍见 [社区Skills参考](../community-references.md)。社区内容已按功能 [提取为本地Skills](../community-skill-extraction.md)，指导与本页运行事实分别记录，不将提取视为发行验收。
 
 自有浮动控件的运行时中键拖动、右锚定和多Mod反馈协议见[游戏内拖拽布局](../ui-drag.md)；旧位置预览已弃用，具体运行证据以UI主题页为准。
+
+模板工具与本地环境规则见[两槽游戏环境/使用者更新](../game-environment.md)；这部分不表示游戏新增接口。使用者同步官方模板与维护者适配新版游戏分别路由到project-update和template-upgrade。

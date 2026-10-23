@@ -4,7 +4,7 @@
 
 | 示例 | 命令 | 证据与边界 |
 | --- | --- | --- |
-| Hello World | `python tools/runtime_test.py` | dist/verification.json、hello-world.png；.work/runtime/game.log。核对当前 DLL、初始化、ready、标签挂载；不证明按钮交互或战斗功能 |
+| Hello World | `python tools/runtime_test.py` | dist/verification.json、hello-world.png；工具输出的本轮.work/runtime/<标识>/game.log。核对当前 DLL、初始化、ready、标签挂载；不证明按钮交互或战斗功能 |
 | FeatureLab | `python tools/runtime_test.py --example feature-lab` | dist/feature-lab/verification.json 和三张截图；.work/runtime-feature-lab/game.log、persistence.log。验证原版提示框、设置、可见选关入口、预设卡槽、阳光、两次真实死亡/HUD与胜利 |
 
 `python tools/mod.py verify --log '<本次日志>'` 对默认示例检查 HELLO_INIT、HELLO_READY、HELLO_UI、package applied 和 DLL 摘要；FeatureLab 加 `--example feature-lab`，使用对应 LAB 标记。输出路径随示例变化，不能拿旧目录中的截图或标记代替当前结果。

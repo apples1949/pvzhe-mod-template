@@ -37,7 +37,7 @@ python tools/mod.py build
 python tools/mod.py check
 ```
 
-将 `$game` 换为自己的发布目录。目录内多个 PCK 时，显式添加 `--pck '完整路径.pck'`。准备步骤读取 PCK 目录及 `project.binary`，记录引擎、格式、资源索引与 SHA-256，并通过发布程序集反射提取 Mod 接口信息，全部保存在忽略提交的 `.work/`。它不会读取任何游戏源码路径。prepare还初始化忽略提交的统一版本资源缓存；新增UI资源按需提取并复用，避免每次问答临时解包。见 [资源缓存与预览捕获](docs/resource-cache-and-capture.md)。
+将 `$game` 换为自己的发布目录。目录内多个 PCK 时，显式添加 `--pck '完整路径.pck'`。prepare 将匹配兼容摘要的发行文件导入忽略提交的 `.game/current/`，最多另留一个 `.game/old/`。以后直接执行 `python tools/mod.py prepare` 复用当前环境。准备步骤读取 PCK 与 `project.binary`，记录摘要和资源索引，通过程序集反射提取 Mod 接口，报告及编译引用保存在 `.work/`，按需资源缓存在 `.game/current/resources/`。它不会读取游戏源码。见 [本地环境与更新](docs/game-environment.md) 及 [资源缓存](docs/resource-cache-and-capture.md)。
 
 构建会核验本地引用摘要、编译入口、验证其实现发布版接口，再按允许名单创建产物：
 
@@ -97,11 +97,11 @@ python tools/mod.py verify --log $log
 python tools/runtime_test.py
 ```
 
-该脚本复制发布 EXE、运行时目录及 PCK 到 `.work/runtime/`，在 PCK 副本内修改应用名和用户目录开关，并加入测试专用 GDScript 驱动。驱动等加载页原有 `StartButton` 可见且可用后触发其按钮信号，进入主菜单，等待过渡完成并截图。测试不修改宿主 C# 代码或 Mod 产物。
+该脚本复用 `.game/current/runtime/` 中的隔离运行环境，只重写一份测试 PCK，不为每轮复制整套游戏。在该副本内修改应用名和用户目录开关，加入测试专用 GDScript 驱动。驱动等加载页原有 `StartButton` 可见且可用后触发其按钮信号，进入主菜单，等待过渡完成并截图。测试不修改原始发行文件、宿主 C# 代码或 Mod 产物。
 
-每次测试在 `%APPDATA%\Godot\app_userdata\PVZHE Mod Template Test <随机标识>` 创建独立数据，路径记录在 `.work/runtime/userdata-path.txt`；不使用原游戏存档。测试会打开一个 OpenGL 游戏窗口，成功截图后自动退出（通常约 20 秒；90 秒为帧数退出上限，120 秒为进程超时）。游戏必须能在此电脑上运行，并且 EXE 与 PCK 同名。预留约 1 GB 磁盘空间。不要同时运行多份测试。
+每次测试在 `%APPDATA%\Godot\app_userdata\PVZHE Mod Template Test <随机标识>` 创建独立数据，路径记录在本轮 `.work/runtime/<随机标识>/userdata-path.txt`；不使用原游戏存档。测试会打开一个 OpenGL 游戏窗口，成功截图后自动退出（通常约 20 秒；90 秒为帧数退出上限，120 秒为进程超时）。游戏必须能在此电脑上运行，并且 EXE 与 PCK 同名。首次初始化运行环境预留约 1 GB 空间，后续只新增本轮证据。不要同时运行多份测试。
 
-测试仅启用示例，结束时恢复测试目录原有启用状态；日志在 `.work/runtime/game.log`，截图在 `dist/hello-world.png`。新存档会显示用户名弹窗，不影响左上角文字验收，测试不会填写用户资料。此脚本当前只支持 Windows、未加密独立 PCK v4。发布版禁止 `--main-pack` 路径覆盖，故必须复制为同名 EXE/PCK。此版本在本机 `--headless` 会发生原生崩溃，自动测试使用真实图形窗口。测试目录保留供排查，需要时仅删除上述记录指向的测试目录。
+测试仅启用示例，结束时恢复测试目录原有启用状态；日志、驱动与PCK还原记录保留在本轮证据目录，截图另存 `dist/hello-world.png`。新存档会显示用户名弹窗，不影响左上角文字验收，测试不会填写用户资料。此脚本当前只支持 Windows、未加密独立 PCK v4。发布版禁止 `--main-pack` 路径覆盖，故隔离环境使用同名 EXE/PCK。此版本在本机 `--headless` 会发生原生崩溃，自动测试使用真实图形窗口。整理旧副本使用 [磁盘整理工具](docs/game-environment.md#证据与磁盘整理)，不删除整份证据目录。
 
 用户名提示是独立新存档的预期行为；关闭提示不等于已经建档。涉及交互或保存的验证，按 [首次启动处理](.agents/skills/pvzhe-mod-verify/references/first-run.md) 满足对应前提。内置脚本只验证两个固定示例，自定义 Mod 应按玩家需求补充测试场景。
 
@@ -131,6 +131,7 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 | `docs/`、`docs/wiki/` | 兼容证据、扩展原则与按版本组织的游戏操作知识 |
 | `tests/` | PCK 边界与打包隔离检查 |
 | `.work/` | 本地引用与分析信息；不提交 |
+| `.game/` | 当前及上一个发行版本、共享运行环境与资源缓存；不提交 |
 | `dist/` | 本地构建及验证产物；不提交 |
 
 修改身份时同步清单 `id/name`，修改入口命名空间时同步 `runtimeEntryType`。默认类库项目和输出名保持不变；若确需重命名，可用根目录 mod-project.json 选择项目与程序集，无需修改工具，见 [自定义项目配置](docs/project-configuration.md)。不要改用与宿主同名的程序集。
@@ -197,3 +198,6 @@ python -m unittest discover -s tests -v
 自定义功能的运行用例与失败重验见 [验证执行策略](.agents/skills/pvzhe-mod-verify/references/verification-strategy.md)。AI应说明每轮目标，按变更选择用例；报告修复使用已采集证据离线复核，不反复启动完整游戏流程。
 
 可选[攻击方案映射实验](examples/AttackLab/README.md)提供八个远程发射案例及独立验收流程；当前能力、宿主运动差异与生产验证边界见[实验报告](docs/attack-lab-experiment.md)。该实验不加入默认 Hello World，也不是任意攻击方案的通用运行 SDK。
+
+
+本地游戏与模板更新：首次prepare将用户发行目录导入`.game/current`，后续直接`python tools/mod.py prepare`校验复用。只保留current与old两个发行版，第三次轮换会淘汰更早版本；运行环境/资源缓存随版本管理。`.game`、`.work`和dist均不提交，游戏也不进入pmod。使用者更新自己的项目走[pvzhe-project-update](.agents/skills/pvzhe-project-update/SKILL.md)，维护者适配新游戏走[pvzhe-template-upgrade](.agents/skills/pvzhe-template-upgrade/SKILL.md)。版本匹配、合并保护、历史副本清理与恢复命令见[本地环境说明](docs/game-environment.md)。

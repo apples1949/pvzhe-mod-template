@@ -1,6 +1,6 @@
 ---
 name: pvzhe-template-upgrade
-description: 仅在用户明确要求将旧 PVZHE Mod 模板适配更新后的游戏版本时使用；比较新版源码或发行版与旧基线，更新模板、工具、文档、版本化 Wiki 和相关 Skills。普通功能开发、首次准备或一般排错不触发。
+description: 仅供维护者明确要求将旧 PVZHE Mod 模板适配更新后的游戏版本时使用；比较新版源码或发行版与旧基线，更新模板、工具、文档、版本化 Wiki 和相关 Skills。普通功能开发、首次准备或一般排错不触发。
 ---
 
 # 随游戏版本更新模板
@@ -15,3 +15,5 @@ description: 仅在用户明确要求将旧 PVZHE Mod 模板适配更新后的�
 6. 按 [兼容报告](references/compatibility-report.md) 交付差异、修改和验证结论。机器路径、原始源码、PCK、宿主 DLL 和解包内容留在本地，不进入模板分发；相关 Skills 只更新规则与按需参考资料，不复制整份迁移日志。
 
 涉及发行资源或预览变化时，同步 [缓存与捕获协议](../../../docs/resource-cache-and-capture.md)：新哈希启用新缓存，旧背景/透明组件不能自动沿用；源码分析不代替发行哈希校验。检查升级后的阶段/布局就绪条件、刷新/动画重显抑制、捕获诊断、alpha/字体/尺寸、宿主锚点/缩放映射及预览身份；按参考画布与不同窗口尺寸验证用户位置，记录未验组件范围。
+
+本Skill服务模板维护者；玩家只想从官方仓库更新自己的Mod项目时改用[pvzhe-project-update](../pvzhe-project-update/SKILL.md)。迁移须同步game-compatibility.json的真实发行摘要（不只修改版本标签），并核验.game两槽轮换、引用/资源失配拒绝和默认玩家prepare流程；未知发行先prepare --analyze-only独立分析，不覆盖当前环境。来源记录template.lock.json不等于游戏兼容声明。

@@ -44,7 +44,12 @@ def variant_string(text):
     return struct.pack("<II", 4, len(data)) + data + b"\0" * (-len(data) % 4)
 
 
-def test(example="hello-world", *, driver_code=None, package_path=None, runtime_dir=None,
+def test(*args, **kwargs):
+    from game_environment import lease
+    with lease(ROOT): return _test(*args, **kwargs)
+
+
+def _test(example="hello-world", *, driver_code=None, package_path=None, runtime_dir=None,
          user_args=(), required_markers=(), additional_packages=()):
     workflow.select_example(example)
     custom = package_path is not None
@@ -52,12 +57,21 @@ def test(example="hello-world", *, driver_code=None, package_path=None, runtime_
         raise ValueError("Use this example's documented verifier or supply explicit custom verification inputs.")
     if custom and (driver_code is None or not required_markers or runtime_dir is None):
         raise ValueError("Custom verification needs driver_code, runtime_dir and required_markers.")
-    runtime = Path(runtime_dir).resolve() if custom else WORK / ("runtime" if example == "hello-world" else "runtime-feature-lab")
+    runtime = Path(runtime_dir).resolve() if custom else WORK / ("runtime" if example == "hello-world" else "runtime-feature-lab") / uuid.uuid4().hex[:12]
     if custom and (not runtime.is_relative_to(WORK.resolve()) or runtime.exists()):
         raise ValueError("Use a new isolated runtime directory inside .work; preserve earlier evidence.")
     if os.name != "nt":
         raise ValueError("Runtime test currently supports Windows release only")
     evidence = json.loads((WORK / "release.json").read_text(encoding="utf-8"))
+    launch = runtime
+    if (ROOT / 'game-compatibility.json').exists():
+        from game_environment import active, ensure_runtime
+        slot, environment = active(ROOT)
+        if evidence.get('environmentFingerprint') != environment['fingerprint']:
+            raise ValueError('Game environment changed; prepare and build before testing')
+        launch = ensure_runtime(slot, environment)
+    runtime.mkdir(parents=True, exist_ok=True)
+    print('Runtime evidence:', runtime, flush=True)
     if sha(evidence["pck"]) != evidence["pckSha256"]:
         raise ValueError("Released PCK changed; prepare and build again")
     pack = Pack(evidence["pck"])
@@ -103,7 +117,7 @@ func capture():
     for key, value in entries.items():
         k = key.encode()
         data += struct.pack("<I", len(k)) + k + struct.pack("<I", len(value)) + value
-    target = runtime / pack.path.name
+    target = launch / pack.path.name
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(pack.path, target)
     with target.open("r+b") as f:
@@ -125,6 +139,13 @@ func capture():
     # Reparse/check the patched entry before starting the host.
     if Pack(target).read("project.binary") != data:
         raise ValueError("Test pack verification failed")
+    (runtime / driver_name).write_bytes(driver)
+    if launch != runtime:
+        from runtime_storage import archive_pack
+        replay = archive_pack(target, pack.path, runtime, base_sha=evidence['pckSha256'], retain=True)
+        if replay is None: raise ValueError('Cannot record reproducible test PCK')
+        from game_environment import save
+        save(runtime / 'pack-replay.json', replay)
     userdata = Path(os.environ["APPDATA"]) / "Godot/app_userdata" / name
     (runtime / "userdata-path.txt").write_text(str(userdata), encoding="utf-8")
     mods = userdata / "Mods"
@@ -154,14 +175,14 @@ func capture():
     if not original_exe.exists():
         raise FileNotFoundError("Expected game executable beside PCK with same basename")
     exe = target.with_suffix(".exe")
-    shutil.copyfile(original_exe, exe)
+    if launch == runtime: shutil.copyfile(original_exe, exe)
     for folder in original_exe.parent.glob("data_*"):
         if folder.is_dir():
             for dll, identity in evidence["assemblies"].items():
                 source = folder / dll
                 if source.exists() and sha(source) != identity["sha256"]:
                     raise ValueError(f"Released assembly changed: {dll}; prepare and build again")
-            shutil.copytree(folder, target.parent / folder.name, dirs_exist_ok=True)
+            if launch == runtime: shutil.copytree(folder, target.parent / folder.name, dirs_exist_ok=True)
     try:
         state.write_text(json.dumps({"schemaVersion": 2, "enabledIds": enabled_ids, "preferredOrder": enabled_ids}), encoding="utf-8")
         if log.exists():
@@ -177,16 +198,15 @@ func capture():
               ("FeatureLab verifies UI, battle and settings." if example == "feature-lab" else
                "captures the banner, then exits."), flush=True)
         print("Starting released game with isolated data:", userdata, flush=True)
+        with zipfile.ZipFile(package) as archive:
+            binary_hash = hashlib.sha256(archive.read(manifest["runtimeAssembly"])).hexdigest()
+        identity = {"pckSha256": evidence["pckSha256"], "assemblies": evidence["assemblies"],
+                    "packageSha256": sha(package), "runtimeBinarySha256": binary_hash,
+                    "driverSha256": hashlib.sha256(driver).hexdigest(), "command": command,
+                    "requiredMarkers": list(required_markers), "userdata": str(userdata), "additionalPackages": companion_identity}
+        shutil.copyfile(package, runtime / package.name)
+        workflow.write_json(runtime / "identity.json", identity)
         if custom:
-            with zipfile.ZipFile(package) as archive:
-                binary_hash = hashlib.sha256(archive.read(manifest["runtimeAssembly"])).hexdigest()
-            identity = {"pckSha256": evidence["pckSha256"], "assemblies": evidence["assemblies"],
-                        "packageSha256": sha(package), "runtimeBinarySha256": binary_hash,
-                        "driverSha256": hashlib.sha256(driver).hexdigest(), "command": command,
-                        "requiredMarkers": list(required_markers), "userdata": str(userdata), "additionalPackages": companion_identity}
-            shutil.copyfile(package, runtime / package.name)
-            (runtime / driver_name).write_bytes(driver)
-            workflow.write_json(runtime / "identity.json", identity)
             with (runtime / "stdout.log").open("w", encoding="utf-8") as output:
                 with subprocess.Popen(command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT) as proc:
                     deadline = time.monotonic() + 120
@@ -218,12 +238,14 @@ func capture():
             subprocess.run(command, cwd=exe.parent, stdout=output, stderr=subprocess.STDOUT, timeout=120, check=True)
         subprocess.run([sys.executable, str(ROOT / "tools/mod.py"), "verify", "--example", example,
                         "--log", str(log)], cwd=ROOT, check=True)
+        shutil.copyfile(workflow.DIST / "verification.json", runtime / "assessment.json")
         screenshots = ("hello-world",) if example == "hello-world" else ("ui-dialog", "level-browser", "battle-hud")
         for name in screenshots:
             screenshot = userdata / (name + ".png")
             if not screenshot.is_file():
                 raise FileNotFoundError("Missing current test screenshot: " + str(screenshot))
             shutil.copyfile(screenshot, workflow.DIST / screenshot.name)
+            shutil.copyfile(screenshot, runtime / screenshot.name)
         if example == "feature-lab":
             persistence_log = runtime / "persistence.log"
             second_command = command.copy()

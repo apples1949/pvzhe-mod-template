@@ -25,3 +25,5 @@ description: 理解玩家用自然语言提出的 PVZHE Mod 需求，补齐关�
 验证引导行为：用 [需求案例](references/scenarios.md) 检查是否提出正确的必要问题、避免重复询问、正确组合路由。实现后的运行验收必须转入[pvzhe-mod-verify](../pvzhe-mod-verify/SKILL.md)，读取本轮相关参考，不自行省略为启动脚本。功能验收要回应用户描述的效果，不能只报告编译成功。
 
 创建自有浮动UI即组合[pvzhe-ui-drag](../pvzhe-ui-drag/SKILL.md)，不以玩家提出换位置为前提。AI自主安排初始位置并在首次交付时主动告知中键拖动、松开永久保存、发布后仍可用。当前开发任务中，用户拖动是位置调整反馈，先核对本轮目标Mod/控件来源，再更新项目默认布局，不再要求文字请求或二次确认。固定/不可拖动的明确要求仍尊重；旧placement-preview仅兼容明确指定的旧流程。
+
+用户明确说更新/同步官方模板时路由到[pvzhe-project-update](../pvzhe-project-update/SKILL.md)，保护已有Mod身份和功能；只有维护者要求研究新版游戏兼容迁移才用template-upgrade。普通功能开发不自动升级模板或更换.game环境。

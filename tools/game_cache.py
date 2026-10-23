@@ -26,6 +26,11 @@ class GameCache:
     def __init__(self, work, release, pack=None):
         self.work = Path(work).resolve()
         self.release = release
+        if release.get('environmentRoot'):
+            from game_environment import active
+            slot, environment = active(self.work.parent)
+            if Path(release['environmentRoot']).resolve() != slot or release.get('environmentFingerprint') != environment['fingerprint']:
+                raise ValueError('Resource cache does not match active game environment; run prepare')
         self.pack = pack or Pack(release["pck"])
         if sha(self.pack.path) != release["pckSha256"]:
             raise ValueError("Released PCK changed; run prepare before using cached resources")
@@ -39,8 +44,9 @@ class GameCache:
         self.identity = dict(pckSha256=release["pckSha256"], engine=self.pack.engine,
             pckFormat=self.pack.version, assemblies={name:item["sha256"] for name,item in release.get("assemblies", {}).items()}, extractor=EXTRACTOR)
         self.key = hashlib.sha256(json.dumps(self.identity,sort_keys=True).encode()).hexdigest()
-        self.root = self.work / "game-cache" / self.key
-        if not self.root.resolve().is_relative_to((self.work / "game-cache").resolve()):
+        cache_root = Path(release['environmentRoot']) / 'resources' if release.get('environmentRoot') else self.work / 'game-cache'
+        self.root = cache_root / self.key
+        if not self.root.resolve().is_relative_to(cache_root.resolve()):
             raise ValueError("Cache directory escaped game-cache")
         self.files = self.root / "files"
         self.root.mkdir(parents=True,exist_ok=True)

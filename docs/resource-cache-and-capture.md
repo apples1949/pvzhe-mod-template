@@ -1,10 +1,10 @@
 # 资源缓存与预览捕获
 
-适用：发布版准备、资源分析和需要原版外观的位置预览。缓存与渲染资料只保存在项目 .work，已由 .gitignore 排除；不进入 pmod、版本控制或模板分发。无需游戏源码，不将解包当作源码还原。
+适用：发布版准备、资源分析和需要原版外观的位置预览。当前发行缓存与渲染资料保存在.game/current/resources；任务与历史资料保存在.work，已由 .gitignore 排除；不进入 pmod、版本控制或模板分发。无需游戏源码，不将解包当作源码还原。
 
 ## 开始开发时准备，后续增量复用
 
-`python tools/mod.py prepare --game-dir '<用户发行目录>'` 建立发布引用/索引，同时初始化 `.work/game-cache/<发布身份哈希>/` 和 current.json。最小 Hello World只建立索引，不完整解包游戏。UI项目在用途明确后一次提取所需场景与依赖：
+`python tools/mod.py prepare --game-dir '<用户发行目录>'` 建立发布引用/索引，同时初始化 `.game/current/resources/<发布身份哈希>/`，并更新.work/game-cache/current.json导航。最小 Hello World只建立索引，不完整解包游戏。UI项目在用途明确后一次提取所需场景与依赖：
 
 ```powershell
 python tools/mod.py extract --path 'Prefab/GUI/Button/MainButton.tscn' --dependencies
@@ -16,7 +16,7 @@ python tools/mod.py extract --path 'Asset/Theme/MainTheme.tres' --dependencies
 
 缓存目录包含index.json、manifest.json和files/。索引记录PCK条目；清单记录PCK SHA-256、宿主DLL SHA-256、引擎/格式、提取器版本、提取文件MD5/SHA-256和请求依赖结果。catalog共用匹配发行身份，不额外复制素材。后续分析从匹配缓存开始，只有缺项才增量提取。
 
-每次缓存访问校验实际PCK及准备引用，运行时目录的DLL来源也需匹配；变化或移动后明确要求prepare。缓存文件再次使用时核对PCK MD5，不静默覆盖被改文件。版本变化使用新目录，旧缓存保留历史；mtime只可作辅助，不决定兼容性。新的prepare不是清空所有旧资源。显式旧式--output提取仍是独立原始提取，不声称已经绑定完整发行身份。
+每次缓存访问校验实际PCK及准备引用，运行时目录的DLL来源也需匹配；变化或移动后明确要求prepare。缓存文件再次使用时核对PCK MD5，不静默覆盖被改文件。版本变化随.game的current/old两槽轮换，最多保留两个发行资源环境；更早的原始资源可淘汰，但验收日志/截图不被删除；mtime只可作辅助，不决定兼容性。新的prepare不是清空所有旧资源。显式旧式--output提取仍是独立原始提取，不声称已经绑定完整发行身份。
 
 ## 打开位置预览之前准备干净背景
 
@@ -70,3 +70,5 @@ python tools/placement_editor.py --config '.work/position-session/session.json' 
 preview_session转换图片路径为本地绝对路径，记录releaseCacheKey和modAssemblySha256；窗口载入时检查当前发布/PCK/DLL与Mod DLL。已有组件变化或游戏更新会拒绝旧预览，必须重新捕获并绑定。配置/实际图片内容摘要另外绑定会话，变更不能恢复旧确认。此绑定只能验证身份，不能替代“图片确实由这次捕获产生”的流程证据；必须保存捕获日志与本次输出，不给陈旧图片重新盖摘要来伪造新捕获。
 
 背景类型、viewport纹理尺寸、窗口黑边与逻辑坐标必须明确；组件留白、标签宽度和最小尺寸同样参与标定。仅当资料准备成功才启动反馈窗口，失败不消耗用户60秒。不修改默认模板入口来自动截图或提示用户。
+
+完整游戏运行环境和两槽规则见[本地环境](game-environment.md)。测试副本不作为每轮永久证据，保留补丁和摘要；旧.work/game-cache若被历史素材会话引用仍保留，不靠清空它解决游戏复制膨胀。

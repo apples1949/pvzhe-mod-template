@@ -18,3 +18,5 @@ description: 安装、启用并实际运行验证 PVZHE pmod，处理独立测�
 5. 按需求检查再次触发、切场景、禁用重启与存档恢复。只报告实际覆盖项；启动失败、布局异常、资源/身份错误及退出诊断按需读 [运行排障](references/runtime-troubleshooting.md)。保留日志、退出码和失败证据，不将未知诊断过滤为成功。涉及可定位浮动UI时按ui-drag的[玩家试用交接](../pvzhe-ui-drag/references/player-layout-review.md)提供调整机会；最终图按[交付证据](references/feature-acceptance.md#最终交付证据)检查，不以自动验收退出代替交接。
 
 遇到超时、崩溃或不兼容，先定位失败阶段；重跑须说明修复、条件变化或新增观测；同一断点连续两轮未定位先停完整回归、做定向诊断，按执行策略继续推进。证据未变化时不反复重试，不靠修改玩家原存档绕过。实测记录放入验证报告；可复用的机制与解决步骤归入相关 Skill 的参考资料，注明发布版本及验证边界。
+
+磁盘与隔离：按[本地环境](../../../docs/game-environment.md)复用.game/current/runtime，串行持锁；新轮次只新增.work证据及测试PCK补丁，不整包复制游戏。整理历史副本先runtime_storage preview；只清理摘要可重建的游戏文件，失败日志/截图/Mod仍保留，不触碰日常存档。

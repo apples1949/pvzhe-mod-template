@@ -30,3 +30,5 @@
 可选`components/RuntimeUi/DragLayout.cs`提供中键拖动、右锚定、宿主Local数据及带身份的反馈。需要的Mod显式链接/复制源文件，不从默认入口自动注册；DragLayout示例独立构建，生产包保留拖动。布局覆盖不与本局Battle数据混存；AI把反馈定型为默认值是开发步骤，不是玩家日志自动改工程。接入和边界见[拖拽布局](ui-drag.md)。
 
 需求入口统一由 pvzhe-mod-guide 路由。组件资料库保存可复用事实与验证状态，制作 Skill 保存操作决策与验收，运行示例提供已验证配方；不把所有接口堆进一个巨大 Skill，也不要求玩家给出类名或资源路径。
+
+本地发行按.game/current和.game/old两槽管理，缓存/运行环境随版本，.work只保存引用和过程证据；game-compatibility.json与template.lock.json分别描述支持发行与项目模板来源。维护规则见[本地环境](game-environment.md)。

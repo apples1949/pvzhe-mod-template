@@ -91,6 +91,39 @@ def probe_build():
 
 
 def prepare(args):
+    global WORK
+    from game_environment import install, save as save_environment
+    if getattr(args, 'analyze_only', False):
+        if not args.game_dir: raise ValueError('--analyze-only requires a supplied release directory')
+        from game_environment import inspect
+        candidate = inspect(args.game_dir, args.pck)
+        report = WORK / 'release-analysis' / candidate['fingerprint']
+        print('Maintainer analysis only; active game and references remain unchanged:', report)
+        save_environment(report / 'release-manifest.json', candidate)
+        # Analyze interfaces without replacing the active game's references or evidence.
+        old_work = WORK
+        WORK = report
+        try: return _prepare(args)
+        finally: WORK = old_work
+    source = args.game_dir or ROOT / '.game/current'
+    slot, environment, reused = install(ROOT, source, args.pck)
+    old_report = WORK / 'release.json'
+    if old_report.exists():
+        previous = json.loads(old_report.read_text(encoding='utf-8'))
+        if previous.get('environmentFingerprint') != environment['fingerprint']:
+            archive = WORK / 'prepare-history' / sha(old_report)
+            archive.mkdir(parents=True, exist_ok=True)
+            for name in ('release.json','api.json','pck-index.json'):
+                if (WORK / name).exists(): shutil.copyfile(WORK / name, archive / name)
+    print('Reusing verified .game/current' if reused else 'Installed .game/current; at most one previous release in .game/old')
+    from types import SimpleNamespace
+    from game_environment import lease, active
+    with lease(ROOT):
+        if active(ROOT)[1]['fingerprint'] != environment['fingerprint']: raise ValueError('Environment switched during preparation')
+        return _prepare(SimpleNamespace(game_dir=str(slot), pck=str(slot / environment['pck']), environment=environment))
+
+
+def _prepare(args):
     game = Path(args.game_dir).resolve()
     packs = list(game.glob("*.pck"))
     if args.pck:
@@ -128,17 +161,25 @@ def prepare(args):
     if "project.binary" in pack.entries:
         (WORK / "release").mkdir(parents=True, exist_ok=True)
         (WORK / "release/project.binary").write_bytes(pack.read("project.binary"))
-    write_json(WORK / "release.json", {"gameDir": str(game), "pck": str(pck),
+    release = {"gameDir": str(game), "pck": str(pck),
                "pckSha256": sha(pck), "engine": pack.engine, "pckFormat": pack.version,
-               "entryCount": len(pack.entries), "assemblies": identities})
+               "entryCount": len(pack.entries), "assemblies": identities}
+    if getattr(args, 'environment', None):
+        release.update(environmentRoot=str(game), environmentFingerprint=args.environment['fingerprint'])
+    write_json(WORK / "release.json", release)
     cache = GameCache(WORK, json.loads((WORK / "release.json").read_text(encoding="utf-8")), pack)
     print(f"Resource cache initialized: {cache.root}")
     print(f"Prepared released engine {pack.engine}, PCK v{pack.version}, {len(pack.entries)} entries")
-    print("Local evidence: .work/release.json, .work/api.json, .work/pck-index.json")
+    print('Local evidence:', WORK / 'release.json', WORK / 'api.json', WORK / 'pck-index.json')
 
 
 def verify_references():
     evidence = json.loads((WORK / "release.json").read_text(encoding="utf-8"))
+    if (ROOT / 'game-compatibility.json').exists():
+        from game_environment import active
+        slot, environment = active(ROOT)
+        if evidence.get('environmentFingerprint') != environment['fingerprint'] or Path(evidence['pck']).resolve() != slot / environment['pck']:
+            raise ValueError('Prepared references do not match .game/current; run prepare before building')
     for name, item in evidence["assemblies"].items():
         if sha(WORK / "references" / name) != item["sha256"]:
             raise ValueError(f"Changed reference: {name}; run prepare again")
@@ -159,6 +200,13 @@ def manifest(release=False):
 
 
 def build(args):
+    if (ROOT / 'game-compatibility.json').exists():
+        from game_environment import lease
+        with lease(ROOT): return _build(args)
+    return _build(args)
+
+
+def _build(args):
     m = manifest(release=getattr(args, "release", False))
     check_id_conflicts(m, args)
     verify_references()
@@ -324,7 +372,7 @@ def extract(args):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     sub = p.add_subparsers(dest="command", required=True)
-    a = sub.add_parser("prepare"); a.add_argument("--game-dir", required=True); a.add_argument("--pck"); a.set_defaults(func=prepare)
+    a = sub.add_parser("prepare"); a.add_argument("--game-dir"); a.add_argument("--pck"); a.add_argument('--analyze-only', action='store_true'); a.set_defaults(func=prepare)
     a = sub.add_parser("build"); a.set_defaults(func=build)
     a = sub.add_parser("check"); a.set_defaults(func=check)
     a = sub.add_parser("install"); a.add_argument("--mods-dir", required=True); a.set_defaults(func=install)
