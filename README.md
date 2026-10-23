@@ -1,12 +1,12 @@
 # PVZHE 最小 Mod 模板
 
-面向玩家与 AI 的 Hello World 项目。以**已发布的 Windows C# 游戏 0.30.0**为基线，编译自己的 C# DLL，并打包为游戏原生 `.pmod`。无需游戏源码，也不分发游戏程序集、贴图或解包内容。
+面向玩家与 AI 的 Hello World 项目。当前以**已发布的 Windows C# 游戏 0.31.0**为默认基线，编译自己的 C# DLL，并打包为游戏原生 `.pmod`。保留已声明摘要的0.30.0输入支持，旧版各功能证据按原记录界定；0.31差异与验收见[升级记录](docs/upgrade-0.31.0.md)。无需游戏源码，也不分发游戏程序集、贴图或解包内容。
 
 示例启用后，在主菜单左上角显示 `Hello World! · PVZHE Mod`，同时记录初始化、全部 Mod 加载完成与 UI 挂载日志。详细兼容依据与实测记录见 [兼容说明](docs/compatibility.md)。
 
 ## 开发环境
 
-- Windows x64；拥有完整的 0.30.0 C# 发布目录（EXE、PCK、`data_PlantsVsZombies_windows_x86_64/`）。其他版本先执行发布版分析，不能默认兼容。
+- Windows x64；拥有完整的受支持C#发布目录，推荐0.31.0（EXE、PCK、`data_PlantsVsZombies_windows_x86_64/`）。支持的准确摘要见game-compatibility.json，其他发行先分析，不能仅凭同一版本号默认兼容。
 - .NET **9.0 SDK**，最低 9.0.100；`global.json` 允许同一主版本内的最新 feature band。实测 SDK 9.0.316，目标框架 `net9.0`。只装游戏自带运行时不足以编译。
 - Python **3.11+**，实测 3.12；核心构建/解包仅使用标准库。网页运行只需本地浏览器；可选素材捕获及旧版图片位置预览需要 Pillow；游戏内拖拽组件不依赖Python GUI。
 - PowerShell；以下命令在模板根目录执行。若系统使用 `py -3`，将 `python` 替换为 `py -3`。
@@ -142,7 +142,7 @@ python tools/mod.py extract --pck '游戏完整路径.pck' --prefix 'Asset/Confi
 
 ## 给 AI 的入口
 
-[开发 Wiki](docs/wiki/README.md) 集中记录 0.30.0 的启动状态、测试关卡入口、原版组件与鼠标坐标、战斗服务、资源注册表、设置和构建验收路径。AI 先匹配版本，再按任务查阅，避免重复从零分析。每页标明运行实测、静态确认及待验证边界；功能流程仍由 Skills 引导。
+[开发 Wiki](docs/wiki/README.md) 以[0.31增量入口](docs/wiki/updates/0.31.0.md)组织当前差异，沿用未变化的0.30主题正文，涵盖启动、测试关卡、原版组件、战斗服务、资源、设置和构建。AI先匹配当前入口的沿用/覆盖关系，再读任务主题；原页实测标签保留原发行范围，不表示新版全部重验。功能流程仍由Skills引导。
 
 玩家提出功能需求时，AI 先使用 **pvzhe-mod-guide** 理解意图和上下文。缺少影响用途、位置或行为且无法合理推断的信息时询问；原版组件选择、资源路径和技术接入由 AI 处理。无需玩家主动要求复用组件或知道 Skill 名称。
 

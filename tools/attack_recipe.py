@@ -19,7 +19,9 @@ def check_release(config, root):
     provenance = config.get("provenance", {})
     if provenance.get("releaseCacheKey") != cache.key or digest(provenance.get("release")) != digest(cache.identity):
         raise ValueError("素材会话与当前发行基线不同，不能沿用；请重新准备匹配素材")
-    if cache.identity["assemblies"].get("PlantsVsZombies.dll") != ORIGIN_PRESETS["dllSha256"]:
+    if not any(cache.identity.get('pckSha256') == baseline['pckSha256']
+               and cache.identity['assemblies'].get('PlantsVsZombies.dll') == baseline['dllSha256']
+               for baseline in ORIGIN_PRESETS.get('verifiedReleases', [])):
         raise ValueError("出弹位置预设需要按当前发行重新核对")
     if not {"background", "plant", "target"}.issubset(config["assets"]):
         raise ValueError("缺少草坪、植物或目标透明素材")

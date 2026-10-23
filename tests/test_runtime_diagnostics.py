@@ -27,3 +27,8 @@ class RuntimeDiagnosticsTests(unittest.TestCase):
 
     def test_known_diagnostic_is_not_automatically_a_host_exception(self):
         self.assertTrue(assess("unsupported package file\nWARNING: shutdown requires restart\nDONE", ["DONE"])["passed"])
+
+    def test_projectile_callback_warning_cannot_be_hidden_by_success_marker(self):
+        report = assess("WARNING: [BulletField] Spawn callback failed: initializer failed\nDONE", ["DONE"])
+        self.assertFalse(report['passed'])
+        self.assertEqual(report['errors'][0]['line'], 1)

@@ -10,10 +10,23 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from attack_model import digest, file_sha, load_session, save
 from attack_plan import default_plan
 from attack_web import Editor, ORIGIN_PRESETS, default_recipe
-from attack_recipe import verify_result, export_result, bind_recipe, new_session
+from attack_recipe import verify_result, export_result, bind_recipe, new_session, check_release
 
 
 class RecipeWorkflowTests(unittest.TestCase):
+    def test_presets_require_a_verified_pck_and_dll_pair(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); (root / '.work').mkdir()
+            (root / '.work/release.json').write_text('{}', encoding='utf-8')
+            for baseline in ORIGIN_PRESETS['verifiedReleases']:
+                identity = dict(pckSha256=baseline['pckSha256'], assemblies={'PlantsVsZombies.dll':baseline['dllSha256']})
+                config = dict(provenance=dict(releaseCacheKey='fixture', release=identity), assets={k:{} for k in ('background','plant','target')})
+                with patch('game_cache.GameCache', return_value=SimpleNamespace(key='fixture', identity=identity)):
+                    check_release(config, root)
+                    identity['pckSha256'] = 'unknown-resource-pack'
+                    with self.assertRaisesRegex(ValueError, '预设'): check_release(config, root)
+
     def fixture(self, root):
         assets = {}
         for name in ("background", "plant", "target"):

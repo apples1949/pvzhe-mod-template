@@ -10,7 +10,7 @@ def assess(text, required=()):
     for number, line in enumerate(lines, 1):
         if (line.lstrip().startswith(("ERROR:", "SCRIPT ERROR:"))
                 or any(token in line for token in ("Local presentation stopped:", "AUDIT_TEST_ERROR:", "AUDIT_INIT_ERROR:",
-                    "package rolled back after runtime entry failure:"))):
+                    "package rolled back after runtime entry failure:", "[BulletField] Spawn callback failed:"))):
             errors.append({"line": number, "message": line, "context": lines[number:number + 5]})
     missing = [marker for marker in required if marker not in text]
     return {"passed": not errors and not missing, "errors": errors, "missingMarkers": missing}

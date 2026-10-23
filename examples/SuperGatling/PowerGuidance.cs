@@ -46,7 +46,7 @@ public sealed class PowerGuidance : IDisposable
         TowerDefenseCharacter? target=null;
         for(int i=0;i<source.checkRayResources.Count;i++)
         {
-            var hit=source.CheckRayHit(source.checkRayResources[i],flags,i);
+            var hit=FireRayQuery.Check(source,source.checkRayResources[i],flags,i);
             if(Valid(hit)){target=hit;break;}
         }
         if(!Valid(target)&&source.checkShapeResources.Count>0)target=source.FindCatapultTarget(flags,position);

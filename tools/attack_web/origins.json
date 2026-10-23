@@ -127,5 +127,18 @@
       },
       "evidence": "released-scene-evaluated-idle-pose"
     }
-  }
+  },
+  "verifiedReleases": [
+    {
+      "release": "0.30.0",
+      "pckSha256": "36e013ce4852dd6eb17b04c61ac2c37b97b3643475cf4ca9a1f8c85d5ff7f282",
+      "dllSha256": "e31986ec8fd26f349bd29cd5444e6649b76f3f722d13a6695b0ce089cd2e51d1"
+    },
+    {
+      "release": "0.31.0",
+      "pckSha256": "1f234c9d7954cbbb1cd3f21691d764c8ea9533477ad87818cf4e6a68d7f70f2c",
+      "dllSha256": "820e9e8f91f58062fcfc7548bdb9e5588ec8f822f5ddc71f4b4d83b09a912d95"
+    }
+  ],
+  "verificationNote": "Origin geometry from 0.30 reference poses; 0.31 scene/animation dependencies and live marker paths reviewed, starfruit offsets remeasured. Fresh 0.31 capture measures speed, cadence and hitbox. Reference pose is not a fixed animated muzzle."
 }

@@ -1,5 +1,7 @@
 # 发布基线与证据
 
+当前默认发行已升级到Windows C# 0.31.0，PCK v4、28,089条目，Godot仍为4.7.0，Mod schema/API仍为v3。准确摘要、语义差异及新验收范围见[0.31增量入口](wiki/updates/0.31.0.md)和[升级记录](upgrade-0.31.0.md)。game-compatibility.json同时保留原0.30摘要；原0.30的功能实测记录不改名为新版结果。以下保留原始0.30基线，供差异与历史验收引用。
+
 基线为 Windows C# 发布版 0.30.0（`project.binary` 标记 0.30.0.0），PCK 引擎标记 4.7.0、格式 v4、27,426 条目；真实运行显示 `Godot Engine v4.7.stable.mono.official.5b4e0cb0f`。发布运行时为 net9.0，随包运行时 9.0.17。开发实测 Python 3.12、.NET SDK 9.0.316。
 
 发布程序集反射确认：`XWModManifest.CurrentSchemaVersion = 3`、`XWModRuntimeApi.CurrentVersion = 3`，入口契约包含 `Initialize(XWModRuntimeContext)`、`OnAllModsLoaded()`、`Shutdown()`。本示例使用受支持的 API v1 UI 挂载点，清单 schema v3；API 版本数字不等于游戏版本或 Godot 版本。
