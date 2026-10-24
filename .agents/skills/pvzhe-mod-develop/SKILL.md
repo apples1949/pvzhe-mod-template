@@ -1,6 +1,6 @@
 ---
 name: pvzhe-mod-develop
-description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评估宿主能力复用及后续组件扩展；用于入口、资源及功能修改。
+description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评估宿主能力复用及后续组件扩展；用于入口、资源、功能修改、打包发布及社区投稿更新关联。
 ---
 
 # 开发与构建
@@ -12,6 +12,8 @@ description: 基于 PVZHE 已发布程序集开发并构建最小 C# pmod，评�
 输入：发布分析结果、已澄清需求、模板。输出：满足需求的 Mod 变更、对应 pmod 与本地构建证据；自定义身份与入口需同步修改清单。
 
 新建独立 Mod 或准备分发时读 [身份与发布规范](references/identity-and-release.md)。创建时确定合规且稳定的 ID，发布前确认用户署名/显示名称/版本；build/check 均执行基础字段校验，分发使用 `--release` 加严检查。
+
+用户要为自己的Mod添加社区版本更新时，按[社区投稿关联](references/community-updates.md)将用户自己的投稿ID写为mod.json顶层字符串postId，并重建核对最终包；不把Mod更新关联误当成模板升级。
 
 1. 读 README、`docs/architecture.md`、`.work/api.json`。缺少发布证据先 prepare；prepare初始化统一版本资源缓存，新增资源分析从匹配缓存开始，按需增量提取，不默认完整解包。见 [缓存与捕获](../../../docs/resource-cache-and-capture.md)。编译引用只能来自用户发布包，不引用源码工程或复制宿主实现。
 2. 默认项目无需配置；确需更换项目路径/程序集时按 [项目配置](../../../docs/project-configuration.md) 使用mod-project.json，不为重命名改构建器，也不把项目选择误作自定义运行场景。最小入口为普通类 `HelloMod.Entry : IXWModRuntimeEntry`。在 `Initialize` 建立功能与订阅，通过宿主 Lifetime 管理订阅，通过 UI 挂载回调的场景作用域管理节点；`Shutdown` 释放本地引用，避免静态节点/跨场景残留。

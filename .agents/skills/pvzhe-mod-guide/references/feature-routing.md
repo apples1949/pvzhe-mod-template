@@ -26,5 +26,6 @@
 | 快捷键、改键、触摸触发 | pvzhe-input-bindings | 业务命令已有或单独实现；持久化组合mod-settings |
 | 只有pmod、调已有文本字段 | pvzhe-pmod-patch | 源项目存在优先回改源码；不恢复DLL源码 |
 | 构建/发行分析/运行验收 | 原release-analyze、mod-develop、mod-verify | 普通功能不自动触发template-upgrade |
+| 为自己的Mod添加社区版本更新/关联投稿 | mod-develop的references/community-updates.md | 使用用户自己的postId，重建并核对包；不是更新模板，不自动上传 |
 
 新增社区提取入口是可使用的制作指导，不是已验证的通用生成器。先匹配当前发行、调查本任务契约再实现；有证据缺口标出具体缺项，不因旧“暂缓”提示直接拒绝，也不无条件承诺全部角色/模式支持。实际生成能力和游戏结果由后续构建/运行证据确认。

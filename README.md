@@ -50,6 +50,8 @@ dist/build-info.json        # 本地构建证据；含发布包路径与摘要
 
 ## 创建自己的 Mod 与发布
 
+自己的Mod需要接入社区版本更新时，提供投稿链接/ID，AI按[社区投稿关联](.agents/skills/pvzhe-mod-develop/references/community-updates.md)在mod.json中添加字符串postId。例如自己的链接是`https://www.pvzhe.com/mods/121`，则填`"postId": "121"`；121仅为示例，默认模板不绑定投稿。之后更新保持同一Mod id/postId并维护version，重新构建最终包；字段关联不等于已经投稿或联网验收完成。
+
 AI 在新项目主题明确后会拟定稳定的小写 ID，名称依据实际功能建议，例如单个清屏按钮叫“僵尸清屏按钮”，不会默认扩称“工具箱”；作者由你指定。已有 Mod 增加功能不会自动改 ID。模板和 FeatureLab 的默认身份仅用于示例；准备分享时确认 `mod/mod.json` 中的名称、作者和版本，并替换示例 ID。作者最多32个 UTF-16 单元，ID 为1～32个小写字母/数字/`_-.`，版本最多32字符且符合 SemVer（默认 `0.1.0`）。姓名可用中文；Mod 显示名称没有另设32字符上限。
 
 ```powershell

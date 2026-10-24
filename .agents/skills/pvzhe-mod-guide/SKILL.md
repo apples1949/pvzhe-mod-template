@@ -27,3 +27,5 @@ description: 理解玩家用自然语言提出的 PVZHE Mod 需求，补齐关�
 创建自有浮动UI即组合[pvzhe-ui-drag](../pvzhe-ui-drag/SKILL.md)，不以玩家提出换位置为前提。AI自主安排初始位置并在首次交付时主动告知中键拖动、松开永久保存、发布后仍可用。当前开发任务中，用户拖动是位置调整反馈，先核对本轮目标Mod/控件来源，再更新项目默认布局，不再要求文字请求或二次确认。固定/不可拖动的明确要求仍尊重；旧placement-preview仅兼容明确指定的旧流程。
 
 用户明确说更新/同步官方模板时路由到[pvzhe-project-update](../pvzhe-project-update/SKILL.md)，保护已有Mod身份和功能；只有维护者要求研究新版游戏兼容迁移才用template-upgrade。普通功能开发不自动升级模板或更换.game环境。
+
+用户说“给我的Mod加版本更新”、提供社区投稿链接或要求填写postId时，走mod-develop的[社区投稿关联](../pvzhe-mod-develop/references/community-updates.md)，不误触发模板更新；缺少该Mod自己的投稿信息再询问。
