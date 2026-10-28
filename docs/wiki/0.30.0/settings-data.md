@@ -13,6 +13,25 @@
 
 示例具体字段名仅用于说明，按玩家需求确定默认值、范围和生效时机。非法值拒绝、取消/保存失败等负例未统一实测，不由两次正常保存推导所有异常路径正确。
 
+## 设置声明字段速查（用户实机记录，本模板待复核）
+
+状态：下表字段名与默认值来自用户十几个 Mod 的实机调试（同系列发行），**本模板只用 showKills/bonusSun 两项验证过**（见上表）。声明前先用发行清单解析/设置页实际渲染核对一次，再据此写 mod.json。
+
+| 需求 | 写法 | 不按此写的后果 |
+| --- | --- | --- |
+| 配置项显示名 | `"label": "中文名"` | 写成 `"name"` 时设置页不显示预期文字 |
+| 改完立即生效 | `"applyMode": "immediate"` | 默认是 `restart`，用户会认为"改了没效果" |
+| 战斗中也能保存 | `"affectsGameplay": false` | 默认 `true`，战斗中被拒绝保存 |
+| 分组标签 | `"group": "<名>"` | 留空则宿主显示"未分组" |
+| 合法 `type` | `bool` / `int` / `float` / `string` / `enum` / `multienum` / `text` / `richtext` / `color` | 写别的类型无法渲染 |
+| 联动显隐/启用 | `visibleWhen` / `enabledWhen`，形如 `{key, op, value}` | 只能自己写代码监听，容易漏同步 |
+| 多选上限 | `multienum` 配 `minSelected` / `maxSelected` | 无上限时玩家可全选，业务侧要多判一层 |
+| **没有图片类型** | `text` / `richtext` 是**只读展示**（`IsDisplay`） | 想在设置页放"演示图"只能退化为文字＋链接 |
+
+读取一律 `Get<object>(key)` 再自行转换：`Get<T>` 类型不符会抛 `InvalidCastException`，缺键抛 `KeyNotFoundException`，而实际值类型可能是 `bool` / `long` / `string` / `System.Text.Json.JsonElement`。这两条属于用户记录的异常症状，本模板未复现。
+
+`applyMode`/`affectsGameplay` 的生效语义仍以本页上表两个已实测示例为准；"默认值"是从用户记录归纳的，写清单时显式声明比依赖默认值安全。
+
 ## 账号、设置与对局数据分开验收
 
 - 用户名提示关闭不等于账号建立；测试目录随机新建，跨进程复用和建档前提见 [启动页](startup.md)。
