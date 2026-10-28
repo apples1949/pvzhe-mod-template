@@ -31,6 +31,8 @@ DialogManager 等公开宿主类不是独立稳定 SDK，集中封装在 Adapter
 
 Initialize 注册 v3 MainMenu/BattleHud；收到 Root/Lifetime 后实例化自己的控件，把节点及事件清理纳入场景作用域。MainButton 参考 [HostUi](../../../examples/FeatureLab/Adapters/HostUi.cs)；HUD 布局参考 [KillCounter](../../../examples/FeatureLab/Features/KillCounter.cs)。不要用每帧全树搜索来代替挂载点。
 
+**包内场景不能覆盖 `Prefab/` 下的 UI**（用户实机记录，待复核）：资源类别推导只认配置类扩展名，类别表里没有 `Prefab/` 前缀 ⇒ 往包里放一份同名 `.tscn` 只会变成**死文件**，既不会生效也不报错。因此"给设置页/战斗选项框加控件"的唯一可行路线是**运行时注入**：在挂载回调里找到目标节点，`AddChild` 自己的控件，并自己连接信号（游戏脚本只处理它认识的节点）。注入必须**幂等**（按节点名查，已存在就只校准状态），因为这些对话框每次打开都会重新实例化。
+
 提示框从 DialogManager 创建 DialogBoxTips，设置公开 text；不要在业务提示打开时叠加。关闭使用 CloseDialog，并验证暂停/TimeScale及输入恢复。UI节点不携带修改钱包或战斗的权限，按钮业务仍走相应宿主命令。
 
 ## UI-01：程序化事件与真实点击分别验收
@@ -87,6 +89,34 @@ FeatureLab 的 PRESET 关卡跳过选卡，因此它通过不能验证“选卡�
 新增自有浮动控件使用[游戏内拖拽布局](../../ui-drag.md)：中键拖动、始终右锚定、发布后保存及带来源反馈。默认位置先分析宿主共存，玩家拖动后不自动避让。旧外部placement-preview已弃用；下段透明捕获配方仅在明确需要旧预览或其他资源捕获时读取。
 
 原版外观的位置预览优先使用完整组件的透明SubViewport渲染，字体/贴图来自当前发布环境；开启测试前准备隐藏目标组件后的背景捕获。0.30.0 MainButton常态透明输出已通过独立测试，不能泛化为全部弹窗/复杂组件均可离屏渲染。实现和缓存规则见 [资源缓存与捕获](../../resource-cache-and-capture.md)。
+
+## 组件字段真相（来自用户实机记录，本模板待复核）
+
+状态：以下条目来自用户自己十几个 Mod 的实机调试（同系列发行，非本模板本轮实测）。**使用前先用当前发行场景/DLL 核对一次**，核对通过再升级为已实测；与本页其他实测结论冲突时以运行证据为准。
+
+| 组件 | 记录内容 | 不按此写的后果 |
+| --- | --- | --- |
+| MainButton 文字 | 走 `[Export] public string text`（默认值 `"Test"`）；`_Ready()` 与每次布局刷新都会用它回写子 Label | 直接改子 `Label.Text` 会被覆盖回 `"Test"` |
+| MainButton 根类型 | `TextureButton`；按 `BaseButton` 接（本页实测已确认根类型） | 按 `Button` 转换得到 null，退化成无外观按钮 |
+| `DialogManager` | 全局命名空间下的 `[GlobalClass]` 类型；`DialogCreate(name, data = null)` 为两参（第二参有默认值） | 猜命名空间、或按单参调用会编译失败/找不到类型 |
+| `LevelChoose.Select(int id)` | 既选章节也选关卡，并会写入全局当前关卡 id | 当成"只选关卡"用会造成章节/关卡身份错位 |
+| `Tree.SetSelected` | Godot 4 签名是 `(TreeItem, int column)` | 写 `SetSelected(item, true)` 报 CS1503（bool→int） |
+| `Godot.Collections.Dictionary` | **不是** `GodotObject` | `IsObjectValid(dict)` 一类写法直接 CS1503 |
+| SeedBank 相关节点 | **类名 ≠ 节点名**；按名字 `FindChild` 找不到，需按类型名递归 | 按节点名查找永远为空 |
+
+宿主类仍按本页约定集中封装在 Adapters 并记录发布版本，不散落到业务代码。
+
+## 命中判定的坐标系（规则已核对，对照日志待复核）
+
+状态：坐标系结论与 Godot 接口文档一致（`Control.get_global_rect`、`get_global_transform_with_canvas`）；"三种写法只有一种对"的对照来自用户实机日志，本模板未重跑。这是排查"看得见但点不动"的顺序，不是唯一实现要求。
+
+| 写法 | 结果 | 原因 |
+| --- | --- | --- |
+| `ctl.GetGlobalRect().HasPoint(viewport.GetMousePosition())` | 否 | 前者只含祖先 Node2D/Control 变换，**不含 viewport 的 canvas 变换**；后者是窗口像素 |
+| `ctl.GetRect().HasPoint(ctl.GetLocalMousePosition())` | 否 | `GetRect()` = `Rect2(position, size)`，含控件在父容器里的位置；与"控件自身坐标系"原点不同 |
+| `new Rect2(Vector2.Zero, ctl.Size).HasPoint(ctl.GetLocalMousePosition())` | 可用 | 局部鼠标配零原点矩形，同一坐标系 |
+
+排查方式：把 `GetLocalMousePosition()` 与控件矩形**一起打印**，能直接看出"明明在矩形里为什么 false"。另注意 `CanvasLayer` 没有 `GetCanvasTransform()`（只有 `CanvasItem` 有）；跨 CanvasLayer 定位要用 `GetGlobalTransformWithCanvas()` 自行变换。命中失败仍先按 UI-01 区分坐标、遮挡、MouseFilter、Disabled 与业务回调。
 
 ## MainButton实例的默认局部偏移
 
